@@ -10,9 +10,9 @@ from config import Config
 from db.migrations import init_db
 from db.models import RegisteredUser
 
-from api.director import router as director_router, CATEGORY_CONFIGS
 from api.creative_api import router as creative_router
 from services.task_manager import task_manager
+from services.prompt_engine import CATEGORY_CONFIGS
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 APP_VERSION = "0.3.0"
 
 PUBLIC_API_PATHS = {"/api/health", "/api/register"}
-WS_PREFIXES = {"/api/director/ws/", "/api/creative/ws/"}
+WS_PREFIXES = {"/api/creative/ws/"}
 
 
 class AuthMiddleware(BaseHTTPMiddleware):
@@ -42,7 +42,6 @@ app.add_middleware(AuthMiddleware)
 
 app.mount("/static", StaticFiles(directory="web/static"), name="static")
 
-app.include_router(director_router)
 app.include_router(creative_router)
 templates = Jinja2Templates(directory="web/templates")
 
@@ -110,10 +109,8 @@ async def direct_gen_page(request: Request):
 
 @app.get("/director")
 async def director_page(request: Request):
-    return templates.TemplateResponse("director.html", {
-        "request": request,
-        "category_angles": {k: v["required_angles"] for k, v in CATEGORY_CONFIGS.items()}
-    })
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse("/factory")
 
 
 @app.get("/creative")

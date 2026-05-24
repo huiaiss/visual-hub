@@ -202,7 +202,7 @@
   </div>
 
   <a href="/" class="back-link">← 返回首页</a>
-  <div class="register-footer">已有账号？<a href="/director">直接开始使用 ↗</a></div>
+  <div class="register-footer">已有账号？<a href="/factory">直接开始使用 ↗</a></div>
 </div>
 
 <script>
@@ -252,7 +252,7 @@ document.getElementById('regForm').addEventListener('submit', function(e){
     if(data.success){
       msg.className = 'msg success';
       msg.textContent = '注册成功！正在跳转到方案生成页...';
-      setTimeout(function(){window.location.href='/director'},1500);
+      setTimeout(function(){window.location.href='/factory'},1500);
     }else{
       msg.className = 'msg error';
       msg.textContent = data.message || '注册失败，请重试';

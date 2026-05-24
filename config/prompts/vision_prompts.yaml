@@ -1,0 +1,271 @@
+# Vision analysis prompts — extracted from prompt_engine.py
+# Category-specific vision dimensions, hook types, BGM, scenes, required angles
+
+default_category_config:
+  vision_dims: |
+    1. 品类：具体产品类型
+    2. 外观特征：颜色/材质/尺寸/设计
+    3. 核心卖点：主要功能和差异化特点
+    4. 目标人群：年龄段+使用场景
+    5. 风格：整体视觉风格关键词
+  hook_types:
+    - 视觉冲击
+    - 价格锚点
+    - 痛点解决
+    - 身份认同
+    - 反差对比
+  bgm_with_cart: 快节奏/强节奏感，110-130BPM
+  bgm_without_cart: 轻松氛围/自然感，75-90BPM
+
+category_configs:
+  鞋类:
+    vision_dims: |
+      1. 品类：具体鞋型（老爹鞋/运动鞋/帆布鞋/乐福鞋/高跟鞋/凉鞋/拖鞋/靴子/童鞋/商务皮鞋等）及性别（男/女/童/中性）
+      2. 鞋底：厚底/松糕底/平底/橡胶底/牛筋底？厚度多少cm？（目测）
+      3. 鞋面：材质（PU/真皮/帆布/网面/绒面/飞织/超纤等）、鞋头形状（圆头/方头/尖头/露趾）
+      4. 颜色：列举所有颜色，多色产品逐个列出
+      5. 风格：整体风格关键词（运动/通勤/休闲/街头/甜美/商务/户外等）
+      6. 适合人群：性别+年龄段+穿搭场景
+    hook_types:
+      - 视觉冲击
+      - 反差对比
+      - 身份认同
+      - 价格锚点
+      - 场景痛点
+    bgm_with_cart: 快节奏卡点/电子鼓点/变装BGM，120-130BPM
+    bgm_without_cart: 轻快吉他/钢琴/氛围感，80-90BPM
+    typical_scenes:
+      - 街头/斑马线
+      - 咖啡厅/商场
+      - 运动场/户外
+      - 对镜自拍/衣帽间
+      - 居家/窗台
+    required_angles:
+      - slot: 1
+        name: 正面平拍
+        desc: 产品正面完整展示，鞋头/鞋面/闭合方式清晰
+        required: true
+      - slot: 2
+        name: 鞋底特写
+        desc: 鞋底纹路/厚度/品牌标识清晰可见
+        required: true
+      - slot: 3
+        name: 侧面
+        desc: 展示鞋底厚度/跟高/鞋型弧线
+        required: true
+      - slot: 4
+        name: 细节特写
+        desc: 材质纹理/缝线/装饰/logo近拍
+        required: false
+      - slot: 5
+        name: 上脚效果
+        desc: 真人穿着展示比例和搭配效果
+        required: false
+
+  服装:
+    vision_dims: |
+      1. 品类：具体单品类型（连衣裙/T恤/衬衫/裤装/外套/套装等）及版型（修身/宽松/oversize）
+      2. 面料：材质（棉/麻/丝/雪纺/针织/牛仔/西装料等）、厚薄、垂感
+      3. 颜色/图案：主色+辅色，是否有印花/条纹/格纹/纯色
+      4. 领型/袖型/长度：具体款式细节
+      5. 风格：整体风格关键词（通勤/休闲/街头/法式/新中式/辣妹/甜美等）
+      6. 适合人群：年龄段+身材类型+穿搭场景
+    hook_types:
+      - 视觉冲击
+      - 反差对比
+      - 身份认同
+      - 身材痛点
+      - 场景痛点
+      - 价格锚点
+    bgm_with_cart: 快节奏卡点/变装BGM/强鼓点，120-135BPM
+    bgm_without_cart: 轻快流行/法式慵懒/氛围钢琴，75-90BPM
+    typical_scenes:
+      - 街拍/咖啡厅
+      - 对镜自拍/试衣间
+      - 户外/公园
+      - 商场/买手店
+      - 居家/卧室
+    required_angles:
+      - slot: 1
+        name: 正面平铺
+        desc: 服装正面完整平铺或挂拍，展示整体版型
+        required: true
+      - slot: 2
+        name: 背面平铺
+        desc: 服装背面完整展示，领标/洗标可见
+        required: true
+      - slot: 3
+        name: 侧面版型
+        desc: 侧面展示廓形/下摆/袖型弧线
+        required: true
+      - slot: 4
+        name: 细节特写
+        desc: 领口/袖口/纽扣/面料纹理近拍
+        required: false
+      - slot: 5
+        name: 上身效果
+        desc: 真人穿着展示比例和搭配
+        required: false
+
+  美妆:
+    vision_dims: |
+      1. 品类：口红/眼影/粉底/腮红/眉笔/护肤品等
+      2. 包装：外观设计、便携性、质感
+      3. 质地：哑光/滋润/水光/雾面/闪粉
+      4. 色号：具体颜色+适用肤色
+      5. 适用人群：年龄段+肤质+妆容风格
+    hook_types:
+      - 视觉冲击
+      - 反差对比
+      - 成分党
+      - 妆效展示
+      - 痛点解决
+    bgm_with_cart: 轻快电子/时尚节拍，110-125BPM
+    bgm_without_cart: 舒缓氛围/纯净钢琴，70-85BPM
+    required_angles:
+      - slot: 1
+        name: 产品正面
+        desc: 产品正面完整展示，品牌/品名/外观清晰
+        required: true
+      - slot: 2
+        name: 背面成分
+        desc: 背面标签/成分表/备案号清晰可见
+        required: true
+      - slot: 3
+        name: 质地/颜色
+        desc: 展示质地（膏体/粉质/液体）和真实颜色
+        required: true
+      - slot: 4
+        name: 使用效果
+        desc: 手臂试色或上脸效果对比展示
+        required: false
+      - slot: 5
+        name: 包装盒/赠品
+        desc: 完整包装/配件/赠品展示
+        required: false
+
+  食品:
+    vision_dims: |
+      1. 品类：零食/饮品/速食/调味品/生鲜等
+      2. 包装：袋装/罐装/盒装、设计风格
+      3. 卖点：口味/配料/产地/工艺
+      4. 规格：净含量、份量
+      5. 适合场景：追剧/办公/聚会/送礼/健身
+    hook_types:
+      - 食欲刺激
+      - 价格锚点
+      - 场景痛点
+      - 健康焦虑
+      - 好奇心
+    bgm_with_cart: 快节奏/食欲感BGM/ASMR，100-120BPM
+    bgm_without_cart: 温馨/治愈/生活感，70-85BPM
+    required_angles:
+      - slot: 1
+        name: 包装正面
+        desc: 产品正面完整展示，品牌/品名/外观清晰
+        required: true
+      - slot: 2
+        name: 配料表/背面
+        desc: 配料表/营养成分表/生产信息清晰
+        required: true
+      - slot: 3
+        name: 内容物实拍
+        desc: 打开包装展示真实内容物状态
+        required: true
+      - slot: 4
+        name: 食用场景
+        desc: 展示食用/使用场景（摆盘/冲泡/试吃）
+        required: false
+      - slot: 5
+        name: 保质期/规格
+        desc: 保质期标签/净含量/规格对比
+        required: false
+
+  3C数码:
+    vision_dims: |
+      1. 品类：手机配件/耳机/充电器/智能穿戴/电脑周边等
+      2. 外观：颜色/材质/尺寸/工业设计
+      3. 核心功能：主要卖点和技术参数
+      4. 接口/兼容性：适用设备
+      5. 适用人群：游戏/办公/学生/通勤
+    hook_types:
+      - 功能震撼
+      - 价格锚点
+      - 痛点解决
+      - 对比测评
+      - 科技感
+    bgm_with_cart: 科技感电子/快节奏，110-130BPM
+    bgm_without_cart: 极简电子/氛围科技，75-90BPM
+    required_angles:
+      - slot: 1
+        name: 产品正面
+        desc: 产品正面完整展示，品牌/型号/外观清晰
+        required: true
+      - slot: 2
+        name: 背面/接口
+        desc: 背面接口/参数标签/认证标识清晰
+        required: true
+      - slot: 3
+        name: 侧面厚度
+        desc: 侧面展示产品厚度/比例/工业设计
+        required: true
+      - slot: 4
+        name: 接口/细节
+        desc: 接口/按键/镜头/屏幕细节近拍
+        required: false
+      - slot: 5
+        name: 配件全家福
+        desc: 所有配件/包装/说明书完整展示
+        required: false
+
+  家居:
+    vision_dims: |
+      1. 品类：收纳/装饰/清洁/家纺/厨具等
+      2. 材质：木质/塑料/金属/布艺/陶瓷
+      3. 尺寸/颜色/风格
+      4. 使用场景：客厅/卧室/厨房/卫生间
+      5. 目标人群：租房党/新家装修/宝妈/收纳控
+    hook_types:
+      - 场景痛点
+      - 视觉冲击
+      - 价格锚点
+      - 收纳魔法
+      - 对比展示
+    bgm_with_cart: 轻快活泼/家居感，95-110BPM
+    bgm_without_cart: 温暖治愈/慢生活，65-80BPM
+    required_angles:
+      - slot: 1
+        name: 产品正面
+        desc: 产品正面完整展示，款式/颜色/设计清晰
+        required: true
+      - slot: 2
+        name: 背面/底部
+        desc: 背面或底部结构/支撑方式/标签
+        required: true
+      - slot: 3
+        name: 侧面整体
+        desc: 侧面展示比例/尺寸/厚度/轮廓
+        required: true
+      - slot: 4
+        name: 材质细节
+        desc: 材质纹理/接缝/做工/logo近拍
+        required: false
+      - slot: 5
+        name: 场景/参照
+        desc: 实际使用场景或尺寸参照物对比
+        required: false
+
+# Vision prompt templates (single vs multi-image)
+vision_prompt_single: |
+  你是{industry}产品鉴定专家。请仔细观察图片，按以下维度精准描述（80-120字）：
+
+  {vision_dims}
+
+  用简洁中文，严格基于图片内容，不要编造不存在的特征。注意：图片可能是纯背景的产品白底图，请根据实际可见内容描述。
+
+vision_prompt_multi: |
+  你是{industry}产品鉴定专家。以下是同一产品的{image_count}张多角度实拍图，请综合分析所有图片，按以下维度精准描述（100-150字）：
+
+  {vision_dims}
+
+  用简洁中文，综合所有图片信息，严格基于图片内容，不要编造不存在的特征。

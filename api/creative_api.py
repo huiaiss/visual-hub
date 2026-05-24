@@ -26,7 +26,7 @@ from services.creative_engine import (
 )
 from services.scene_generator import generate_scenes_from_brief, generate_scene, list_generated_scenes
 from services.gatekeeper import review_all
-from services.pipeline_bridge import plan_to_video, batch_plans_to_videos, check_auto_video_available
+from services.video_renderer import render_video, check_renderer_available
 from services.task_manager import task_manager
 from db.models import GeneratedPlan, CreativeBrief, BatchJob
 
@@ -496,15 +496,15 @@ async def creative_health():
 
     checks = {}
 
-    # auto-video-platform import check
+    # video renderer check
     try:
-        from services.pipeline_bridge import check_auto_video_available
-        checks["auto_video_platform"] = {
-            "ok": check_auto_video_available(),
-            "detail": "importable + AssetPipeline + AssemblyEngine" if check_auto_video_available() else "not importable",
+        from services.video_renderer import check_renderer_available
+        checks["video_renderer"] = {
+            "ok": check_renderer_available(),
+            "detail": "importable + AssetPipeline + AssemblyEngine" if check_renderer_available() else "not importable",
         }
     except Exception as e:
-        checks["auto_video_platform"] = {"ok": False, "detail": str(e)}
+        checks["video_renderer"] = {"ok": False, "detail": str(e)}
 
     # Database
     try:
@@ -632,7 +632,7 @@ async def export_video_endpoint(
 
     Returns paths to HTML preview, MP4 video, audio, and SRT subtitles.
     """
-    if not check_auto_video_available():
+    if not check_renderer_available():
         raise HTTPException(503, "auto-video-platform 不可用，请检查依赖和路径配置")
 
     # Resolve plan data
@@ -696,7 +696,7 @@ async def export_video_endpoint(
     try:
         result = await loop.run_in_executor(
             None,
-            lambda: plan_to_video(
+            lambda: render_video(
                 plan=plan,
                 scene_images=scene_images,
                 video_type="product_promo",
@@ -746,7 +746,7 @@ async def export_videos_batch_endpoint(
 
     Launches a background job and returns a job_id for WebSocket progress tracking.
     """
-    if not check_auto_video_available():
+    if not check_renderer_available():
         raise HTTPException(503, "auto-video-platform 不可用")
 
     row = CreativeBrief.get_or_none(CreativeBrief.brief_id == brief_id)
@@ -851,7 +851,7 @@ async def _run_video_export_pipeline(
             try:
                 result = await loop.run_in_executor(
                     None,
-                    lambda p=plan, pd=plan_dir: plan_to_video(
+                    lambda p=plan, pd=plan_dir: render_video(
                         plan=p,
                         scene_images=scene_images,
                         output_dir=pd,

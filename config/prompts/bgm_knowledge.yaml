@@ -1,0 +1,50 @@
+# BGM knowledge base — extracted from script_knowledge.py
+# Sources: OpenReels, MoneyPrinterTurbo, VideoProduction
+
+bgm_knowledge:
+  mixing_rules:
+    voice_volume: "100% (人声优先)"
+    bgm_volume: "25-30% (不压人声)"
+    sfx_volume: "10% (点缀不抢戏)"
+    fade_in: "0.5s (BGM渐入)"
+    fade_out: "1.0s (BGM渐出)"
+  tempo_by_product:
+    老爹鞋/运动鞋:
+      bpm: "120-140"
+      genre: 街头潮流/电子鼓点/hip-hop beat
+    高跟鞋/女靴:
+      bpm: "100-115"
+      genre: 时尚秀场/轻电子/女性力量
+    帆布鞋/板鞋:
+      bpm: "110-130"
+      genre: 校园青春/独立摇滚/轻快流行
+    乐福鞋/商务鞋:
+      bpm: "90-105"
+      genre: 爵士/轻奢/都市节奏
+    运动鞋/跑鞋:
+      bpm: "130-150"
+      genre: 热血/运动节拍/电音
+    拖鞋/凉鞋:
+      bpm: "100-115"
+      genre: 夏日/度假/雷鬼/Bossa Nova
+    童鞋:
+      bpm: "120-135"
+      genre: 可爱/童趣/动画配乐
+  how_to_find_trending:
+    - 抖音→搜索「热门BGM」→筛选「本周最热」→按视频模板类型筛选
+    - 小红书→搜索「爆款BGM」→按点赞排序→收藏高互动笔记的BGM
+    - 剪映→音乐→热歌榜→筛选近7天上升趋势的歌曲
+    - 巨量创意→创意榜单→热门音乐→按行业筛选（服饰鞋包）
+    - 蝉妈妈/飞瓜数据→素材库→热门BGM→按品类和转化率排序
+  usage_patterns:
+    卡点剪辑: 每1-2秒切镜，踩BGM鼓点，适合挂车版快节奏
+    情绪递进: 开场BGM弱→中段渐强→高潮最强→结尾淡出，适合不挂车版
+    反差切换: 前半段慢BGM（痛点场景）→突然快BGM（产品上场），制造听觉反差
+
+emotional_arc:
+  挂车版:
+    arc: 冲击(0-3s) → 好奇(3-6s) → 渴望(6-14s) → 信任(14-20s) → 行动(20-25s)
+    music_mapping: BGM从强节奏卡点开始→中段稍微降低→结尾再次推高配合CTA
+  不挂车版:
+    arc: 吸引(0-3s) → 沉浸(3-8s) → 共鸣(8-15s) → 回味(15-20s) → 关注(20-25s)
+    music_mapping: BGM从氛围感开始→中段温暖升华→结尾余韵悠长配合关注引导

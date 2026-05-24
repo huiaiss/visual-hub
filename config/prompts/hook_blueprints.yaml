@@ -1,0 +1,308 @@
+# Hook blueprints & content patterns — extracted from script_knowledge.py
+# Sources: MoneyPrinterTurbo (39.9k stars), Streamer-Sales (3.7k stars)
+
+hook_blueprints:
+  反差对比:
+    structure: Before → After 视觉冲击
+    text_patterns:
+      - 左边：你的旧XX 右边：我的新XX
+      - 穿前155 vs 穿后165
+      - 普通款vs这款，差距也太大了吧
+      - 同样XX元，左边这样右边这样
+    visual_pattern: 左右分屏/上下分屏，同一人物同一角度，只换产品
+    best_for: 鞋类/服装/美妆（视觉效果强的品类）
+  身份认同:
+    structure: 直接喊话 → 痛点共鸣 → 产品解法
+    text_patterns:
+      - 小个子女生必看！这双鞋自带增高Buff
+      - 脚宽星人集合！终于找到不挤脚的鞋了
+      - 学生党福音，百元出头穿出千元质感
+      - 上班族必备，通勤一整天脚不累
+    visual_pattern: 人物出镜+产品特写交替，建立身份关联
+    best_for: 所有品类（通用型最强钩子）
+  场景痛点:
+    structure: 场景还原 → 痛点触发 → 产品解决
+    text_patterns:
+      - 下雨天最怕穿这双鞋？看完你就放心了
+      - 面试/约会/聚会不知道穿什么？一双搞定
+      - 夏天穿运动鞋闷脚？这双透气到像没穿
+    visual_pattern: 先展示痛点场景（狼狈/尴尬）→ 再展示产品解决方案
+    best_for: 功能性产品（防水/透气/增高/收纳）
+  价格锚点:
+    structure: 高锚点价格 → 实际价格 → 价值感拉升
+    text_patterns:
+      - 商场同款399，今天直接169
+      - 不是贵的买不起，而是这款更有性价比
+      - 同样的品质，一半的价格
+      - 工厂直发，省掉中间商差价
+    visual_pattern: 价格对比字幕+产品细节轮播+限时优惠倒计时
+    best_for: 挂车版（强转化场景）
+  悬念好奇:
+    structure: 抛出问题 → 制造悬念 → 揭晓答案
+    text_patterns:
+      - 这双鞋到底有多软？看完你就知道了
+      - 为什么这双鞋卖了10万双？3个原因
+      - 拆开给你看，里面长这样
+    visual_pattern: 前2秒特写遮挡/模糊→第3秒揭晓，配合音效卡点
+    best_for: 有隐藏卖点的产品（内部结构/材质/工艺）
+
+shot_structure:
+  7_shot_cart:
+    - shot: 1
+      purpose: 钩子/Hook
+      timing: 0-3s
+      notes: 视觉冲击+身份喊话，不介绍产品
+    - shot: 2
+      purpose: 痛点放大
+      timing: 3-7s
+      notes: 具体化痛点场景，让观众对号入座
+    - shot: 3
+      purpose: 卖点爆发
+      timing: 7-11s
+      notes: 密集输出3-4个核心卖点，每个1-2秒
+    - shot: 4
+      purpose: 场景展示
+      timing: 11-15s
+      notes: 产品在真实场景中的效果，建立渴望
+    - shot: 5
+      purpose: 信任建设
+      timing: 15-19s
+      notes: 细节/质量/运费险，消除购买顾虑
+    - shot: 6
+      purpose: 价格锚点
+      timing: 19-22s
+      notes: 价格对比+优惠信息，制造价值感
+    - shot: 7
+      purpose: CTA收单
+      timing: 22-25s
+      notes: 明确指令：点击购物车/下方链接
+  7_shot_no_cart:
+    - shot: 1
+      purpose: 视觉吸引
+      timing: 0-3s
+      notes: 纯视觉冲击，不开口播
+    - shot: 2
+      purpose: 建立好奇
+      timing: 3-7s
+      notes: 展示产品独特之处，引发兴趣
+    - shot: 3
+      purpose: 场景代入
+      timing: 7-12s
+      notes: 多场景轮播，展示产品搭配可能性
+    - shot: 4
+      purpose: 质感展示
+      timing: 12-16s
+      notes: 慢动作/特写，强调产品质感与细节
+    - shot: 5
+      purpose: 情绪共鸣
+      timing: 16-20s
+      notes: 配合BGM高潮，制造记忆点
+    - shot: 6
+      purpose: 品牌种草
+      timing: 20-23s
+      notes: 品牌/概念强化，让观众记住你
+    - shot: 7
+      purpose: 引导关注
+      timing: 23-26s
+      notes: 点赞/收藏/关注，不卖货只种草
+
+title_formulas:
+  数字+痛点:
+    - 155穿出170既视感
+    - 3个原因告诉你为什么这双鞋卖爆
+    - 不到100块，穿出千元质感
+  反常识:
+    - 别看它厚底，轻到可以漂在水上
+    - 这双鞋泡水里都没事
+    - 穿了一个月，鞋底还像新的
+  身份标签:
+    - 学生党福音
+    - 上班族必备
+    - 宝妈救星
+    - 小个子宝藏
+  结果承诺:
+    - 穿上显高5cm
+    - 一整天不累脚
+    - 百搭不挑人
+  疑问引发:
+    - 这鞋到底有多软？
+    - 为什么这么多人买？
+    - 值不值得入手？
+
+customer_question_types:
+  - 价格与优惠政策
+  - 产品质量与性能
+  - 尺寸与兼容性
+  - 售后服务
+  - 发货与配送
+  - 用户评价与口碑
+  - 包装与附件
+  - 环保与安全
+  - 版本与型号选择
+  - 库存与补货
+
+fabe_framework:
+  F_特性: 产品客观属性（材质/设计/参数）
+  A_优势: 相比竞品的差异化优势
+  B_利益: 给用户带来的实际好处
+  E_证据: 真实体验/数据/用户反馈佐证
+
+anchor_personas:
+  甜美可爱型:
+    tone: 甜美、可爱、熟练使用网络热门梗、称呼客户为「家人们」
+    speed: 偏快，有活力
+    suits: 女鞋/服装/美妆/配饰
+    opening: 家人们，今天这款我真的自留了三双！
+    closing: 家人们冲！链接放左下角了，手慢无哦～
+    interaction: 扣1让我看看有多少姐妹想要！
+  专业测评型:
+    tone: 专业、理性、数据说话、有测评精神
+    speed: 适中，清晰有力
+    suits: 3C数码/家电/运动装备
+    opening: 今天不废话，直接上实测数据。
+    closing: 数据都摆在这了，值不值得买你们自己判断。链接在下方。
+    interaction: 有疑问的直接打出来，我现场测给你们看。
+  生活分享型:
+    tone: 亲切、自然、像朋友推荐、不刻意卖货
+    speed: 偏慢，娓娓道来
+    suits: 家居/食品/母婴/日用
+    opening: 最近发现一个好东西，忍不住分享给你们。
+    closing: 真的好用才推荐的，你们自己看需不需要～
+    interaction: 你们家里都用什么？评论区聊聊天～
+
+editing_knowledge:
+  golden_rules:
+    - 前3秒必须有视觉变化（切镜/缩放/特效），不能静止
+    - 每镜2-3秒，挂车版可更快（1.5-2.5秒）
+    - 字幕始终在安全区内（留出顶部画面空间）
+    - 价格数字用红色/黄色突出，CTA用闪烁边框引导点击
+    - BGM和口播音量比3:7，人声永远优先
+  transition_by_emotion:
+    冲击/对比: 闪白(Hard Cut) + 音效卡点
+    细节/质感: 叠化(Dissolve) 0.3s，柔和不跳
+    场景切换: 缩放(Zoom) + 滑动(Slide)，有方向感
+    情绪转折: 变速(Speed Ramp) + 闪黑(Flash to Black)
+  color_grading_by_platform:
+    抖音: 饱和度+8, 对比度+10, 色温+3 (鲜艳抓眼球)
+    小红书: 饱和度+3, 对比度+5, 色温-2 (高级感/低饱和)
+    快手: 饱和度+12, 对比度+8, 色温+5 (接地气/浓郁)
+    视频号: 饱和度+5, 对比度+5, 色温+2 (真实感)
+
+live_stream_patterns:
+  wei_bie_dan_key_phrases:
+    - 家人们，今天这款我真的自穿了三个月才敢推荐
+    - 别着急下单，先听我把这款讲透
+    - 有没有姐妹跟我一样【痛点描述】的？扣1让我看到
+    - 看这个细节【展示产品细节】，外面根本看不到这样的做工
+    - 我今天自己穿的这双，你们看【展示】
+    - 运费险已经给大家安排好了，不合适直接退，一分钱不亏
+    - 库存不多，但不催你们，拍之前有疑问直接问
+  ping_bo_key_phrases:
+    - 欢迎新进来的朋友，今天不逼单，把每款都讲透
+    - 有疑问随时打公屏，我一个个回复
+    - 面料/版型/尺码我都会详细说，听完再决定
+    - 搭配的话，这款配牛仔裤、裙子、阔腿裤都好看
+    - 有需要的去链接里看，运费险都安排好了
+  compliance_replacements:
+    最后3分钟: 库存有限（不报剩余时间）
+    全网最低: 这个价格很划算
+    绝对不: 我个人觉得不...
+    保证/肯定: 我穿了三个月的感受是...
+    马上涨价: 现在买最合适
+    不买就亏: 需要的姐妹可以考虑
+
+customer_perspective_rules:
+  - 先痛后解：每句话从客户烦恼出发，不先讲产品功能。❌'这款鞋有5cm厚底' → ✅'你是不是也受够了平底鞋显矮？'
+  - 场景代入：把客户拉进具体场景里。❌'网面透气' → ✅'大夏天出门，脚闷得出汗的感觉谁懂啊'
+  - 身份喊话：直接说出目标人群的标签。❌'这款鞋很舒适' → ✅'小个子女生/脚宽星人/通勤族看过来'
+  - 共情先行：先承认客户的困扰是真实的。❌'这个产品能解决你的问题' → ✅'我也经历过这个烦恼，直到遇到它'
+  - 对比冲击：让客户看到差距。不是讲参数，是展示'有 vs 没有'的区别
+  - 结果可视化：不说'穿着舒服'，说'走两万步脚还不累'。具体数字>抽象形容词
+  - 降低防御：用'我自己也在用'替代'大家都说好'，用'不合适可以退'替代'保证满意'
+  - 利益翻译：把产品特性翻译成客户生活里的好处。'EVA发泡底'→'踩下去像踩棉花，走一天脚底板不疼'
+
+pain_points_by_industry:
+  鞋类:
+    primary_pains:
+      - pain: 个子矮/腿短显矮
+        inner_voice: 每次拍照都偷偷踮脚，合照永远站后排
+        solution_angle: 厚底/内增高让你悄悄变高，不尴尬
+      - pain: 脚宽/脚胖找不到合适的鞋
+        inner_voice: 试了十双鞋都挤脚，网上买更不敢下单
+        solution_angle: 宽楦设计/弹力鞋面，脚宽星人终于有救了
+      - pain: 穿高跟鞋/硬底鞋脚疼
+        inner_voice: 下班回家的路像走在刀尖上，脱鞋那一刻才解放
+        solution_angle: 软底回弹+足弓支撑，通勤一整天不累脚
+      - pain: 夏天运动鞋闷脚出汗
+        inner_voice: 一脱鞋味道就飘出来，去朋友家都不敢脱鞋
+        solution_angle: 全网面透气，走一天也干爽，光脚穿都舒服
+      - pain: 商场品牌鞋太贵
+        inner_voice: 好看的鞋动不动三四百，学生党/打工人真的买不起
+        solution_angle: 工厂直供同款品质，一半价格穿出一样的效果
+      - pain: 新鞋磨脚后跟
+        inner_voice: 新鞋穿第一天就磨出水泡，创可贴贴了三天
+        solution_angle: 后跟加软垫+防磨设计，新鞋直接穿不用'养'
+    customer_mindset: 买鞋的人不是在买鞋，是在买'自信增高'、'走路不疼'、'出门不被笑'
+  服装:
+    primary_pains:
+      - pain: 身材焦虑显胖
+        inner_voice: 试了一堆衣服，每件都显肚子/显胳膊粗
+        solution_angle: 版型遮肉+视觉显瘦剪裁
+      - pain: 不会搭配
+        inner_voice: 买了好看的单品回家不知道怎么搭，还是穿回旧衣服
+        solution_angle: 一套搞定/百搭基础款/赠送搭配方案
+      - pain: 质感差像地摊货
+        inner_voice: 网上买的衣服拿到手跟图片完全两个东西
+        solution_angle: 实拍无滤镜+面料细节特写
+      - pain: 便宜的质量差，贵的舍不得
+        inner_voice: 几十块穿两次就变形，几百块又觉得不值
+        solution_angle: 工厂价买到专柜同款面料
+    customer_mindset: 买衣服不是在买布料，是在买'穿上好看的自己'
+  美妆:
+    primary_pains:
+      - pain: 不会化妆/手残党
+        inner_voice: 看教程学了半天，自己画出来像唱戏的
+        solution_angle: 傻瓜式操作/一笔成型/不怕手抖
+      - pain: 脱妆卡粉尴尬
+        inner_voice: 中午照镜子发现粉底裂成龟壳，还不如不化
+        solution_angle: 持妆实测12小时+补妆演示
+      - pain: 选不对色号
+        inner_voice: 网上看是豆沙色，到手是死亡芭比粉
+        solution_angle: 多肤色试色+自然光实拍
+      - pain: 成分不安全
+        inner_voice: 敏感肌什么都怕，一换产品就泛红过敏
+        solution_angle: 成分全公开+敏感肌实测+备案号展示
+    customer_mindset: 买美妆不是在买颜色，是在买'出门的底气'
+  3C数码:
+    primary_pains:
+      - pain: 参数看不懂
+        inner_voice: 一堆参数看了头晕，到底哪个好用？
+        solution_angle: 用生活化语言翻译参数→'这个充电头半小时能充满手机'
+      - pain: 怕买贵了被割韭菜
+        inner_voice: 刚买完就降价，或者发现别家便宜一半
+        solution_angle: 价格透明+横向对比+买贵退差价
+      - pain: 质量差容易坏
+        inner_voice: 用了一个月数据线就开裂、充电头发烫
+        solution_angle: 暴力测试+拆解展示+质保承诺
+    customer_mindset: 买数码不是在买参数，是在买'省心不踩坑'
+  家居:
+    primary_pains:
+      - pain: 家里乱不知道怎么收
+        inner_voice: 东西越来越多，塞哪都不是，看着心烦
+        solution_angle: 一个收纳神器搞定一个区域
+      - pain: 担心甲醛/不安全
+        inner_voice: 家里有小孩/宠物，不敢乱买便宜的
+        solution_angle: 检测报告实拍+母婴级安全认证
+      - pain: 租房不敢买贵的
+        inner_voice: 搬家又要扔，便宜的不耐用，贵的舍不得
+        solution_angle: 平价耐用+搬家可拆装
+    customer_mindset: 买家居家居不是在买东西，是在买'回家后的舒心'
+  食品:
+    primary_pains:
+      - pain: 怕不卫生/添加剂多
+        inner_voice: 配料表写满了不认识的东西，吃着不放心
+        solution_angle: 配料表实拍+短保无添加+生产环境展示
+      - pain: 买的不好吃浪费钱
+        inner_voice: 看着好吃买回来尝一口就想扔，浪费钱
+        solution_angle: 实吃镜头+真实口感描述+不好吃包退
+    customer_mindset: 买食品不是在买味道，是在买'放心给孩子吃'的安全感
