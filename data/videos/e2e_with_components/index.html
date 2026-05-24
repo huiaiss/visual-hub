@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080,height=1920">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:1080px;height:1920px;overflow:hidden;
+      background:#000;font-family:"Microsoft YaHei","PingFang SC",sans-serif;
+      position:relative}
+.scene{position:absolute;inset:0;opacity:0;display:flex;
+        flex-direction:column;align-items:center;justify-content:center}
+.scene img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.scene .caption{position:absolute;bottom:200px;left:50%;transform:translateX(-50%);
+    color:#fff;font-size:42px;font-weight:800;text-align:center;
+    text-shadow:0 2px 12px rgba(0,0,0,0.85);z-index:10;max-width:900px;
+    padding:16px 32px;background:rgba(0,0,0,0.45);border-radius:16px}
+.scene .subtitle{position:absolute;bottom:120px;left:50%;transform:translateX(-50%);
+    color:#fff;font-size:30px;font-weight:600;text-align:center;
+    text-shadow:0 2px 10px rgba(0,0,0,0.8);z-index:10;max-width:900px}
+#progress{position:absolute;bottom:0;left:0;height:4px;background:#ff1744;
+           z-index:99;width:0%}
+.btn{position:absolute;inset:0;z-index:100;cursor:pointer}
+
+/* ── E-commerce Components ── */
+#price-card{position:absolute;bottom:28px;left:24px;z-index:20;
+    background:linear-gradient(135deg,#FF6B35,#FF8C42);color:#fff;
+    padding:12px 24px;border-radius:12px;font-size:36px;font-weight:900;
+    box-shadow:0 4px 20px rgba(255,107,53,0.5);opacity:0;
+    letter-spacing:2px}
+#price-card .label{font-size:16px;font-weight:400;opacity:0.85;display:block;
+    letter-spacing:0}
+
+#selling-point{position:absolute;top:120px;right:0;z-index:20;opacity:0;
+    background:rgba(0,0,0,0.7);color:#00D4AA;padding:14px 28px 14px 24px;
+    border-radius:12px 0 0 12px;font-size:28px;font-weight:700;
+    border-left:4px solid #00D4AA;max-width:600px}
+
+#cta-bar{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);
+    z-index:21;opacity:0;text-align:center}
+#cta-bar .main{color:#fff;font-size:38px;font-weight:800;
+    text-shadow:0 2px 12px rgba(0,0,0,0.9);
+    background:rgba(255,23,68,0.85);padding:16px 40px;border-radius:28px;
+    display:inline-block}
+#cta-bar .sub{color:#fff;font-size:22px;font-weight:500;margin-top:10px;
+    text-shadow:0 2px 8px rgba(0,0,0,0.8)}
+</style>
+</head>
+<body>
+<audio id="narration" src="audio/narration.mp3" preload="auto"></audio>
+
+<div id="progress"></div>
+
+<div id="scenes"></div>
+<div id="subtitles"></div>
+
+<div id="price-card"><span class="label">限时特惠</span></div>
+<div id="selling-point"></div>
+<div id="cta-bar"><div class="main"></div><div class="sub"></div></div>
+
+<div class="btn" id="playBtn" onclick="start()"></div>
+
+<script src="gsap.min.js"></script>
+<script>
+var tl = gsap.timeline({paused:true});
+var totalDur = 47.81;
+
+// ── Scenes ──
+var container = document.getElementById('scenes');
+container.insertAdjacentHTML("beforeend","<div class="scene" id="scene1"><img src="assets/0dcf4f838d034f23ad2a6a2ab7167de5.PNG" /><div class="caption">我跟你说这双鞋真的绝了，你们看这个鞋底设计，我拿到手就惊了</div></div>");
+tl.set("#scene1",{opacity:0},0.0);
+tl.to("#scene1",{opacity:1,duration:0.3,ease:"power3.out"},0.0);
+tl.to("#scene1",{opacity:0,duration:0.25,ease:"power3.in"},4.7);
+container.insertAdjacentHTML("beforeend","<div class="scene" id="scene2"><img src="assets/1ec75651013a40a6bab7bd6041da5722.PNG" /><div class="caption">你看我这样按下去马上就弹回来，走一天路脚都不酸</div></div>");
+tl.set("#scene2",{opacity:0},5.0);
+tl.to("#scene2",{opacity:1,duration:0.3,ease:"power3.out"},5.0);
+tl.to("#scene2",{opacity:0,duration:0.25,ease:"power3.in"},9.7);
+container.insertAdjacentHTML("beforeend","<div class="scene" id="scene3"><img src="assets/277e61c9130a4ed397b7980f89e1f9dc.PNG" /><div class="caption">你们看这个网面它真的很透气，完全不闷脚</div></div>");
+tl.set("#scene3",{opacity:0},10.0);
+tl.to("#scene3",{opacity:1,duration:0.3,ease:"power3.out"},10.0);
+tl.to("#scene3",{opacity:0,duration:0.25,ease:"power3.in"},13.7);
+container.insertAdjacentHTML("beforeend","<div class="scene" id="scene4"><img src="assets/0a4c6cbaa3004b5088b0c2efc6b4a984.PNG" /><div class="caption">它真的很好搭衣服，你看我随便穿个牛仔裤就很好看</div></div>");
+tl.set("#scene4",{opacity:0},14.0);
+tl.to("#scene4",{opacity:1,duration:0.3,ease:"power3.out"},14.0);
+tl.to("#scene4",{opacity:0,duration:0.25,ease:"power3.in"},17.7);
+container.insertAdjacentHTML("beforeend","<div class="scene" id="scene5"><img src="assets/0dcf4f838d034f23ad2a6a2ab7167de5.PNG" /><div class="caption">再看后跟这个位置它是有加固的，我使劲扭它都不变形</div></div>");
+tl.set("#scene5",{opacity:0},18.0);
+tl.to("#scene5",{opacity:1,duration:0.3,ease:"power3.out"},18.0);
+tl.to("#scene5",{opacity:0,duration:0.25,ease:"power3.in"},21.7);
+container.insertAdjacentHTML("beforeend","<div class="scene" id="scene6"><img src="assets/1ec75651013a40a6bab7bd6041da5722.PNG" /><div class="caption">它有三个颜色可以选，我觉得这个卡其色最好看</div></div>");
+tl.set("#scene6",{opacity:0},22.0);
+tl.to("#scene6",{opacity:1,duration:0.3,ease:"power3.out"},22.0);
+tl.to("#scene6",{opacity:0,duration:0.25,ease:"power3.in"},25.7);
+container.insertAdjacentHTML("beforeend","<div class="scene" id="scene7"><img src="assets/277e61c9130a4ed397b7980f89e1f9dc.PNG" /><div class="caption">真的就是一顿火锅钱就能买到这么好穿的鞋，左下角链接看一下</div></div>");
+tl.set("#scene7",{opacity:0},26.0);
+tl.to("#scene7",{opacity:1,duration:0.3,ease:"power3.out"},26.0);
+tl.to("#scene7",{opacity:0,duration:0.25,ease:"power3.in"},30.7);
+container.insertAdjacentHTML("beforeend","<div class=\"scene\" id=\"scene8\"><img src="assets/gen_240f6ea9ce13.png" /><div class=\"caption\">截图保存拍摄方案，下次直接对照拍。关注我，每天一个电商拍摄技巧。</div></div>");
+tl.set("#scene8",{opacity:0},31.0);
+tl.to("#scene8",{opacity:1,duration:0.3,ease:"power3.out"},31.0);
+
+// ── Subtitles ──
+var subContainer = document.getElementById('subtitles');
+subContainer.innerHTML = '<div id="subText" class="subtitle"></div>';
+tl.call(function() {document.getElementById("subText").textContent = "我跟你说这双鞋真的绝了，你们看这个鞋底设计，我拿到手就惊了";document.getElementById("subText").style.opacity = "1";}, [], 0.0);
+tl.to("#subText", {opacity:0, duration:0.2}, 6.614999999999999);
+tl.call(function() {document.getElementById("subText").textContent = "你看我这样按下去马上就弹回来，走一天路脚都不酸";document.getElementById("subText").style.opacity = "1";}, [], 7.165);
+tl.to("#subText", {opacity:0, duration:0.2}, 12.293000000000001);
+tl.call(function() {document.getElementById("subText").textContent = "你们看这个网面它真的很透气，完全不闷脚";document.getElementById("subText").style.opacity = "1";}, [], 12.843);
+tl.to("#subText", {opacity:0, duration:0.2}, 16.867);
+tl.call(function() {document.getElementById("subText").textContent = "它真的很好搭衣服，你看我随便穿个牛仔裤就很好看";document.getElementById("subText").style.opacity = "1";}, [], 17.417);
+tl.to("#subText", {opacity:0, duration:0.2}, 22.330000000000002);
+tl.call(function() {document.getElementById("subText").textContent = "再看后跟这个位置它是有加固的，我使劲扭它都不变形";document.getElementById("subText").style.opacity = "1";}, [], 22.88);
+tl.to("#subText", {opacity:0, duration:0.2}, 28.056);
+tl.call(function() {document.getElementById("subText").textContent = "它有三个颜色可以选，我觉得这个卡其色最好看";document.getElementById("subText").style.opacity = "1";}, [], 28.606);
+tl.to("#subText", {opacity:0, duration:0.2}, 33.373999999999995);
+tl.call(function() {document.getElementById("subText").textContent = "真的就是一顿火锅钱就能买到这么好穿的鞋，左下角链接看一下";document.getElementById("subText").style.opacity = "1";}, [], 33.924);
+tl.to("#subText", {opacity:0, duration:0.2}, 39.628);
+tl.call(function() {document.getElementById("subText").textContent = "截图保存拍摄方案，下次直接对照拍。关注我，每天一个电商拍摄技巧。";document.getElementById("subText").style.opacity = "1";}, [], 40.178);
+tl.to("#subText", {opacity:0, duration:0.2}, 47.61);
+
+// ── Components ──
+document.getElementById("price-card").innerHTML = '<span class="label">限时特惠</span>¥129-169';
+tl.to("#price-card", {opacity:1, duration:0.4, ease:"power3.out"}, 0.5);
+tl.to("#price-card", {scale:1.08, duration:0.3, yoyo:true, repeat:1}, 0.9);
+tl.to("#price-card", {opacity:0, duration:0.3}, 25.795500000000004);
+tl.to("#price-card", {opacity:1, duration:0.4, ease:"power3.out"}, 41.81);
+tl.to("#price-card", {scale:1.1, duration:0.3, yoyo:true, repeat:2}, 42.31);
+tl.call(function() {document.getElementById("selling-point").textContent = "✓ 高弹EVA鞋底";}, [], 3.0);
+tl.fromTo("#selling-point", {opacity:0, x:60}, {opacity:1, x:0, duration:0.35, ease:"power2.out"}, 3.0);
+tl.to("#selling-point", {opacity:0, x:-30, duration:0.25, ease:"power2.in"}, 8.523875);
+tl.call(function() {document.getElementById("selling-point").textContent = "✓ 透气飞织网面";}, [], 8.823875000000001);
+tl.fromTo("#selling-point", {opacity:0, x:60}, {opacity:1, x:0, duration:0.35, ease:"power2.out"}, 8.823875000000001);
+tl.to("#selling-point", {opacity:0, x:-30, duration:0.25, ease:"power2.in"}, 14.347750000000001);
+tl.call(function() {document.getElementById("selling-point").textContent = "✓ 复古厚底";}, [], 14.647750000000002);
+tl.fromTo("#selling-point", {opacity:0, x:60}, {opacity:1, x:0, duration:0.35, ease:"power2.out"}, 14.647750000000002);
+tl.to("#selling-point", {opacity:0, x:-30, duration:0.25, ease:"power2.in"}, 20.171625000000002);
+tl.call(function() {document.getElementById("selling-point").textContent = "✓ TPU稳定片";}, [], 20.471625000000003);
+tl.fromTo("#selling-point", {opacity:0, x:60}, {opacity:1, x:0, duration:0.35, ease:"power2.out"}, 20.471625000000003);
+tl.to("#selling-point", {opacity:0, x:-30, duration:0.25, ease:"power2.in"}, 25.995500000000003);
+document.getElementById("cta-bar").querySelector(".main").textContent = "点击左下角链接购买";
+document.getElementById("cta-bar").querySelector(".sub").textContent = "关注我，每天分享好鞋测评";
+tl.fromTo("#cta-bar", {opacity:0, y:40, scale:0.9}, {opacity:1, y:0, scale:1, duration:0.5, ease:"back.out(1.7)"}, 43.31);
+tl.to("#cta-bar", {scale:1.05, duration:0.4, yoyo:true, repeat:2}, 43.910000000000004);
+
+// ── Progress bar ──
+tl.to("#progress", {width:"100%",duration:totalDur,ease:"none"}, 0);
+
+// ── Audio ──
+var narration = document.getElementById("narration");
+var bgm = document.getElementById("bgm");
+tl.call(function() { narration.play(); if(bgm) bgm.play(); }, [], 0);
+
+// ── Autoplay support ──
+var autoplay = new URLSearchParams(window.location.search).get("autoplay");
+if (autoplay === "1") {
+  document.getElementById("playBtn").style.display = "none";
+  setTimeout(function() { start(); }, 500);
+}
+
+function start() {
+  document.getElementById("playBtn").style.display = "none";
+  tl.seek(0);
+  tl.play();
+  narration.play();
+  if (bgm) bgm.play();
+}
+</script>
+</body>
+</html>

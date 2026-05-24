@@ -49,8 +49,13 @@ class FrameAssembler:
 
     def assemble(self, script, asset_plan: dict,
                  bgm_path: str = "", bgm_tracks: list = None,
-                 ref_analysis: dict = None) -> AssemblyResult:
-        """Full assembly: TTS → HTML → result."""
+                 ref_analysis: dict = None,
+                 ecommerce_data: dict = None) -> AssemblyResult:
+        """Full assembly: TTS → HTML → result.
+
+        ecommerce_data: optional dict with 'price', 'key_features', 'product_name'
+                        for rendering price card, selling points, and CTA overlays.
+        """
         audio_dir = self.output_dir / "audio"
         audio_dir.mkdir(parents=True, exist_ok=True)
 
@@ -59,7 +64,7 @@ class FrameAssembler:
 
         # 2. Build HTML page
         html_path = self._build_html(script, asset_plan, audio_path, srt_path,
-                                     bgm_path, total_dur)
+                                     bgm_path, total_dur, ecommerce_data)
 
         # 3. Copy GSAP to output dir
         self._copy_gsap()
@@ -108,13 +113,15 @@ class FrameAssembler:
 
     def _build_html(self, script, asset_plan: dict,
                     audio_path: str, srt_path: str,
-                    bgm_path: str, total_dur: float) -> Path:
+                    bgm_path: str, total_dur: float,
+                    ecommerce_data: dict = None) -> Path:
         """Generate a self-contained GSAP HTML page for Chromium rendering."""
         scenes_js = self._build_scenes_js(script, asset_plan)
         srt_entries = self._load_srt_entries(srt_path)
         subtitles_js = self._build_subtitles_js(srt_entries)
+        components_js = self._build_components_js(script, total_dur, ecommerce_data)
 
-        audio_rel = os.path.basename(audio_path)
+        audio_rel = f"audio/{os.path.basename(audio_path)}"
         bgm_rel = os.path.basename(bgm_path) if bgm_path and os.path.exists(bgm_path) else ""
 
         html = f'''<!DOCTYPE html>
@@ -140,6 +147,29 @@ body{{width:{self.canvas_width}px;height:{self.canvas_height}px;overflow:hidden;
 #progress{{position:absolute;bottom:0;left:0;height:4px;background:#ff1744;
            z-index:99;width:0%}}
 .btn{{position:absolute;inset:0;z-index:100;cursor:pointer}}
+
+/* ── E-commerce Components ── */
+#price-card{{position:absolute;bottom:28px;left:24px;z-index:20;
+    background:linear-gradient(135deg,#FF6B35,#FF8C42);color:#fff;
+    padding:12px 24px;border-radius:12px;font-size:36px;font-weight:900;
+    box-shadow:0 4px 20px rgba(255,107,53,0.5);opacity:0;
+    letter-spacing:2px}}
+#price-card .label{{font-size:16px;font-weight:400;opacity:0.85;display:block;
+    letter-spacing:0}}
+
+#selling-point{{position:absolute;top:120px;right:0;z-index:20;opacity:0;
+    background:rgba(0,0,0,0.7);color:#00D4AA;padding:14px 28px 14px 24px;
+    border-radius:12px 0 0 12px;font-size:28px;font-weight:700;
+    border-left:4px solid #00D4AA;max-width:600px}}
+
+#cta-bar{{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);
+    z-index:21;opacity:0;text-align:center}}
+#cta-bar .main{{color:#fff;font-size:38px;font-weight:800;
+    text-shadow:0 2px 12px rgba(0,0,0,0.9);
+    background:rgba(255,23,68,0.85);padding:16px 40px;border-radius:28px;
+    display:inline-block}}
+#cta-bar .sub{{color:#fff;font-size:22px;font-weight:500;margin-top:10px;
+    text-shadow:0 2px 8px rgba(0,0,0,0.8)}}
 </style>
 </head>
 <body>
@@ -149,6 +179,10 @@ body{{width:{self.canvas_width}px;height:{self.canvas_height}px;overflow:hidden;
 
 <div id="scenes"></div>
 <div id="subtitles"></div>
+
+<div id="price-card"><span class="label">限时特惠</span></div>
+<div id="selling-point"></div>
+<div id="cta-bar"><div class="main"></div><div class="sub"></div></div>
 
 <div class="btn" id="playBtn" onclick="start()"></div>
 
@@ -162,6 +196,9 @@ var totalDur = {total_dur};
 
 // ── Subtitles ──
 {subtitles_js}
+
+// ── Components ──
+{components_js}
 
 // ── Progress bar ──
 tl.to("#progress", {{width:"100%",duration:totalDur,ease:"none"}}, 0);
@@ -274,6 +311,85 @@ function start() {{
             lines.append(
                 f'tl.to("#subText", {{opacity:0, duration:0.2}}, {end - 0.2});'
             )
+
+        return "\n".join(lines)
+
+    def _build_components_js(self, script, total_dur: float,
+                            ecommerce_data: dict = None) -> str:
+        """Generate GSAP JS for e-commerce overlay components."""
+        eco = ecommerce_data or {}
+        price = eco.get("price", "¥129-169")
+        features = eco.get("key_features", getattr(script, "key_features", []))
+        if not features and hasattr(script, "tags"):
+            features = getattr(script, "tags", [])[:4]
+        product_name = eco.get("product_name", getattr(script, "title", "好物推荐"))
+        cta_text = eco.get("cta_text", "点击左下角链接购买")
+        cta_sub = eco.get("cta_sub", "关注我，每天分享好鞋测评")
+
+        lines = []
+
+        # Price card — show at 1s, hide at half, show again at end
+        midpoint = total_dur * 0.55
+        lines.append(
+            f'document.getElementById("price-card").innerHTML = '
+            f'\'<span class="label">限时特惠</span>{self._escape_js(price)}\';'
+        )
+        # Fade in at 0.5s
+        lines.append(
+            f'tl.to("#price-card", {{opacity:1, duration:0.4, ease:"power3.out"}}, 0.5);'
+        )
+        # Pulse animation at start
+        lines.append(
+            f'tl.to("#price-card", {{scale:1.08, duration:0.3, yoyo:true, repeat:1}}, 0.9);'
+        )
+        # Fade out mid-video
+        lines.append(
+            f'tl.to("#price-card", {{opacity:0, duration:0.3}}, {midpoint - 0.5});'
+        )
+        # Reappear with pulse near end
+        reappear_time = total_dur - 6.0
+        lines.append(
+            f'tl.to("#price-card", {{opacity:1, duration:0.4, ease:"power3.out"}}, {reappear_time});'
+        )
+        lines.append(
+            f'tl.to("#price-card", {{scale:1.1, duration:0.3, yoyo:true, repeat:2}}, {reappear_time + 0.5});'
+        )
+
+        # Selling point badges — rotate through features
+        if features:
+            feat_interval = (midpoint - 3.0) / max(len(features), 1)
+            for i, feat in enumerate(features):
+                t = 3.0 + i * feat_interval
+                escaped_feat = self._escape_js(feat)
+                lines.append(
+                    f'tl.call(function() {{'
+                    f'document.getElementById("selling-point").textContent = "✓ {escaped_feat}";'
+                    f'}}, [], {t});'
+                )
+                lines.append(
+                    f'tl.fromTo("#selling-point", '
+                    f'{{opacity:0, x:60}}, {{opacity:1, x:0, duration:0.35, ease:"power2.out"}}, {t});'
+                )
+                lines.append(
+                    f'tl.to("#selling-point", {{opacity:0, x:-30, duration:0.25, ease:"power2.in"}}, {t + feat_interval - 0.3});'
+                )
+
+        # CTA bar — appears at end
+        cta_start = total_dur - 4.5
+        lines.append(
+            f'document.getElementById("cta-bar").querySelector(".main").textContent = "{self._escape_js(cta_text)}";'
+        )
+        lines.append(
+            f'document.getElementById("cta-bar").querySelector(".sub").textContent = "{self._escape_js(cta_sub)}";'
+        )
+        lines.append(
+            f'tl.fromTo("#cta-bar", {{opacity:0, y:40, scale:0.9}}, '
+            f'{{opacity:1, y:0, scale:1, duration:0.5, ease:"back.out(1.7)"}}, {cta_start});'
+        )
+        # Pulse twice
+        lines.append(
+            f'tl.to("#cta-bar", {{scale:1.05, duration:0.4, yoyo:true, repeat:2}}, {cta_start + 0.6});'
+        )
 
         return "\n".join(lines)
 

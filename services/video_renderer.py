@@ -328,8 +328,24 @@ def render_video(
         logger.info("BGM download requested but not yet implemented in FrameCraft")
     bgm_path = ""
 
+    # Build ecommerce overlay data
+    pa = plan.get("product_analysis", {})
+    if isinstance(pa, str):
+        try:
+            pa = json.loads(pa)
+        except (json.JSONDecodeError, TypeError):
+            pa = {}
+    ecommerce_data = {
+        "price": "¥129-169",
+        "key_features": pa.get("key_features", []),
+        "product_name": pa.get("category", ""),
+        "cta_text": "点击左下角链接购买",
+        "cta_sub": "关注我，每天分享好鞋测评",
+    }
+
     try:
-        result = assembler.assemble(script, asset_plan, bgm_path, ref_analysis)
+        result = assembler.assemble(script, asset_plan, bgm_path, ref_analysis,
+                                    ecommerce_data=ecommerce_data)
     except Exception as e:
         logger.exception("Assembly failed")
         return VideoRenderResult(script=script, output_dir=output_dir, error=f"Assembly failed: {e}")
