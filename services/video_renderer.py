@@ -332,10 +332,10 @@ def render_video(
         asset_plan = asset_pipeline.generate_missing(asset_plan)
 
     # 6. Assembly
-    from builders.assembly_engine import AssemblyEngine
+    from services.rendering.assembler import FrameAssembler
     width, height = _PLATFORM_DIMENSIONS.get(platform, _PLATFORM_DIMENSIONS["default"])
     component_set = _VIDEO_TYPE_TO_COMPONENT_SET.get(video_type, "ecommerce")
-    assembler = AssemblyEngine(
+    assembler = FrameAssembler(
         output_dir=output_dir, tts_voice=tts_voice, tts_speed=tts_speed,
         canvas_width=width, canvas_height=height, component_set=component_set,
     )
@@ -383,7 +383,7 @@ def check_renderer_available() -> bool:
     """Check if rendering engine dependencies are importable."""
     try:
         from services.rendering.asset_pipeline import AssetPipeline
-        from builders.assembly_engine import AssemblyEngine
+        from services.rendering.assembler import FrameAssembler
         return True
     except ImportError as e:
         logger.warning(f"Renderer not available: {e}")

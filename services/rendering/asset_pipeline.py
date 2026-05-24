@@ -20,14 +20,6 @@ from pathlib import Path
 from typing import Optional
 
 
-def _brand_name() -> str:
-    try:
-        from config.brand_loader import get_brand_name
-        return get_brand_name()
-    except Exception:
-        return "Auto Video"
-
-
 # ─── Data Types ─────────────────────────────────────────────
 
 @dataclass
@@ -58,10 +50,12 @@ class AssetPlan:
 class AssetPipeline:
     """多源素材匹配与生成."""
 
-    def __init__(self, assets_dir: str = "assets", cache_dir: str = None):
+    def __init__(self, assets_dir: str = "assets", cache_dir: str = None,
+                 brand_name: str = None):
         self.assets_dir = Path(assets_dir)
         self.cache_dir = Path(cache_dir or os.path.join(assets_dir, ".cache"))
         self.cache_dir.mkdir(parents=True, exist_ok=True)
+        self.brand_name = brand_name or "AI电商"
 
         # 初始化各源
         self._local_index: dict[str, list[Path]] = {}
@@ -240,8 +234,7 @@ class AssetPipeline:
         draw.rectangle([(0, 0), (W, 130)], fill=(0, 200, 100))
         tag = {1: "HOOK", 2: "展示", 3: "破绽①", 4: "破绽②", 5: "破绽③",
                6: "原理", 7: "清单", 8: "转发", 9: "评论", 10: "OUTRO"}.get(beat_idx, f"BEAT{beat_idx}")
-        brand = _brand_name()
-        draw.text((40, 30), f"{brand} · {tag}", fill=(8, 10, 18), font=font_lg)
+        draw.text((40, 30), f"{self.brand_name} · {tag}", fill=(8, 10, 18), font=font_lg)
 
         # ── Center: visual placeholder area ──
         # AI detection interface mockup

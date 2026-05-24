@@ -107,12 +107,6 @@ async def direct_gen_page(request: Request):
     return templates.TemplateResponse("direct_gen.html", {"request": request})
 
 
-@app.get("/director")
-async def director_page(request: Request):
-    from fastapi.responses import RedirectResponse
-    return RedirectResponse("/factory")
-
-
 @app.get("/creative")
 async def creative_page(request: Request):
     return templates.TemplateResponse("creative.html", {"request": request})
