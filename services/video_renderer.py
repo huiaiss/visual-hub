@@ -1,7 +1,7 @@
 """Video Renderer — FrameCraft's native video export pipeline.
 
 Encapsulates: plan → Script → TTS → Assets → HTML → MP4
-Uses auto-video-platform's battle-tested rendering engines under the hood.
+Fully independent — zero code dependency on auto-video-platform.
 
 Usage:
     from services.video_renderer import render_video
@@ -13,28 +13,12 @@ Usage:
 import json
 import logging
 import os
-import sys
 import time
 import uuid
-from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 
-# ── Resolve auto-video-platform path ──────────────────────────
-
-_AUTO_VIDEO_ROOT = os.environ.get(
-    "AUTO_VIDEO_PATH",
-    os.path.join(os.path.dirname(__file__), "..", "..", "auto-video-platform"),
-)
-_AUTO_VIDEO_ROOT = os.path.abspath(_AUTO_VIDEO_ROOT)
-if not os.path.isdir(_AUTO_VIDEO_ROOT):
-    _ALT = r"d:\auto-video-platform"
-    if os.path.isdir(_ALT):
-        _AUTO_VIDEO_ROOT = _ALT
-if _AUTO_VIDEO_ROOT not in sys.path:
-    sys.path.insert(0, _AUTO_VIDEO_ROOT)
-
-from generators.script_engine import Beat, Script
+from services.script_models import Beat, Script
 
 
 # ── Constants ─────────────────────────────────────────────────
@@ -340,10 +324,9 @@ def render_video(
         canvas_width=width, canvas_height=height, component_set=component_set,
     )
 
-    bgm_path = ""
     if bgm:
-        from pipeline import VideoPipeline
-        bgm_path = VideoPipeline.download_bgm(output_dir, script.total_duration_s)
+        logger.info("BGM download requested but not yet implemented in FrameCraft")
+    bgm_path = ""
 
     try:
         result = assembler.assemble(script, asset_plan, bgm_path, ref_analysis)

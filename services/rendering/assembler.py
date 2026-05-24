@@ -322,8 +322,6 @@ function start() {{
             return
         candidates = [
             Path(__file__).resolve().parent / "static" / "gsap.min.js",
-            Path(__file__).resolve().parent.parent.parent
-            / "auto-video-platform" / "builders" / "static" / "gsap.min.js",
         ]
         for src in candidates:
             if src.exists():

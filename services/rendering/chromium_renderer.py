@@ -239,13 +239,7 @@ class ChromiumRenderer:
         gsap_dst = os.path.join(html_dir, "gsap.min.js")
         if os.path.exists(gsap_dst):
             return
-        # Try the rendering/static copy first, then auto-video-platform fallback
         gsap_src = os.path.join(os.path.dirname(__file__), "static", "gsap.min.js")
-        if not os.path.exists(gsap_src):
-            # Fallback: check auto-video-platform
-            gsap_src = os.path.join(
-                os.path.dirname(__file__), "..", "..", "..",
-                "auto-video-platform", "builders", "static", "gsap.min.js")
         if os.path.exists(gsap_src):
             import shutil as _shutil
             _shutil.copy2(gsap_src, gsap_dst)
