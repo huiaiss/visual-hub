@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FrameCraft — 拍摄方案生成</title>
+<link rel="manifest" href="/static/manifest.json">
+<link rel="icon" type="image/svg+xml" href="/static/icon-192.svg">
+<meta name="theme-color" content="#050505">
+<link rel="stylesheet" href="/static/css/premium.css?v=2">
+<style>
+  :root {
+    --bg:#050505;--surface:#0b0b0b;--card:#0f0f0f;--border:rgba(255,255,255,.04);
+    --text:#e8e2d6;--muted:#706a60;
+    --accent:#a78bfa;--accent-dim:rgba(167,139,250,.06);--accent-glow:rgba(167,139,250,.12);
+    --green:#3ea86a;--red:#c05555;
+    --font-display:'STXingkai','STZhongsong','Noto Serif SC','SimSun','STSong',serif;
+    --font-body:'PingFang SC','Microsoft YaHei','Noto Sans SC','Hiragino Sans GB','Microsoft JhengHei','WenQuanYi Micro Hei',sans-serif;
+    --radius:16px;--radius-sm:10px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--bg);color:var(--text);font-family:var(--font-body);
+    min-height:100vh;position:relative;overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* Ambient */
+  .bg-ambient{position:fixed;inset:0;pointer-events:none;z-index:0}
+  .bg-ambient .orb{position:absolute;border-radius:50%;filter:blur(140px)}
+  .bg-ambient .orb-1{width:650px;height:650px;background:radial-gradient(circle,rgba(167,139,250,.15),transparent);top:-20%;left:-12%}
+  .bg-ambient .orb-2{width:500px;height:500px;background:radial-gradient(circle,rgba(139,92,246,.06),transparent);bottom:-15%;right:-10%}
+  .bg-ambient .orb-3{width:350px;height:350px;background:radial-gradient(circle,rgba(167,139,250,.05),transparent);top:55%;left:55%}
+
+  .grain-overlay{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.018;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+  #p-particles{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.3}
+
+  /* Top bar */
+  .topbar{
+    position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:1000;
+    display:flex;align-items:center;gap:2px;padding:5px 6px;
+    background:rgba(10,10,18,.88);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+    border:1px solid rgba(255,255,255,.05);border-radius:999px;
+    transition:all .5s cubic-bezier(.16,1,.3,1);
+  }
+  .topbar.scrolled{top:6px;background:rgba(5,5,8,.94);border-color:rgba(167,139,250,.15);box-shadow:0 8px 40px rgba(0,0,0,.6)}
+  .topbar-brand{
+    display:flex;align-items:center;gap:7px;padding:6px 12px;
+    font-family:var(--font-display);font-weight:900;font-size:13px;
+    color:var(--accent);letter-spacing:.04em;text-decoration:none;white-space:nowrap;
+  }
+  .topbar-link{
+    color:var(--muted);text-decoration:none;font-size:12px;padding:6px 12px;
+    border-radius:999px;font-weight:500;transition:all .3s;
+  }
+  .topbar-link:hover{color:var(--text);background:rgba(255,255,255,.04)}
+
+  .page-wrap{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:80px 20px 60px}
+
+  /* Cards */
+  .card{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:24px;position:relative;overflow:hidden;
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+    transition:border-color .3s;
+  }
+  .card::before{
+    content:'';position:absolute;top:0;left:20%;right:20%;height:1px;
+    background:linear-gradient(90deg,transparent,rgba(167,139,250,.15),transparent);
+  }
+  .card+.card{margin-top:16px}
+
+  /* Buttons */
+  .btn{
+    background:var(--accent);color:#0a0a0a;border:none;border-radius:999px;
+    padding:13px 28px;font-size:14px;font-weight:600;cursor:pointer;
+    font-family:var(--font-body);letter-spacing:.04em;
+    transition:all .4s cubic-bezier(.16,1,.3,1);
+    position:relative;overflow:hidden;
+  }
+  .btn:hover{background:#c4b5fd;box-shadow:0 0 48px rgba(167,139,250,.25);transform:translateY(-2px)}
+  .btn:active{transform:scale(.97)}
+  .btn::after{
+    content:'';position:absolute;inset:0;
+    background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.2) 50%,transparent 60%);
+    transform:translateX(-100%) skewX(-12deg);transition:transform .8s;
+  }
+  .btn:hover::after{transform:translateX(200%) skewX(-12deg)}
+  .btn:disabled{background:#1f1d18;color:var(--muted);cursor:not-allowed;box-shadow:none;transform:none}
+  .btn:disabled::after{display:none}
+  .btn-sm{font-size:11px;padding:6px 14px;letter-spacing:.05em}
+  .btn-outline{
+    background:transparent;border:1px solid var(--border);color:var(--text);
+    border-radius:999px;padding:12px 24px;font-size:13px;font-weight:500;cursor:pointer;
+    font-family:var(--font-body);transition:all .3s;
+  }
+  .btn-outline:hover{background:var(--accent-dim);border-color:var(--accent)}
+
+  /* Tags */
+  .tag{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;margin:2px;font-family:var(--font-body);letter-spacing:.03em;font-weight:500}
+  .tag-purple{background:rgba(167,139,250,.1);color:#a78bfa}
+  .tag-green{background:rgba(62,168,106,.12);color:#6cc98a}
+  .tag-amber{background:rgba(232,180,90,.08);color:#f0c56a}
+  .tag-red{background:rgba(192,85,85,.12);color:#e07070}
+
+  /* Forms */
+  select,input[type="text"],textarea{
+    background:rgba(255,255,255,.02);border:1px solid var(--border);
+    border-radius:var(--radius-sm);color:var(--text);padding:11px 14px;
+    font-size:14px;width:100%;font-family:var(--font-body);
+    transition:border-color .3s,box-shadow .3s;outline:none;
+  }
+  select:focus,input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(167,139,250,.08)}
+  select{appearance:none;-webkit-appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23706a60' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+  select option{background:var(--card);color:var(--text)}
+
+  label.block-label{display:block;font-size:11px;color:var(--muted);margin-bottom:6px;letter-spacing:.04em;font-weight:500;text-transform:uppercase}
+
+  /* Angle slots */
+  .angle-slot{
+    border:1px dashed var(--border);border-radius:var(--radius-sm);padding:10px 14px;
+    transition:all .25s;display:flex;align-items:center;gap:12px;
+  }
+  .angle-slot:hover{border-color:var(--accent);background:var(--accent-dim)}
+  .angle-slot.filled{border-color:var(--green);border-style:solid;background:rgba(62,168,106,.03)}
+  .angle-slot .slot-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;font-family:var(--font-display)}
+  .angle-slot .slot-num.required{background:rgba(192,85,85,.15);color:#e07070}
+  .angle-slot .slot-num.optional{background:rgba(138,128,112,.12);color:var(--muted)}
+  .angle-slot .slot-info{flex:1;min-width:0}
+  .angle-slot .slot-name{font-size:13px;font-weight:600;color:var(--text)}
+  .angle-slot .slot-desc{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .angle-slot .slot-upload{width:52px;height:52px;border:1px dashed var(--border);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .25s;position:relative;overflow:hidden}
+  .angle-slot .slot-upload:hover{border-color:var(--accent);background:var(--accent-dim)}
+  .angle-slot .slot-upload img{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;border-radius:var(--radius-sm)}
+  .angle-slot .slot-upload .slot-plus{font-size:18px;color:var(--muted);transition:color .2s}
+  .angle-slot .slot-upload:hover .slot-plus{color:var(--accent)}
+  .angle-slot .slot-upload .slot-clear{position:absolute;top:0;right:0;width:18px;height:18px;background:var(--red);color:#fff;border:none;border-radius:0 0 0 6px;font-size:10px;cursor:pointer;display:none;align-items:center;justify-content:center;line-height:1;z-index:2}
+  .angle-slot.filled .slot-upload .slot-clear{display:flex}
+  .angle-slot.filled .slot-upload .slot-plus{display:none}
+
+  /* Radio cards */
+  .radio-card{
+    cursor:pointer;border:2px solid var(--border);border-radius:var(--radius-sm);
+    padding:10px 14px;transition:all .25s;display:flex;align-items:center;gap:8px;
+    background:transparent;
+  }
+  .radio-card:hover{border-color:var(--muted)}
+  .radio-card.selected{border-color:var(--accent);background:rgba(167,139,250,.05)}
+  .radio-card input{display:none}
+
+  /* Platform chips */
+  .platform-chip{
+    padding:7px 14px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);
+    border-radius:999px;cursor:pointer;font-size:12px;transition:all .25s;
+    display:flex;align-items:center;gap:6px;user-select:none;font-weight:500;
+  }
+  .platform-chip:hover{border-color:rgba(167,139,250,.25)}
+  .platform-chip.active{background:rgba(167,139,250,.12);border-color:rgba(167,139,250,.35);color:var(--accent)}
+  .platform-chip svg{flex-shrink:0;opacity:.7;transition:opacity .3s}
+  .platform-chip.active svg{opacity:1}
+
+  /* Variant tabs */
+  .variant-tab{
+    cursor:pointer;padding:10px 20px;border-radius:999px;border:1px solid var(--border);
+    font-size:13px;font-weight:600;transition:all .25s;text-align:center;
+    background:transparent;color:var(--muted);font-family:var(--font-body);
+  }
+  .variant-tab:hover{border-color:var(--accent);color:var(--text)}
+  .variant-tab.active{background:var(--accent);color:#0a0a0a;border-color:var(--accent)}
+  .variant-tab .hook-type{font-size:11px;font-weight:400;opacity:.7;display:block;margin-top:2px}
+
+  /* Platform tabs */
+  .script-tab{
+    background:transparent;border:none;color:var(--muted);padding:8px 16px;
+    cursor:pointer;font-size:13px;font-weight:600;border-bottom:2px solid transparent;
+    margin-bottom:-2px;transition:all .2s;font-family:var(--font-body);
+  }
+  .script-tab.active{color:var(--text)!important;border-bottom-color:var(--accent)!important}
+  .script-tab:hover{color:var(--text)}
+
+  /* Storyboard */
+  table.storyboard{width:100%;border-collapse:collapse;font-size:13px}
+  table.storyboard th{text-align:left;color:var(--muted);font-weight:500;padding:8px 12px;border-bottom:1px solid var(--border);font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-family:var(--font-body)}
+  table.storyboard td{padding:10px 12px;border-bottom:1px solid rgba(31,29,24,.4);vertical-align:top;line-height:1.5}
+  table.storyboard tr:hover td{background:var(--accent-dim)}
+  .shot-num{width:30px;height:30px;border-radius:50%;background:var(--accent);color:#0a0a0a;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;font-family:var(--font-display);flex-shrink:0}
+
+  /* Loading & Progress */
+  .loading-spinner{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .fade-in{animation:fadeIn .5s ease}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  .progress-wrap{max-width:480px;margin:0 auto 20px;position:relative}
+  .progress-track{width:100%;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),#c4b5fd);border-radius:2px;transition:width .5s cubic-bezier(.16,1,.3,1);width:0%}
+  .progress-pct{text-align:right;font-size:11px;color:var(--muted);margin-top:6px;font-family:var(--font-body)}
+  .partial-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-top:14px;text-align:left;animation:fadeIn .5s ease}
+  .partial-card .badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:999px;background:rgba(62,168,106,.12);color:var(--green);margin-bottom:8px;display:inline-block}
+  .rated-good{background:rgba(62,168,106,.08)!important;border-color:var(--green)!important;color:var(--green)!important}
+  .rated-meh{background:rgba(232,180,90,.08)!important;border-color:#f0c56a!important;color:#f0c56a!important}
+  .rated-bad{background:rgba(192,85,85,.08)!important;border-color:var(--red)!important;color:var(--red)!important}
+
+  /* Toast */
+  .toast{position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:9999;padding:14px 24px;border-radius:var(--radius-sm);font-size:14px;max-width:480px;text-align:center;animation:toastIn .3s ease;pointer-events:none}
+  .toast.error{background:rgba(220,60,60,.15);border:1px solid rgba(220,60,60,.3);color:#e88888}
+  .toast.success{background:rgba(62,168,106,.15);border:1px solid rgba(62,168,106,.3);color:#7ecb9a}
+  @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(-12px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+  /* Export menu */
+  .export-menu{
+    position:absolute;z-index:50;min-width:150px;background:var(--card);
+    border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px;
+    box-shadow:0 12px 40px rgba(0,0,0,.5);
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  }
+  .export-menu button{
+    display:block;width:100%;text-align:left;padding:9px 14px;border:none;
+    background:transparent;color:var(--text);cursor:pointer;border-radius:8px;
+    font-size:13px;font-family:var(--font-body);transition:all .2s;
+  }
+  .export-menu button:hover{background:rgba(255,255,255,.04);color:var(--accent)}
+
+  .support-float{position:fixed;bottom:28px;right:28px;z-index:999;
+    width:48px;height:48px;border-radius:50%;background:var(--accent);color:#0a0a0a;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    font-size:12px;font-weight:700;letter-spacing:.04em;
+    box-shadow:0 4px 24px rgba(167,139,250,.3);
+    transition:all .4s cubic-bezier(.16,1,.3,1);text-decoration:none;
+    font-family:var(--font-body)}
+  .support-float:hover{transform:scale(1.08);box-shadow:0 8px 36px rgba(167,139,250,.45)}
+
+  /* Scrollbar */
+  ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:3px}
+
+  /* Section inner cards */
+  .info-card{padding:14px 16px;border-radius:var(--radius-sm);margin-bottom:8px}
+  .info-card-amber{background:rgba(232,180,90,.04)}
+  .info-card-indigo{background:rgba(99,102,241,.04)}
+  .info-card-purple{background:rgba(168,85,247,.04)}
+  .info-card-green{background:rgba(62,168,106,.04)}
+  .info-card-red{background:rgba(220,60,60,.04)}
+  .info-card-label{font-size:11px;margin-bottom:4px;font-weight:600;letter-spacing:.04em}
+
+  @media(max-width:640px){
+    .page-wrap{padding:72px 12px 40px}
+    .card{padding:18px}
+    .input-grid{grid-template-columns:1fr!important}
+    table.storyboard{font-size:11px}
+    table.storyboard th,table.storyboard td{padding:6px 8px}
+    .topbar{top:8px;padding:4px 5px}
+    .topbar-link{font-size:11px;padding:5px 8px}
+    .topbar-brand{font-size:12px;padding:5px 8px}
+  }
+</style>
+
+<script>const CATEGORY_ANGLES = {"鞋类": [{"slot": 1, "name": "正面平拍", "desc": "产品正面完整展示，鞋头/鞋面/闭合方式清晰", "required": true}, {"slot": 2, "name": "鞋底特写", "desc": "鞋底纹路/厚度/品牌标识清晰可见", "required": true}, {"slot": 3, "name": "侧面", "desc": "展示鞋底厚度/跟高/鞋型弧线", "required": true}, {"slot": 4, "name": "细节特写", "desc": "材质纹理/缝线/装饰/logo近拍", "required": false}, {"slot": 5, "name": "上脚效果", "desc": "真人穿着展示比例和搭配效果", "required": false}], "服装": [{"slot": 1, "name": "正面平铺", "desc": "服装正面完整平铺或挂拍，展示整体版型", "required": true}, {"slot": 2, "name": "背面平铺", "desc": "服装背面完整展示，领标/洗标可见", "required": true}, {"slot": 3, "name": "侧面版型", "desc": "侧面展示廓形/下摆/袖型弧线", "required": true}, {"slot": 4, "name": "细节特写", "desc": "领口/袖口/纽扣/面料纹理近拍", "required": false}, {"slot": 5, "name": "上身效果", "desc": "真人穿着展示比例和搭配", "required": false}], "美妆": [{"slot": 1, "name": "产品正面", "desc": "产品正面完整展示，品牌/品名/外观清晰", "required": true}, {"slot": 2, "name": "背面成分", "desc": "背面标签/成分表/备案号清晰可见", "required": true}, {"slot": 3, "name": "质地/颜色", "desc": "展示质地（膏体/粉质/液体）和真实颜色", "required": true}, {"slot": 4, "name": "使用效果", "desc": "手臂试色或上脸效果对比展示", "required": false}, {"slot": 5, "name": "包装盒/赠品", "desc": "完整包装/配件/赠品展示", "required": false}], "食品": [{"slot": 1, "name": "包装正面", "desc": "产品正面完整展示，品牌/品名/外观清晰", "required": true}, {"slot": 2, "name": "配料表/背面", "desc": "配料表/营养成分表/生产信息清晰", "required": true}, {"slot": 3, "name": "内容物实拍", "desc": "打开包装展示真实内容物状态", "required": true}, {"slot": 4, "name": "食用场景", "desc": "展示食用/使用场景（摆盘/冲泡/试吃）", "required": false}, {"slot": 5, "name": "保质期/规格", "desc": "保质期标签/净含量/规格对比", "required": false}], "3C数码": [{"slot": 1, "name": "产品正面", "desc": "产品正面完整展示，品牌/型号/外观清晰", "required": true}, {"slot": 2, "name": "背面/接口", "desc": "背面接口/参数标签/认证标识清晰", "required": true}, {"slot": 3, "name": "侧面厚度", "desc": "侧面展示产品厚度/比例/工业设计", "required": true}, {"slot": 4, "name": "接口/细节", "desc": "接口/按键/镜头/屏幕细节近拍", "required": false}, {"slot": 5, "name": "配件全家福", "desc": "所有配件/包装/说明书完整展示", "required": false}], "家居": [{"slot": 1, "name": "产品正面", "desc": "产品正面完整展示，款式/颜色/设计清晰", "required": true}, {"slot": 2, "name": "背面/底部", "desc": "背面或底部结构/支撑方式/标签", "required": true}, {"slot": 3, "name": "侧面整体", "desc": "侧面展示比例/尺寸/厚度/轮廓", "required": true}, {"slot": 4, "name": "材质细节", "desc": "材质纹理/接缝/做工/logo近拍", "required": false}, {"slot": 5, "name": "场景/参照", "desc": "实际使用场景或尺寸参照物对比", "required": false}]};</script>
+</head>
+<body>
+
+<canvas id="p-particles"></canvas>
+<div class="bg-ambient">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+<div class="grain-overlay"></div>
+
+<header class="topbar" id="topbar">
+  <a href="/" class="topbar-brand">
+    <svg width="22" height="22" viewBox="0 0 192 192" style="display:inline-block;vertical-align:middle;flex-shrink:0">
+      <rect width="192" height="192" rx="28" fill="transparent"/>
+      <g transform="translate(96,96)">
+        <rect x="-54" y="-54" width="108" height="108" rx="14" fill="none" stroke="#e8b45a" stroke-width="8" transform="rotate(45)"/>
+        <circle cx="0" cy="0" r="30" fill="none" stroke="#e8b45a" stroke-width="7"/>
+        <circle cx="0" cy="0" r="6" fill="#e8b45a" opacity="0.45"/>
+        <line x1="-52" y1="0" x2="-34" y2="0" stroke="#e8b45a" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+        <line x1="34" y1="0" x2="52" y2="0" stroke="#e8b45a" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+        <line x1="0" y1="-52" x2="0" y2="-34" stroke="#e8b45a" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+        <line x1="0" y1="34" x2="0" y2="52" stroke="#e8b45a" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+      </g>
+    </svg>
+    FrameCraft
+  </a>
+  <a href="/" class="topbar-link">首页</a>
+</header>
+
+<main class="page-wrap">
+
+  <!-- Page Header -->
+  <div style="text-align:center;margin-bottom:40px">
+    <h1 style="font-family:var(--font-display);font-size:32px;font-weight:900;letter-spacing:.04em;color:var(--accent);margin-bottom:6px">拍摄方案生成器</h1>
+    <p style="font-size:13px;color:var(--muted);max-width:480px;margin:0 auto;line-height:1.7">上传多角度产品图，AI 自动分析产品特征<br>生成抖音/快手/小红书/视频号全套拍摄脚本与分镜表</p>
+  </div>
+
+  <!-- Showcase sample -->
+  <div class="card" style="margin-bottom:24px;cursor:pointer" onclick="toggleShowcase()">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:20px">📋</span>
+        <div>
+          <div style="font-size:14px;font-weight:600;color:var(--text)">查看参考案例：老爹鞋拍摄方案</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">鞋厂深度合作电商真实使用的方案样本，点击展开</div>
+        </div>
+      </div>
+      <svg id="showcaseArrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" style="transition:transform .3s"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div id="showcaseContent" style="display:none;margin-top:18px;padding-top:18px;border-top:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+        <span class="tag tag-purple">鞋类·老爹鞋</span>
+        <span class="tag tag-red">挂车版</span>
+        <span class="tag tag-green">3套方案</span>
+        <span style="font-size:11px;color:var(--muted)">PU皮面·厚底5cm·89元·受众18-35岁</span>
+      </div>
+      <p style="font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:14px">复古厚底老爹鞋，PU皮面+网面拼接，圆头闭合设计，鞋底5cm增高橡胶大底。米白/灰蓝/黑色三色可选。适合18-28岁女性日常通勤/校园穿搭，搭配宽松牛仔裤或百褶裙。</p>
+
+      <div style="margin-bottom:12px"><span style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:500">备选标题</span></div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px">
+        <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--accent-dim)"><span class="tag tag-green" style="flex-shrink:0">痛点型</span><span style="font-size:13px">脚宽星人本命老爹鞋！穿上瞬间显脚小两圈</span></div>
+        <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--accent-dim)"><span class="tag tag-green" style="flex-shrink:0">反差对比</span><span style="font-size:13px">普通厚底鞋vs这双，看完就知道为什么月销10万+</span></div>
+        <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--accent-dim)"><span class="tag tag-green" style="flex-shrink:0">身份认同</span><span style="font-size:13px">155-165女生的天菜老爹鞋！小个子直接锁死</span></div>
+      </div>
+
+      <div style="margin-bottom:8px"><span style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:500">前3秒钩子</span> <span class="tag tag-purple">反差对比</span></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px">
+        <div class="info-card info-card-red"><div class="info-card-label" style="color:#e07070">核心思路</div><div style="font-size:13px">左边普通鞋显脚宽，右边老爹鞋瞬间修饰脚型</div></div>
+        <div class="info-card info-card-indigo"><div class="info-card-label" style="color:#818cf8">画面</div><div style="font-size:13px">双屏对比：普通鞋VS老爹鞋，脚部特写慢动作</div></div>
+        <div class="info-card info-card-purple"><div class="info-card-label" style="color:#a78bfa">文字</div><div style="font-size:13px">脚宽？穿这双就对了</div></div>
+      </div>
+
+      <div style="overflow-x:auto;margin-bottom:16px">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:500;margin-bottom:8px">拍摄分镜表（5镜）</div>
+        <table class="storyboard">
+          <thead><tr><th>镜号</th><th>时长</th><th>画面</th><th>口播</th><th>字幕</th></tr></thead>
+          <tbody>
+            <tr><td><div class="shot-num" style="width:24px;height:24px;font-size:10px">1</div></td><td style="font-size:11px;color:var(--muted);white-space:nowrap">0-3s</td><td>双屏对比画面，左普通鞋右老爹鞋，脚部特写</td><td>你看这双普通鞋，显脚宽还勒脚</td><td>脚宽星人别划走！</td></tr>
+            <tr><td><div class="shot-num" style="width:24px;height:24px;font-size:10px">2</div></td><td style="font-size:11px;color:var(--muted);white-space:nowrap">3-7s</td><td>45度侧面展示鞋型弧线，慢动作旋转</td><td>这双老爹鞋，圆头设计不挤脚，5cm增高拉长腿型</td><td>5cm悄悄增高</td></tr>
+            <tr><td><div class="shot-num" style="width:24px;height:24px;font-size:10px">3</div></td><td style="font-size:11px;color:var(--muted);white-space:nowrap">7-12s</td><td>鞋底特写+按压回弹展示，近拍材质纹理</td><td>橡胶大底防滑耐磨回弹好，PU皮面防水一擦就干净</td><td>下雨天随便穿</td></tr>
+            <tr><td><div class="shot-num" style="width:24px;height:24px;font-size:10px">4</div></td><td style="font-size:11px;color:var(--muted);white-space:nowrap">12-17s</td><td>三色平铺展示+真人上脚对比</td><td>米白百搭、灰蓝高级、黑色经典，三个颜色都89</td><td>89块三个颜色都想入</td></tr>
+            <tr><td><div class="shot-num" style="width:24px;height:24px;font-size:10px">5</div></td><td style="font-size:11px;color:var(--muted);white-space:nowrap">17-22s</td><td>整身穿搭出镜（宽松牛仔裤+老爹鞋），街拍感</td><td>搭配牛仔裤百褶裙都好看，小个子闭眼入。点左下角购物车</td><td>155-170都能穿</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">
+        <div class="info-card info-card-amber"><span style="font-size:11px;color:#f0c56a;font-weight:500">BGM</span><div style="font-size:12px;color:var(--muted);margin-top:4px">电子鼓点卡点BGM · 125BPM · 剪映搜"卡点变装""潮流穿搭"</div></div>
+        <div class="info-card info-card-purple"><span style="font-size:11px;color:#a78bfa;font-weight:500">发布策略</span><div style="font-size:12px;color:var(--muted);margin-top:4px">抖音：周五18-21点 · 快手：周六11-13点 · 小红书：周末20-22点</div></div>
+        <div class="info-card info-card-green"><span style="font-size:11px;color:var(--green);font-weight:500">投流建议</span><div style="font-size:12px;color:var(--muted);margin-top:4px">千川放量投放 · 日预算200元起 · 20条素材轮投 · ROI目标1.8</div></div>
+      </div>
+
+      <div style="font-size:11px;color:var(--muted);opacity:.6;text-align:center;margin-top:8px">以上为真实案例样本。上传你的产品图 → AI 生成专属于你的全链路方案</div>
+    </div>
+  </div>
+
+  <!-- Input Area -->
+  <div class="card" id="inputArea" style="margin-bottom:24px">
+    <div class="input-grid" style="display:grid;grid-template-columns:380px 1fr;gap:28px">
+      <!-- Left: Upload slots -->
+      <div>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:10px;letter-spacing:.04em;text-transform:uppercase">
+          按角度上传产品图（<span style="color:var(--red)">*</span>必填，至少3张）
+        </p>
+        <div style="display:flex;flex-direction:column;gap:8px" id="angleSlots"></div>
+        <input type="file" id="fileInput" accept="image/*" multiple style="display:none" />
+      </div>
+      <!-- Right: Settings -->
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div>
+            <label class="block-label">品类</label>
+            <select id="industry" onchange="onIndustryChange()">
+              <option value="鞋类">鞋类</option>
+              <option value="服装">服装</option>
+              <option value="美妆">美妆</option>
+              <option value="食品">食品</option>
+              <option value="3C数码">3C数码</option>
+              <option value="家居">家居</option>
+            </select>
+          </div>
+          <div>
+            <label class="block-label">细分品类</label>
+            <select id="subcategory" onchange="onSubcategoryChange()">
+              <option value="">请先选择品类</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block-label">脚本类型</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <label class="radio-card selected" id="radioCart" onclick="selectScriptType('with_cart')">
+              <input type="radio" name="scriptType" value="with_cart" checked>
+              <div>
+                <div style="font-size:14px;font-weight:600">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-3px;margin-right:3px"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+                  挂车
+                </div>
+                <div style="font-size:11px;color:var(--muted);margin-top:1px">转化优先</div>
+              </div>
+            </label>
+            <label class="radio-card" id="radioNoCart" onclick="selectScriptType('without_cart')">
+              <input type="radio" name="scriptType" value="without_cart">
+              <div>
+                <div style="font-size:14px;font-weight:600">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-3px;margin-right:3px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                  不挂车
+                </div>
+                <div style="font-size:11px;color:var(--muted);margin-top:1px">完播优先</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label class="block-label">生成数量</label>
+          <div style="display:flex;gap:8px">
+            <label class="radio-card" id="var1" onclick="selectVariantCount(1)" style="flex:1;justify-content:center">
+              <input type="radio" name="variantCount" value="1"><span style="font-size:14px;font-weight:600">1套</span>
+            </label>
+            <label class="radio-card selected" id="var3" onclick="selectVariantCount(3)" style="flex:1;justify-content:center">
+              <input type="radio" name="variantCount" value="3"><span style="font-size:14px;font-weight:600">3套</span>
+            </label>
+            <label class="radio-card" id="var5" onclick="selectVariantCount(5)" style="flex:1;justify-content:center">
+              <input type="radio" name="variantCount" value="5"><span style="font-size:14px;font-weight:600">5套</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label class="block-label">适配平台（多选，按平台数计次）</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <span class="platform-chip active" id="plat-douyin" onclick="togglePlatform('douyin')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="5,3 19,12 5,21"/></svg>
+              抖音
+            </span>
+            <span class="platform-chip active" id="plat-kuaishou" onclick="togglePlatform('kuaishou')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/></svg>
+              快手
+            </span>
+            <span class="platform-chip active" id="plat-xiaohongshu" onclick="togglePlatform('xiaohongshu')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="4"/><circle cx="8" cy="8" r="2"/><path d="M14 8l4 4-4 4"/></svg>
+              小红书
+            </span>
+            <span class="platform-chip active" id="plat-shipinhao" onclick="togglePlatform('shipinhao')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+              视频号
+            </span>
+          </div>
+        </div>
+
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <label class="block-label" style="margin-bottom:0">产品补充说明（写了更准）</label>
+            <button id="aiDescribeBtn" onclick="aiDescribe()" style="display:flex;align-items:center;gap:4px;background:rgba(99,102,241,.08);color:var(--accent);border:1px solid rgba(99,102,241,.15);border-radius:999px;padding:5px 12px;cursor:pointer;font-size:11px;font-weight:500;transition:all .25s;font-family:var(--font-body)" onmouseover="this.style.background='rgba(99,102,241,.15)';this.style.borderColor='rgba(99,102,241,.3)'" onmouseout="this.style.background='rgba(99,102,241,.08)';this.style.borderColor='rgba(99,102,241,.15)'">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/></svg>
+              AI帮写
+            </button>
+          </div>
+          <textarea id="extraInfo" rows="4" placeholder="例如：PU皮面、三个颜色、卖89、受众18-35岁..." style="line-height:1.7;font-size:13px;min-height:96px;resize:vertical" oninput="this.style.height='auto';this.style.height=Math.max(96,this.scrollHeight)+'px'"></textarea>
+        </div>
+
+        <div id="costDisplay" style="text-align:center;font-size:12px;color:var(--accent);font-weight:600;padding:8px;background:var(--accent-dim);border-radius:var(--radius-sm)">
+          本次消耗：<span id="costNum">6</span> 次 · <span style="color:var(--muted);font-weight:400">用专业包(¥149/30次) 合 ¥<span id="costPrice">30</span></span>
+        </div>
+
+        <button class="btn" id="genBtn" disabled onclick="generate()" style="width:100%">生成拍摄方案</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading / Progress -->
+  <div id="loading" style="display:none;text-align:center;padding:40px 0">
+    <div class="card" style="max-width:540px;margin:0 auto">
+      <div class="progress-wrap">
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="progress-pct" id="progressPct">0%</div>
+      </div>
+      <p style="font-size:14px;color:var(--muted);margin-top:12px" id="loadingStep">正在连接...</p>
+    </div>
+    <div id="partialResults"></div>
+  </div>
+
+  <!-- Results -->
+  <div id="results" style="display:none"></div>
+
+</main>
+
+<script src="/static/js/particles.js"></script>
+<script src="/static/js/premium.js"></script>
+
+<script>
+let selectedFiles = [];
+let slotFiles = [null, null, null, null, null];
+let currentScriptType = 'with_cart';
+let currentVariantCount = 3;
+let currentVariantIndex = 0;
+let currentPlatformTab = 'douyin';
+let currentPlanData = null;
+let selectedPlatforms = ['douyin','kuaishou','xiaohongshu','shipinhao'];
+
+function showToast(msg, type='error') {
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; setTimeout(() => t.remove(), 300); }, 3000);
+}
+
+const fileInput = document.getElementById('fileInput');
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('industry').dataset.prevIndustry = document.getElementById('industry').value;
+  renderAngleSlots();
+});
+
+function selectScriptType(type) {
+  currentScriptType = type;
+  document.getElementById('radioCart').classList.toggle('selected', type==='with_cart');
+  document.getElementById('radioNoCart').classList.toggle('selected', type==='without_cart');
+}
+
+function selectVariantCount(n) {
+  currentVariantCount = n;
+  ['var1','var3','var5'].forEach(id => document.getElementById(id).classList.toggle('selected', id===`var${n}`));
+  updateCostDisplay();
+}
+
+function togglePlatform(code) {
+  const idx = selectedPlatforms.indexOf(code);
+  if (idx >= 0) {
+    if (selectedPlatforms.length <= 1) return;
+    selectedPlatforms.splice(idx, 1);
+  } else {
+    selectedPlatforms.push(code);
+  }
+  const el = document.getElementById('plat-'+code);
+  if (el) {
+    el.classList.toggle('active', selectedPlatforms.includes(code));
+  }
+  updateCostDisplay();
+}
+
+const SUBCATEGORIES = {
+  '鞋类': ['老爹鞋/厚底鞋', '运动鞋/跑鞋', '帆布鞋/板鞋', '乐福鞋/单鞋', '高跟鞋/细跟', '凉鞋/拖鞋', '靴子/马丁靴', '童鞋/宝宝鞋', '商务皮鞋/正装鞋', '登山鞋/户外鞋'],
+  '服装': ['T恤/打底衫', '衬衫/雪纺衫', '连衣裙/半身裙', '牛仔裤/休闲裤', '外套/风衣', '卫衣/帽衫', '针织衫/毛衣', '西装/套装', '运动服/瑜伽服', '童装/亲子装'],
+  '美妆': ['口红/唇釉', '粉底/气垫', '眼影/眼线', '护肤套装/礼盒', '面膜/精华', '香水/香氛', '卸妆/洁面', '防晒/隔离'],
+  '食品': ['零食/膨化', '饮料/冲调', '调味品/酱料', '速食/方便面', '茶叶/咖啡', '保健品/滋补', '生鲜/水果', '烘焙/糕点'],
+  '3C数码': ['手机壳/保护套', '耳机/蓝牙音箱', '充电器/数据线', '手机支架/指环', '平板/电脑配件', '智能手表/手环', '相机/摄影配件'],
+  '家居': ['收纳/整理', '清洁/洗护', '家纺/床品', '装饰/摆件', '厨具/餐具', '灯具/照明', '香薰/蜡烛', '浴室/卫浴']
+};
+
+(function(){
+  ['douyin','kuaishou','xiaohongshu','shipinhao'].forEach(code => {
+    const el = document.getElementById('plat-'+code);
+    if (el) el.classList.add('active');
+  });
+  onIndustryChange();
+})();
+
+function calcCost(variants, platformCount) {
+  const vMul = variants === 1 ? 1 : variants === 3 ? 2 : 3;
+  const pMul = platformCount === 1 ? 1 : platformCount === 2 ? 2 : 3;
+  return vMul * pMul;
+}
+
+function updateCostDisplay() {
+  const cost = calcCost(currentVariantCount, selectedPlatforms.length);
+  document.getElementById('costNum').textContent = cost;
+  const price = (cost * 5).toFixed(0);
+  document.getElementById('costPrice').textContent = price;
+}
+
+function buildExtraInfo() {
+  const sub = document.getElementById('subcategory').value;
+  const extra = document.getElementById('extraInfo').value.trim();
+  const parts = [];
+  if (sub) parts.push('细分品类：' + sub);
+  if (extra) parts.push(extra);
+  return parts.join('；');
+}
+
+function onIndustryChange() {
+  const industry = document.getElementById('industry').value;
+  const oldIndustry = document.getElementById('industry').dataset.prevIndustry || '鞋类';
+  const oldAngles = CATEGORY_ANGLES[oldIndustry] || CATEGORY_ANGLES['鞋类'];
+  const newAngles = CATEGORY_ANGLES[industry] || CATEGORY_ANGLES['鞋类'];
+  const sameStructure = oldAngles.length === newAngles.length &&
+    oldAngles.every((a, i) => a.name === newAngles[i].name);
+  if (!sameStructure) {
+    slotFiles = [null, null, null, null, null];
+  }
+  document.getElementById('industry').dataset.prevIndustry = industry;
+  renderAngleSlots();
+  updateSlotValidation();
+
+  const subSel = document.getElementById('subcategory');
+  subSel.innerHTML = '<option value="">全部子类</option>';
+  const subs = SUBCATEGORIES[industry] || [];
+  subs.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s; opt.textContent = s;
+    subSel.appendChild(opt);
+  });
+}
+
+function onSubcategoryChange() {
+  calcCost();
+  updateCostDisplay();
+}
+
+async function aiDescribe() {
+  selectedFiles = slotFiles.filter(f => f !== null);
+  if (!selectedFiles.length) { showToast('请先上传产品图'); return; }
+  const btn = document.getElementById('aiDescribeBtn');
+  const origHTML = btn.innerHTML;
+  btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin .8s linear infinite"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 分析中...';
+  btn.disabled = true;
+  btn.style.opacity = '0.6';
+
+  try {
+    const formData = new FormData();
+    selectedFiles.forEach(f => formData.append('files', f));
+    formData.append('industry', document.getElementById('industry').value);
+    formData.append('extra_info', buildExtraInfo());
+
+    const resp = await fetch('/api/director/auto-describe', { method: 'POST', body: formData });
+    if (!resp.ok) throw new Error((await resp.json().catch(()=>({})).detail) || '请求失败');
+    const data = await resp.json();
+    document.getElementById('extraInfo').value = data.description;
+    const ta = document.getElementById('extraInfo');
+    ta.style.height = 'auto';
+    ta.style.height = Math.max(96, ta.scrollHeight) + 'px';
+  } catch (err) {
+    showToast('AI帮写失败: ' + err.message);
+  } finally {
+    btn.innerHTML = origHTML;
+    btn.disabled = false;
+    btn.style.opacity = '1';
+  }
+}
+
+function renderAngleSlots() {
+  const industry = document.getElementById('industry').value;
+  const angles = (CATEGORY_ANGLES[industry] || CATEGORY_ANGLES['鞋类']);
+  const container = document.getElementById('angleSlots');
+  container.innerHTML = angles.map((a, i) => {
+    const cls = a.required ? 'required' : 'optional';
+    const badge = a.required ? '<span style="color:var(--red);font-size:10px">*必填</span>' : '<span style="color:var(--muted);font-size:10px">选填</span>';
+    return `<div class="angle-slot" data-slot="${i}" id="slot${i}">
+      <div class="slot-num ${cls}">${a.slot}</div>
+      <div class="slot-info">
+        <div class="slot-name">${a.name} ${badge}</div>
+        <div class="slot-desc">${a.desc}</div>
+      </div>
+      <div class="slot-upload" id="slotUpload${i}" onclick="triggerSlotUpload(${i})" ondragover="event.preventDefault();this.style.borderColor='var(--accent)'" ondragleave="this.style.borderColor=''" ondrop="handleSlotDrop(event, ${i})">
+        <span class="slot-plus">+</span>
+        <button class="slot-clear" onclick="event.stopPropagation();clearSlot(${i})">&times;</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function triggerSlotUpload(i) {
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = 'image/*';
+  inp.onchange = () => { if (inp.files.length) setSlotFile(i, inp.files[0]); };
+  inp.click();
+}
+
+function handleSlotDrop(e, i) {
+  e.preventDefault();
+  e.currentTarget.style.borderColor = '';
+  if (e.dataTransfer.files.length) setSlotFile(i, e.dataTransfer.files[0]);
+}
+
+function setSlotFile(i, file) {
+  slotFiles[i] = file;
+  const slot = document.getElementById('slot'+i);
+  const upload = document.getElementById('slotUpload'+i);
+  if (!slot || !upload) return;
+  slot.classList.add('filled');
+  let img = upload.querySelector('img');
+  if (!img) { img = document.createElement('img'); upload.prepend(img); }
+  if (img.src && img.src.startsWith('blob:')) { URL.revokeObjectURL(img.src); }
+  img.src = URL.createObjectURL(file);
+  updateSlotValidation();
+}
+
+function clearSlot(i) {
+  slotFiles[i] = null;
+  const slot = document.getElementById('slot'+i);
+  const upload = document.getElementById('slotUpload'+i);
+  if (slot) slot.classList.remove('filled');
+  if (upload) {
+    const img = upload.querySelector('img');
+    if (img) {
+      if (img.src && img.src.startsWith('blob:')) { URL.revokeObjectURL(img.src); }
+      img.remove();
+    }
+  }
+  updateSlotValidation();
+}
+
+function updateSlotValidation() {
+  const industry = document.getElementById('industry').value;
+  const angles = (CATEGORY_ANGLES[industry] || CATEGORY_ANGLES['鞋类']);
+  const filledCount = slotFiles.filter(f => f !== null).length;
+  const requiredFilled = angles.filter((a, i) => a.required && slotFiles[i] !== null).length;
+  const requiredTotal = angles.filter(a => a.required).length;
+  document.getElementById('genBtn').disabled = (filledCount < 3 || requiredFilled < requiredTotal);
+}
+
+fileInput.addEventListener('change', () => {
+  if (!fileInput.files.length) return;
+  for (const f of Array.from(fileInput.files)) {
+    const emptyIdx = slotFiles.findIndex(sf => sf === null);
+    if (emptyIdx >= 0) setSlotFile(emptyIdx, f);
+  }
+  fileInput.value = '';
+});
+
+let wsConnection = null;
+let completedVariants = [];
+
+async function generate() {
+  selectedFiles = slotFiles.filter(f => f !== null);
+  if (!selectedFiles.length) return;
+  if (selectedFiles.length < 3) {
+    showToast('请至少上传3张产品图（必填角度带 * 标记），确保AI能精准识别产品特征');
+    return;
+  }
+
+  // Close any existing WS connection
+  if (wsConnection) { wsConnection.close(); wsConnection = null; }
+  completedVariants = [];
+
+  document.getElementById('inputArea').style.display = 'none';
+  document.getElementById('loading').style.display = '';
+  document.getElementById('results').innerHTML = '';
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('partialResults').innerHTML = '';
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('progressPct').textContent = '0%';
+  document.getElementById('loadingStep').textContent = '正在提交...';
+
+  try {
+    // Step 1: POST to async endpoint
+    const formData = new FormData();
+    selectedFiles.forEach(f => formData.append('files', f));
+    formData.append('industry', document.getElementById('industry').value);
+    formData.append('extra_info', buildExtraInfo());
+    formData.append('script_type', currentScriptType);
+    formData.append('variant_count', String(currentVariantCount));
+
+    const resp = await fetch('/api/director/analyze-async', { method: 'POST', body: formData });
+    if (!resp.ok) {
+      const errData = await resp.json().catch(() => ({}));
+      throw new Error(errData.detail || '请求失败');
+    }
+    const { task_id } = await resp.json();
+
+    // Step 2: Connect WebSocket for progress
+    const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${wsProtocol}//${location.host}/api/director/ws/${task_id}`;
+    wsConnection = new WebSocket(wsUrl);
+
+    wsConnection.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      handleProgressMessage(data);
+    };
+
+    wsConnection.onerror = () => {
+      document.getElementById('loadingStep').textContent = '连接中断，正在重试...';
+    };
+
+    wsConnection.onclose = () => {
+      wsConnection = null;
+    };
+
+  } catch (err) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('inputArea').style.display = '';
+    showToast('生成失败: ' + err.message);
+  }
+}
+
+function handleProgressMessage(data) {
+  const pct = data.progress || 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('loadingStep').textContent = data.message || '';
+
+  // Render partial variant cards from events
+  if (data.events && data.events.length > completedVariants.length) {
+    const partialDiv = document.getElementById('partialResults');
+    for (let i = completedVariants.length; i < data.events.length; i++) {
+      const evt = data.events[i];
+      if (evt.plan) {
+        // Quick preview: show the variant's hook type & first title
+        const hookType = evt.plan.hook?.type || '';
+        const firstTitle = (evt.plan.titles && evt.plan.titles[0])
+          ? (typeof evt.plan.titles[0] === 'string' ? evt.plan.titles[0] : evt.plan.titles[0].text)
+          : '';
+        partialDiv.innerHTML += `<div class="partial-card">
+          <div class="badge">方案${evt.variant}/${evt.total} 已完成</div>
+          <div style="font-size:14px;font-weight:600;color:var(--text)">${escapeHtml(hookType)}</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:4px;line-height:1.5">${escapeHtml(firstTitle)}</div>
+        </div>`;
+      }
+    }
+    completedVariants = data.events.slice();
+  }
+
+  if (data.status === 'failed') {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('inputArea').style.display = '';
+    showToast('生成失败: ' + (data.error || '未知错误'));
+    if (wsConnection) { wsConnection.close(); wsConnection = null; }
+    return;
+  }
+
+  if (data.status === 'complete' && data.result) {
+    document.getElementById('progressFill').style.width = '100%';
+    document.getElementById('progressPct').textContent = '100%';
+    document.getElementById('loadingStep').textContent = '方案生成完毕！';
+
+    setTimeout(() => {
+      document.getElementById('loading').style.display = 'none';
+      if (wsConnection) { wsConnection.close(); wsConnection = null; }
+      currentVariantIndex = 0;
+      renderResults(data.result);
+    }, 600);
+  }
+}
+
+function switchVariant(idx) {
+  currentVariantIndex = idx;
+  document.querySelectorAll('.variant-tab').forEach((el, i) => el.classList.toggle('active', i === idx));
+  if (currentPlanData) renderVariantContent(currentPlanData, idx);
+}
+
+function switchPlatformTab(plat) {
+  currentPlatformTab = plat;
+  ['douyin','kuaishou','xiaohongshu','shipinhao'].forEach(p => {
+    const btn = document.getElementById('ptab-'+p);
+    if (!btn) return;
+    btn.classList.toggle('active', p===plat);
+    const panel = document.getElementById('ppanel-'+p);
+    if (panel) panel.style.display = p===plat ? '' : 'none';
+  });
+}
+
+function renderStoryboardTable(storyboard) {
+  return `<table class="storyboard">
+    <thead><tr><th>镜号</th><th>时长</th><th>画面</th><th>口播</th><th>字幕</th></tr></thead>
+    <tbody>${(storyboard||[]).map(s => `<tr>
+      <td><div class="shot-num" style="width:28px;height:28px;font-size:11px">${s.shot}</div></td>
+      <td style="font-size:12px;color:var(--muted);white-space:nowrap">${escapeHtml(s.duration||'')}</td>
+      <td>${escapeHtml(s.visual||'')}</td>
+      <td>${escapeHtml(s.audio||'')}</td>
+      <td>${escapeHtml(s.caption||'')}</td>
+    </tr>`).join('')}</tbody></table>`;
+}
+
+function renderPublishStrategy(ps) {
+  if (!ps) return '';
+  return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+    <div class="info-card info-card-amber"><div class="info-card-label" style="color:#f0c56a">最佳发布时间</div>${(ps.best_times||[]).map(t => `<div style="font-size:13px;color:var(--muted);margin-top:2px">${escapeHtml(t)}</div>`).join('')}</div>
+    <div class="info-card info-card-indigo"><div class="info-card-label" style="color:#818cf8">最佳日期 & 频率</div><div style="font-size:13px;color:var(--muted);margin-top:2px">${escapeHtml((ps.best_days||[]).join('、'))}</div><div style="font-size:13px;color:var(--muted)">${escapeHtml(ps.frequency||'')}</div></div>
+    <div class="info-card info-card-red"><div class="info-card-label" style="color:#e07070">首发自评</div><div style="font-size:13px;color:var(--muted);margin-top:2px">${escapeHtml(ps.first_comment||'')}</div></div>
+    <div class="info-card info-card-green"><div class="info-card-label" style="color:var(--green)">互动策略</div><div style="font-size:13px;color:var(--muted);margin-top:2px">${escapeHtml(ps.interaction_guide||'')}</div></div>
+  </div>`;
+}
+
+function renderVariantContent(data, idx) {
+  const p = data.plans[idx];
+  const label = data.script_type === 'without_cart' ? '不挂车版' : '挂车版';
+  const script = p.script || {};
+  const pp = p.post_production;
+  const isGranularPP = pp?.editing && typeof pp.editing === 'object';
+
+  let html = '';
+
+  html += `<div class="card fade-in"><h3 style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;font-weight:500">备选标题</h3><div style="display:flex;flex-direction:column;gap:8px">`;
+  (p.titles||[]).forEach(t => {
+    const titleText = typeof t === 'string' ? t : t.text;
+    const titleType = typeof t === 'string' ? ['痛点型','反常识型','身份快照型'][p.titles.indexOf(t)]||'备选' : (t.type||'备选');
+    const scenario = t.scenario ? `<span class="tag tag-amber" style="margin-left:6px">${escapeHtml(t.scenario)}</span>` : '';
+    html += `<div style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:var(--radius-sm);background:var(--accent-dim)">
+      <span class="tag tag-green" style="flex-shrink:0;margin-top:1px">${escapeHtml(titleType)}</span>
+      <span style="font-size:14px">${escapeHtml(titleText)}</span>${scenario}
+    </div>`;
+  });
+  html += `</div></div>`;
+
+  html += `<div class="card fade-in"><h3 style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;font-weight:500">前3秒钩子 <span class="tag tag-purple" style="margin-left:6px">${escapeHtml(p.hook?.type||'')}</span></h3>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+      <div class="info-card info-card-red"><div class="info-card-label" style="color:#e07070">核心思路</div><div style="font-size:14px">${escapeHtml(p.hook?.description||'')}</div></div>
+      <div class="info-card info-card-indigo"><div class="info-card-label" style="color:#818cf8">画面</div><div style="font-size:14px">${escapeHtml(p.hook?.visual||'')}</div></div>
+      <div class="info-card info-card-purple"><div class="info-card-label" style="color:#a78bfa">文字叠加</div><div style="font-size:14px">${escapeHtml(p.hook?.text||'')}</div></div>
+    </div></div>`;
+
+  html += `<div class="card fade-in" style="overflow-x:auto"><h3 style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;font-weight:500">拍摄分镜表 <span class="tag tag-red" style="margin-left:6px">${label}</span></h3>
+    <p style="font-size:12px;color:var(--accent);margin-bottom:10px">${escapeHtml(script.goal||'')}</p>${renderStoryboardTable(script.storyboard)}</div>`;
+
+  if (p.bgm?.recommendations) {
+    html += `<div class="card fade-in"><h3 style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;font-weight:500">BGM 推荐</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="info-card info-card-green"><div class="info-card-label" style="color:var(--green)">风格</div><div style="font-size:14px">${escapeHtml(p.bgm.style)}</div><div class="info-card-label" style="color:var(--green);margin-top:10px">BPM</div><div style="font-size:14px">${escapeHtml(p.bgm.tempo_bpm)}</div></div>
+        <div class="info-card info-card-purple"><div class="info-card-label" style="color:#a78bfa">推荐曲目</div>${(p.bgm.recommendations||[]).map(r => `<div style="font-size:13px;color:var(--muted);margin-top:2px">${escapeHtml(r)}</div>`).join('')}<div class="info-card-label" style="color:#a78bfa;margin-top:10px">搜索关键词</div><div>${(p.bgm.search_keywords||[]).map(k => `<span class="tag tag-purple">${escapeHtml(k)}</span>`).join(' ')}</div></div>
+        <div class="info-card info-card-amber"><div class="info-card-label" style="color:#f0c56a">怎么找爆款BGM</div><div style="font-size:13px;color:var(--muted)">${escapeHtml(p.bgm.how_to_find_trending)}</div></div>
+        <div class="info-card info-card-indigo"><div class="info-card-label" style="color:#818cf8">使用技巧</div><div style="font-size:13px;color:var(--muted)">${escapeHtml(p.bgm.usage_tips)}</div></div>
+      </div></div>`;
+  }
+
+  html += `<div class="card fade-in"><h3 style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;font-weight:500">后期制作指南</h3>`;
+  if (isGranularPP) {
+    html += `<div style="display:flex;flex-direction:column;gap:10px">
+      <div class="info-card info-card-amber"><div class="info-card-label" style="color:#f0c56a">剪辑</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div><span style="font-size:11px;color:var(--muted)">节奏：</span><span style="font-size:13px">${escapeHtml(pp.editing.pace)}</span></div><div><span style="font-size:11px;color:var(--muted)">转场：</span><span style="font-size:13px">${escapeHtml(pp.editing.transitions)}</span></div><div><span style="font-size:11px;color:var(--muted)">特效：</span><span style="font-size:13px">${escapeHtml(pp.editing.effects)}</span></div><div><span style="font-size:11px;color:var(--muted)">关键节点：</span><span style="font-size:13px">${escapeHtml(pp.editing.key_moments)}</span></div></div></div>
+      <div class="info-card info-card-purple"><div class="info-card-label" style="color:#a78bfa">调色</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <div><span style="font-size:11px;color:var(--muted)">风格：</span><span style="font-size:13px">${escapeHtml(pp.color_grading.style)}</span></div><div><span style="font-size:11px;color:var(--muted)">滤镜：</span><span style="font-size:13px">${escapeHtml(pp.color_grading.filter_lut)}</span></div><div><span style="font-size:11px;color:var(--muted)">参数：</span><span style="font-size:13px">${escapeHtml(pp.color_grading.parameters)}</span></div></div></div>
+      <div class="info-card info-card-indigo"><div class="info-card-label" style="color:#818cf8">字幕</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div><span style="font-size:11px;color:var(--muted)">字体：</span><span style="font-size:13px">${escapeHtml(pp.captions.font)}</span></div><div><span style="font-size:11px;color:var(--muted)">位置：</span><span style="font-size:13px">${escapeHtml(pp.captions.size_position)}</span></div><div><span style="font-size:11px;color:var(--muted)">动画：</span><span style="font-size:13px">${escapeHtml(pp.captions.animation)}</span></div><div><span style="font-size:11px;color:var(--muted)">配色：</span><span style="font-size:13px">${escapeHtml(pp.captions.color_palette)}</span></div><div style="grid-column:1/-1"><span style="font-size:11px;color:var(--muted)">高亮规则：</span><span style="font-size:13px">${escapeHtml(pp.captions.highlight_rules)}</span></div></div></div>
+      <div class="info-card info-card-red"><div class="info-card-label" style="color:#e07070">音效与混音</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div><span style="font-size:11px;color:var(--muted)">音效：</span><span style="font-size:13px">${escapeHtml(pp.sound_design.sfx)}</span></div><div><span style="font-size:11px;color:var(--muted)">混音：</span><span style="font-size:13px">${escapeHtml(pp.sound_design.audio_mixing)}</span></div></div></div></div>`;
+  }
+  if (p.voiceover) {
+    html += `<div class="info-card info-card-green" style="border:1px solid rgba(62,168,106,.15);margin-top:10px"><div class="info-card-label" style="color:var(--green)">AI语音方案（无需真人录音）</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div><span style="font-size:11px;color:var(--muted)">推荐方式：</span><span style="font-size:13px">${escapeHtml(p.voiceover.method)}</span></div><div><span style="font-size:11px;color:var(--muted)">推荐音色：</span><span style="font-size:13px">${escapeHtml(p.voiceover.recommended_voice)}</span></div><div><span style="font-size:11px;color:var(--muted)">语速：</span><span style="font-size:13px">${escapeHtml(p.voiceover.speed)}</span></div><div><span style="font-size:11px;color:var(--muted)">操作步骤：</span><span style="font-size:13px">${escapeHtml(p.voiceover.how_to_clone)}</span></div><div style="grid-column:1/-1"><span style="font-size:11px;color:var(--muted)">使用技巧：</span><span style="font-size:13px">${escapeHtml(p.voiceover.tips)}</span></div></div></div>`;
+  }
+
+  if (p.live_stream) {
+    html += `<div class="card fade-in" style="margin-top:12px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><h3 style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:500">直播话术</h3><div style="display:flex;gap:6px"><button class="btn btn-sm btn-outline live-mode-tab active" id="liveTabWei${idx}" onclick="switchLiveMode('wei', ${idx})" style="font-size:11px;padding:5px 10px">微憋单</button><button class="btn btn-sm btn-outline live-mode-tab" id="liveTabPing${idx}" onclick="switchLiveMode('ping', ${idx})" style="font-size:11px;padding:5px 10px">平播</button></div></div>`;
+
+    const wbd = p.live_stream.wei_bie_dan;
+    if (wbd) {
+      html += `<div id="liveWei${idx}" class="live-panel"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px"><div class="info-card info-card-amber"><span style="font-size:11px;color:#f0c56a">适用场景：</span><span style="font-size:13px">${escapeHtml(wbd.suitable)}</span></div><div class="info-card info-card-indigo"><span style="font-size:11px;color:#818cf8">出镜方式：</span><span style="font-size:13px">${escapeHtml(wbd.host_position)}</span></div></div><div style="font-size:11px;color:var(--muted);margin-bottom:8px">循环结构：${escapeHtml(wbd.cycle)}</div>`;
+      (wbd.segments||[]).forEach(seg => {
+        html += `<div style="padding:12px 14px;border-radius:var(--radius-sm);margin-bottom:6px;background:rgba(62,168,106,.03);border-left:3px solid var(--green)"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span class="tag tag-green">${escapeHtml(seg.phase)}</span><span style="font-size:11px;color:var(--muted)">${escapeHtml(seg.duration)}</span></div><div style="font-size:14px;color:var(--text);margin-bottom:4px">${escapeHtml(seg.script)}</div><div style="font-size:11px;color:var(--muted)">${escapeHtml(seg.tips)}</div></div>`;
+      });
+      html += `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">${(wbd.compliance_alerts||[]).map(a => `<span class="tag tag-red">${escapeHtml(a)}</span>`).join(' ')}</div></div>`;
+    }
+
+    const pb = p.live_stream.ping_bo;
+    if (pb) {
+      html += `<div id="livePing${idx}" class="live-panel" style="display:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px"><div class="info-card info-card-amber"><span style="font-size:11px;color:#f0c56a">适用场景：</span><span style="font-size:13px">${escapeHtml(pb.suitable)}</span></div><div class="info-card info-card-indigo"><span style="font-size:11px;color:#818cf8">出镜方式：</span><span style="font-size:13px">${escapeHtml(pb.host_position)}</span></div></div><div style="font-size:11px;color:var(--muted);margin-bottom:8px">循环结构：${escapeHtml(pb.cycle)}</div>`;
+      (pb.segments||[]).forEach(seg => {
+        html += `<div style="padding:12px 14px;border-radius:var(--radius-sm);margin-bottom:6px;background:rgba(99,102,241,.03);border-left:3px solid var(--accent)"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span class="tag tag-purple">${escapeHtml(seg.phase)}</span><span style="font-size:11px;color:var(--muted)">${escapeHtml(seg.duration)}</span></div><div style="font-size:14px;color:var(--text);margin-bottom:4px">${escapeHtml(seg.script)}</div><div style="font-size:11px;color:var(--muted)">${escapeHtml(seg.tips)}</div></div>`;
+      });
+      html += `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">${(pb.compliance_alerts||[]).map(a => `<span class="tag tag-red">${escapeHtml(a)}</span>`).join(' ')}</div></div>`;
+    }
+    html += `</div>`;
+  }
+
+  html += `</div>`;
+
+  document.getElementById('variantContent').innerHTML = html;
+}
+
+function renderResults(data) {
+  currentPlanData = data;
+  const label = data.script_type === 'without_cart' ? '不挂车版' : '挂车版';
+  const p0 = data.plans[0];
+
+  let html = '';
+
+  html += `<div class="card fade-in"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <span class="tag tag-purple">产品识别</span>
+      <span class="tag ${data.script_type==='without_cart' ? 'tag-green' : 'tag-red'}">${label}</span>
+      <span class="tag tag-amber">${data.variant_count}套方案</span>
+    </div>
+    <div style="display:flex;gap:6px">
+      <div style="position:relative;display:inline-block">
+        <button class="btn btn-sm" id="exportCurrentBtn" onclick="toggleExportMenu('current')" style="padding-right:8px">导出当前方案 <svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5" style="vertical-align:middle;margin-left:2px"><path d="M1 1l4 4 4-4"/></svg></button>
+        <div id="exportMenuCurrent" class="export-menu" style="display:none;top:100%;right:0;margin-top:6px">
+          <button onclick="exportContent('md','current');toggleExportMenu('current')">Markdown (.md)</button>
+          <button onclick="exportContent('pdf','current');toggleExportMenu('current')">PDF (.pdf)</button>
+          <button onclick="exportContent('html','current');toggleExportMenu('current')">网页 (.html)</button>
+          <button onclick="exportContent('copy','current');toggleExportMenu('current')">复制到剪贴板</button>
+        </div>
+      </div>
+      <div style="position:relative;display:inline-block">
+        <button class="btn btn-sm btn-outline" id="exportAllBtn" onclick="toggleExportMenu('all')">导出全部方案 <svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5" style="vertical-align:middle;margin-left:2px"><path d="M1 1l4 4 4-4"/></svg></button>
+        <div id="exportMenuAll" class="export-menu" style="display:none;top:100%;right:0;margin-top:6px">
+          <button onclick="exportContent('md','all');toggleExportMenu('all')">Markdown (.md)</button>
+          <button onclick="exportContent('pdf','all');toggleExportMenu('all')">PDF (.pdf)</button>
+          <button onclick="exportContent('html','all');toggleExportMenu('all')">网页 (.html)</button>
+          <button onclick="exportContent('copy','all');toggleExportMenu('all')">复制到剪贴板</button>
+        </div>
+      </div>
+    </div>
+  </div><p style="font-size:14px;color:var(--muted);line-height:1.7">${escapeHtml(data.product_analysis)}</p>`;
+
+  if (data.errors?.length) {
+    html += `<div style="margin-top:8px;font-size:12px;color:#f0c56a">部分方案生成失败：${data.errors.join('、')}，已自动跳过</div>`;
+  }
+  html += `</div>
+  <div style="display:flex;gap:6px;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);flex-wrap:wrap">
+    <span style="font-size:11px;color:var(--muted);font-weight:500">方案怎么样？</span>
+    <button class="rate-btn${data.plan_id && data.rating===1?' rated-good':''}" id="rateGood" onclick="ratePlan('${data.plan_id||''}',1)" style="background:transparent;border:1px solid var(--border);border-radius:999px;padding:4px 14px;cursor:pointer;font-size:12px;color:var(--muted);transition:all .2s" onmouseover="this.style.borderColor='var(--green)';this.style.color='var(--green)'" onmouseout="rateBtnHover(this,1)">👍 好用</button>
+    <button class="rate-btn${data.plan_id && data.rating===0?' rated-meh':''}" id="rateMeh" onclick="ratePlan('${data.plan_id||''}',0)" style="background:transparent;border:1px solid var(--border);border-radius:999px;padding:4px 12px;cursor:pointer;font-size:12px;color:var(--muted);transition:all .2s" onmouseover="this.style.borderColor='#f0c56a';this.style.color='#f0c56a'" onmouseout="rateBtnHover(this,0)">😐 一般</button>
+    <button class="rate-btn${data.plan_id && data.rating===-1?' rated-bad':''}" id="rateBad" onclick="ratePlan('${data.plan_id||''}',-1)" style="background:transparent;border:1px solid var(--border);border-radius:999px;padding:4px 12px;cursor:pointer;font-size:12px;color:var(--muted);transition:all .2s" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="rateBtnHover(this,-1)">👎 不行</button>
+    <span id="rateMsg" style="font-size:11px;color:var(--green);display:none"></span>
+  </div>`;
+
+  html += `<div class="card fade-in"><div style="display:flex;gap:8px;flex-wrap:wrap">`;
+  data.plans.forEach((p, i) => {
+    const hookType = p.hook?.type || '';
+    html += `<button class="variant-tab${i===0?' active':''}" onclick="switchVariant(${i})">方案${i+1}<span class="hook-type">${escapeHtml(hookType)}</span></button>`;
+  });
+  html += `</div></div>`;
+
+  html += `<div id="variantContent"></div>`;
+
+  html += `<div class="card fade-in"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+    <h3 style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:500">平台分发 & 发布策略</h3>
+    <button class="btn btn-sm btn-outline" onclick="exportContent('md','platform')">导出平台方案</button>
+  </div>
+    <div style="display:flex;gap:2px;margin-bottom:16px;border-bottom:2px solid var(--border)">
+      <button id="ptab-douyin" class="script-tab active" onclick="switchPlatformTab('douyin')">抖音</button>
+      <button id="ptab-kuaishou" class="script-tab" onclick="switchPlatformTab('kuaishou')">快手</button>
+      <button id="ptab-xiaohongshu" class="script-tab" onclick="switchPlatformTab('xiaohongshu')">小红书</button>
+      <button id="ptab-shipinhao" class="script-tab" onclick="switchPlatformTab('shipinhao')">视频号</button>
+    </div>`;
+
+  const platOrder = ['douyin','kuaishou','xiaohongshu','shipinhao'];
+  platOrder.forEach((key, idx) => {
+    const plat = p0.platforms?.[key];
+    if (!plat) return;
+    html += `<div id="ppanel-${key}"${idx>0?' style="display:none"':''}>`;
+    if (plat.video) {
+      html += `<div style="margin-bottom:10px"><div style="font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:500">视频版本</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:12px 14px;border-radius:var(--radius-sm);background:rgba(0,0,0,.15)">
+        <div><span style="font-size:11px;color:var(--muted)">适配：</span><span style="font-size:13px">${escapeHtml(plat.video.adaptation||'')}</span></div>
+        <div><span style="font-size:11px;color:var(--muted)">比例/时长：</span><span style="font-size:13px">${escapeHtml(plat.video.aspect_ratio||'')} / ${escapeHtml(plat.video.duration||'')}</span></div>`;
+      if ((key==='douyin'||key==='kuaishou') && plat.video?.cart_hook) html += `<div><span style="font-size:11px;color:var(--muted)">购物车：</span><span style="font-size:13px">${escapeHtml(plat.video.cart_hook)}</span></div><div><span style="font-size:11px;color:var(--muted)">券策略：</span><span style="font-size:13px">${escapeHtml(plat.video.coupon_strategy)}</span></div>`;
+      if (key==='shipinhao') html += `<div><span style="font-size:11px;color:var(--muted)">转发钩子：</span><span style="font-size:13px">${escapeHtml(plat.video.social_sharing_hook||'')}</span></div><div><span style="font-size:11px;color:var(--muted)">私域导流：</span><span style="font-size:13px">${escapeHtml(plat.video.private_domain_guide||'')}</span></div>`;
+      html += `</div></div>`;
+    }
+    if (key==='xiaohongshu' && plat.image_post) {
+      const ip = plat.image_post;
+      html += `<div style="margin-bottom:10px;padding:12px 14px;border-radius:var(--radius-sm);background:rgba(220,60,60,.04)"><div style="font-size:11px;color:#e07070;margin-bottom:8px;font-weight:600">图文笔记</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><div><span style="font-size:11px;color:var(--muted)">封面：</span><span style="font-size:13px">${escapeHtml(ip.cover_design||'')}</span></div><div><span style="font-size:11px;color:var(--muted)">标题：</span><span style="font-size:13px">${escapeHtml(ip.title||'')}</span></div></div>
+        <div style="margin-top:8px"><span style="font-size:11px;color:var(--muted)">图片序列：</span></div><div style="font-size:13px;color:var(--muted);margin-top:4px">${(ip.image_sequence||[]).map((s,i) => `<div>${i+1}. ${escapeHtml(s)}</div>`).join('')}</div>
+        <div style="margin-top:8px"><span style="font-size:11px;color:var(--muted)">正文框架：</span><span style="font-size:13px">${escapeHtml(ip.copywriting||'')}</span></div><div style="margin-top:4px"><span style="font-size:11px;color:var(--muted)">标签策略：</span><span style="font-size:13px">${escapeHtml(ip.hashtag_strategy||'')}</span></div>
+        ${ip.publish_note ? `<div style="margin-top:4px"><span style="font-size:11px;color:var(--muted)">发布注意：</span><span style="font-size:13px">${escapeHtml(ip.publish_note)}</span></div>` : ''}</div>`;
+    }
+    if (plat.publish_strategy) {
+      html += `<div style="font-size:11px;color:var(--muted);margin-top:12px;margin-bottom:4px;font-weight:500">发布策略</div>${renderPublishStrategy(plat.publish_strategy)}`;
+      const ps = plat.publish_strategy;
+      if (ps.hashtag_tips || ps.seo_tips || ps.fission_guide) {
+        html += `<div style="display:grid;grid-template-columns:1fr;gap:6px;margin-top:8px">`;
+        if (ps.hashtag_tips) html += `<div class="info-card info-card-indigo"><span style="font-size:11px;color:#818cf8;font-weight:500">标签技巧：</span><span style="font-size:13px">${escapeHtml(ps.hashtag_tips)}</span></div>`;
+        if (ps.seo_tips) html += `<div class="info-card info-card-green"><span style="font-size:11px;color:var(--green);font-weight:500">SEO：</span><span style="font-size:13px">${escapeHtml(ps.seo_tips)}</span></div>`;
+        if (ps.fission_guide) html += `<div class="info-card info-card-purple"><span style="font-size:11px;color:#a78bfa;font-weight:500">裂变：</span><span style="font-size:13px">${escapeHtml(ps.fission_guide)}</span></div>`;
+        html += `</div>`;
+      }
+    }
+    html += `</div>`;
+  });
+  html += `</div>`;
+
+  const pp0 = data.plans[0].paid_promotion;
+  if (pp0) {
+    html += `<div class="card fade-in"><h3 style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;font-weight:500">付费推广策略 <span class="tag tag-green" style="margin-left:6px">推荐</span></h3>
+      <div style="display:flex;gap:2px;margin-bottom:14px;border-bottom:2px solid var(--border);flex-wrap:wrap">
+        <button id="protab-douyin" class="script-tab active" onclick="switchPromoPlatform('douyin')">抖音千川</button>
+        <button id="protab-kuaishou" class="script-tab" onclick="switchPromoPlatform('kuaishou')">快手磁力金牛</button>
+        <button id="protab-xiaohongshu" class="script-tab" onclick="switchPromoPlatform('xiaohongshu')">小红书</button>
+        <button id="protab-shipinhao" class="script-tab" onclick="switchPromoPlatform('shipinhao')">视频号</button>
+      </div>`;
+
+    const promoPlatforms = ['douyin','kuaishou','xiaohongshu','shipinhao'];
+    promoPlatforms.forEach((key, idx) => {
+      const promo = pp0[key];
+      if (!promo) return;
+      html += `<div id="promopanel-${key}"${idx>0?' style="display:none"':''}>
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px"><span class="tag tag-purple">${escapeHtml(promo.tool)}</span><span class="tag tag-green">${escapeHtml(promo.recommendation_level)}</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div class="info-card info-card-amber"><div class="info-card-label" style="color:#f0c56a">冷启动期</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px">预算：<span style="font-size:13px;color:var(--text)">${escapeHtml(promo.cold_start?.budget||'')}</span></div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">定向：<span style="font-size:13px;color:var(--text)">${escapeHtml(promo.cold_start?.targeting||'')}</span></div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">出价：<span style="font-size:13px;color:var(--text)">${escapeHtml(promo.cold_start?.bidding||'')}</span></div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">素材：<span style="font-size:13px;color:var(--text)">${escapeHtml(promo.cold_start?.material_count||'')}</span></div></div>
+          <div class="info-card info-card-green"><div class="info-card-label" style="color:var(--green)">放量 & 优化</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px">模型：<span style="font-size:13px;color:var(--text)">${escapeHtml(promo.scaling?.roi_model||'')}</span></div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">放量：<span style="font-size:13px;color:var(--text)">${escapeHtml(promo.scaling?.budget_scale||'')}</span></div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">调优：<span style="font-size:13px;color:var(--text)">${escapeHtml(promo.scaling?.roi_adjust||'')}</span></div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">素材：<span style="font-size:13px;color:var(--text)">${escapeHtml(promo.scaling?.material_update||'')}</span></div></div></div>
+        <div class="info-card info-card-indigo" style="margin-top:6px"><div class="info-card-label" style="color:#818cf8">ROI优化技巧</div><div style="font-size:13px;color:var(--text)">${escapeHtml(promo.roi_tips||'')}</div></div>
+        <div class="info-card info-card-purple" style="margin-top:6px"><div class="info-card-label" style="color:#a78bfa">预算建议</div><div style="font-size:13px;color:var(--text)">${escapeHtml(promo.budget_advice||'')}</div></div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">${(promo.compliance||[]).map(c => `<span class="tag tag-red">${escapeHtml(c)}</span>`).join(' ')}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  html += `<div class="card fade-in"><h3 style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;font-weight:500">话题标签</h3>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div><span class="tag tag-green" style="margin-right:6px">核心词</span>${(p0.tags?.core||[]).map(t => `<span class="tag tag-purple">${escapeHtml(t)}</span>`).join(' ')}</div>
+      <div><span class="tag tag-amber" style="margin-right:6px">热搜大词</span>${(p0.tags?.trending||[]).map(t => `<span class="tag tag-purple">${escapeHtml(t)}</span>`).join(' ')}</div>
+      <div><span class="tag" style="background:rgba(99,102,241,.1);color:#a5b4fc;margin-right:6px">长尾词</span>${(p0.tags?.long_tail||[]).map(t => `<span class="tag tag-purple">${escapeHtml(t)}</span>`).join(' ')}</div></div></div>`;
+
+  html += `<div class="card fade-in"><h3 style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;font-weight:500">评论区运营 & 热点</h3>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px">${(p0.comments||[]).map((c,i) => `<div style="display:flex;align-items:flex-start;gap:8px;font-size:14px;color:var(--muted)"><span style="font-size:11px;flex-shrink:0;color:var(--accent);font-weight:600">0${i+1}</span>${escapeHtml(c)}</div>`).join('')}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div class="info-card info-card-amber"><div class="info-card-label" style="color:#f0c56a">季节热点</div><div style="font-size:14px">${escapeHtml(p0.creative_direction?.season_hook||'')}</div></div>
+      <div class="info-card info-card-red"><div class="info-card-label" style="color:#e07070">节日营销</div><div style="font-size:14px">${escapeHtml(p0.creative_direction?.holiday_tie_in||'')}</div></div></div></div>`;
+
+  html += `<div style="text-align:center;padding:20px 0 60px;display:flex;justify-content:center;gap:16px">
+    <button class="btn btn-outline" onclick="resetForm()">重新生成</button>
+    <div style="position:relative;display:inline-block"><button class="btn" id="exportAllBtn2" onclick="toggleExportMenu('all2')">导出全部方案 <svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5" style="vertical-align:middle;margin-left:2px"><path d="M1 1l4 4 4-4"/></svg></button><div id="exportMenuAll2" class="export-menu" style="display:none;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:6px"><button onclick="exportContent('md','all');toggleExportMenu('all2')">Markdown (.md)</button><button onclick="exportContent('pdf','all');toggleExportMenu('all2')">PDF (.pdf)</button><button onclick="exportContent('html','all');toggleExportMenu('all2')">网页 (.html)</button><button onclick="exportContent('copy','all');toggleExportMenu('all2')">复制到剪贴板</button></div></div></div>`;
+
+  document.getElementById('results').innerHTML = html;
+  document.getElementById('results').style.display = '';
+  document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
+
+  renderVariantContent(data, 0);
+}
+
+function getScript(p) { return p.script || p.script_with_cart || {}; }
+
+function buildSharedMarkdown(p, label) {
+  const script = getScript(p);
+  let md = '';
+  md += `## 一图看懂\n\n| 项目 | 内容 |\n|------|------|\n| 版本 | ${label} |\n| 钩子 | ${p.hook?.type||''} |\n| 镜头数 | ${script.storyboard?.length||0}个 |\n| BPM | ${p.bgm?.tempo_bpm||''} |\n| AI语音 | ${p.voiceover?.recommended_voice||''} |\n\n---\n\n`;
+  md += `## 前3秒钩子\n\n**${p.hook?.type||''}**：${p.hook?.description||''}\n\n| 核心思路 | 画面 | 文字叠加 |\n|------|------|------|\n| ${p.hook?.description||''} | ${p.hook?.visual||''} | ${p.hook?.text||''} |\n\n`;
+  md += `## 标题备选\n\n`; (p.titles||[]).forEach(t => { md += `- [${t.type}] **${t.text}** → ${t.scenario}\n`; }); md += `\n`;
+  md += `## 拍摄分镜\n\n| 镜号 | 时长 | 画面 | 口播 | 字幕 |\n|------|------|------|------|------|\n`;
+  (script.storyboard||[]).forEach(s => { md += `| ${s.shot} | ${s.duration} | ${s.visual} | ${s.audio} | ${s.caption} |\n`; }); md += `\n`;
+
+  if (p.bgm) { md += `## BGM & 音乐\n\n| 项目 | 详情 |\n|------|------|\n| 风格 | ${p.bgm.style} |\n| BPM | ${p.bgm.tempo_bpm} |\n| 推荐曲目 | ${(p.bgm.recommendations||[]).join(' | ')} |\n| 搜索关键词 | ${(p.bgm.search_keywords||[]).join('、')} |\n| 找爆款方法 | ${p.bgm.how_to_find_trending} |\n| 使用技巧 | ${p.bgm.usage_tips} |\n\n`; }
+  const pp = p.post_production;
+  if (pp?.editing) { md += `## 后期制作\n\n### 剪辑\n| 项目 | 设置 |\n|------|------|\n| 节奏 | ${pp.editing.pace} |\n| 转场 | ${pp.editing.transitions} |\n| 特效 | ${pp.editing.effects} |\n| 关键节点 | ${pp.editing.key_moments} |\n\n### 调色\n| 项目 | 设置 |\n|------|------|\n| 风格 | ${pp.color_grading.style} |\n| 滤镜 | ${pp.color_grading.filter_lut} |\n| 参数 | ${pp.color_grading.parameters} |\n\n### 字幕\n| 项目 | 设置 |\n|------|------|\n| 字体 | ${pp.captions.font} |\n| 位置 | ${pp.captions.size_position} |\n| 动画 | ${pp.captions.animation} |\n| 配色 | ${pp.captions.color_palette} |\n| 高亮 | ${pp.captions.highlight_rules} |\n\n### 音效\n| 项目 | 设置 |\n|------|------|\n| 音效 | ${pp.sound_design.sfx} |\n| 混音 | ${pp.sound_design.audio_mixing} |\n\n`; }
+  if (p.voiceover) { md += `## AI语音\n\n| 项目 | 设置 |\n|------|------|\n| 工具 | ${p.voiceover.method||''} |\n| 音色 | ${p.voiceover.recommended_voice||''} |\n| 语速 | ${p.voiceover.speed||''} |\n| 步骤 | ${p.voiceover.how_to_clone||''} |\n| 技巧 | ${p.voiceover.tips||''} |\n\n`; }
+  return md;
+}
+
+function buildSinglePlatformMarkdown(plat, key) {
+  if (!plat) return '';
+  const names = {douyin:'抖音', kuaishou:'快手', xiaohongshu:'小红书', shipinhao:'视频号'};
+  const guides = {douyin:'强转化·重卡点·小黄车', kuaishou:'接地气·喊麦风·老铁文化', xiaohongshu:'精致感·图文+视频·SEO', shipinhao:'生活化·私域导流·社交裂变'};
+  let md = `### ${names[key]} — ${guides[key]}\n\n#### 视频参数\n| 项目 | 详情 |\n|------|------|\n`;
+  if (plat.video?.adaptation) md += `| 适配 | ${plat.video.adaptation} |\n`;
+  if (plat.video?.aspect_ratio) md += `| 比例 | ${plat.video.aspect_ratio} |\n`;
+  if (plat.video?.duration) md += `| 时长 | ${plat.video.duration} |\n`;
+  if ((key==='douyin'||key==='kuaishou') && plat.video?.cart_hook) md += `| 购物车 | ${plat.video.cart_hook} |\n| 券策略 | ${plat.video.coupon_strategy||''} |\n`;
+  if (key==='shipinhao') { if (plat.video?.social_sharing_hook) md += `| 转发钩子 | ${plat.video.social_sharing_hook} |\n`; if (plat.video?.private_domain_guide) md += `| 私域导流 | ${plat.video.private_domain_guide} |\n`; }
+
+  if (key==='xiaohongshu' && plat.image_post) {
+    const ip = plat.image_post;
+    md += `\n#### 图文笔记\n| 项目 | 详情 |\n|------|------|\n| 封面 | ${ip.cover_design||''} |\n| 标题 | ${ip.title||''} |\n\n**图片序列：**\n`; (ip.image_sequence||[]).forEach((s,i) => md += `${i+1}. ${s}\n`);
+    md += `\n**正文：**\n${ip.copywriting||''}\n\n- 标签策略：${ip.hashtag_strategy||''}\n`;
+    if (ip.publish_note) md += `- 发布注意事项：${ip.publish_note}\n`;
+  }
+  const ps = plat.publish_strategy;
+  if (ps) { md += `\n#### 发布策略\n| 项目 | 详情 |\n|------|------|\n`; if (ps.best_times) md += `| 最佳时段 | ${ps.best_times.join(' / ')} |\n`; if (ps.best_days) md += `| 最佳日期 | ${ps.best_days.join('、')} |\n`; if (ps.frequency) md += `| 频率 | ${ps.frequency} |\n`; if (ps.first_comment) md += `| 首发自评 | ${ps.first_comment} |\n`; if (ps.interaction_guide) md += `| 互动策略 | ${ps.interaction_guide} |\n`; if (ps.hashtag_tips) md += `| 标签技巧 | ${ps.hashtag_tips} |\n`; if (ps.seo_tips) md += `| SEO | ${ps.seo_tips} |\n`; if (ps.fission_guide) md += `| 裂变 | ${ps.fission_guide} |\n`; }
+  md += `\n`;
+  return md;
+}
+
+function buildFooterMarkdown(p) {
+  let md = `## 话题标签\n\n- 核心词：${(p.tags?.core||[]).join(' ')}\n- 热搜大词：${(p.tags?.trending||[]).join(' ')}\n- 长尾精准词：${(p.tags?.long_tail||[]).join(' ')}\n\n## 评论区运营\n\n`; (p.comments||[]).forEach((c,i) => md += `${i+1}. ${c}\n`); md += `\n`;
+  if (p.creative_direction) md += `## 热点借势\n\n- 季节：${p.creative_direction.season_hook||''}\n- 节日：${p.creative_direction.holiday_tie_in||''}\n\n`;
+  md += `---\n\n> **AI 生成声明**：本方案由FrameCraft AI 自动生成，仅供参考（《标识办法》国信办通字〔2025〕2 号）。您依据本方案实际拍摄并发布的视频为真人原创内容，无需标注 AI 生成标识。\n`;
+  return md;
+}
+
+function toggleExportMenu(which) {
+  const menu = document.getElementById('exportMenu'+which.charAt(0).toUpperCase()+which.slice(1));
+  if (menu) menu.style.display = menu.style.display === 'none' ? '' : 'none';
+  document.querySelectorAll('.export-menu').forEach(m => {
+    if (m !== menu) m.style.display = 'none';
+  });
+}
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.export-menu') && !e.target.closest('[id^="export"]')) {
+    document.querySelectorAll('.export-menu').forEach(m => m.style.display = 'none');
+  }
+});
+
+function buildExportMarkdown(scope) {
+  if (!currentPlanData) return '';
+  const label = currentPlanData.script_type==='without_cart'?'不挂车版':'挂车版';
+  const d=new Date(); const ds=d.getFullYear()+'.'+(d.getMonth()+1)+'.'+d.getDate();
+  let md = '';
+  if (scope==='current') {
+    const p = currentPlanData.plans[currentVariantIndex];
+    md = '# 拍摄方案 — '+label+' — 方案'+(currentVariantIndex+1)+'\n\n> '+p.product_summary+'　|　'+label+'　|　'+ds+'\n\n---\n\n';
+    md += buildSharedMarkdown(p, label);
+    md += buildFooterMarkdown(p);
+  } else if (scope==='platform') {
+    const p = currentPlanData.plans[currentVariantIndex];
+    const pn={douyin:'抖音',kuaishou:'快手',xiaohongshu:'小红书',shipinhao:'视频号'};
+    md = '# 拍摄方案 — '+label+' — '+pn[currentPlatformTab]+'专属\n\n> '+p.product_summary+'　|　'+label+'　|　'+ds+'\n\n---\n\n';
+    md += buildSharedMarkdown(p, label);
+    md += buildSinglePlatformMarkdown(p.platforms?.[currentPlatformTab], currentPlatformTab);
+    md += buildFooterMarkdown(p);
+  } else {
+    md = '# 拍摄方案合集 — '+label+'\n\n> '+currentPlanData.variant_count+'套方案　|　'+ds+'\n\n---\n\n';
+    currentPlanData.plans.forEach((p,i)=>{
+      md += '# 方案'+(i+1)+'：'+((p.hook||{}).type||'')+' — '+p.product_summary+'\n\n';
+      md += buildSharedMarkdown(p, label);
+      md += '---\n\n';
+    });
+    md += '# 四平台分发指南\n\n';
+    ['douyin','kuaishou','xiaohongshu','shipinhao'].forEach(k=>{ md+=buildSinglePlatformMarkdown(currentPlanData.plans[0].platforms?.[k],k); });
+    md += buildFooterMarkdown(currentPlanData.plans[0]);
+  }
+  return md;
+}
+
+function buildExportHTML(md) {
+  let html = md;
+  html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+  html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+  html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+  html = html.replace(/\|(.+)\|/g, (match) => {
+    if (match.includes('---')) return '';
+    const cells = match.split('|').filter(c => c.trim());
+    return '<tr>'+cells.map(c => '<td>'+c.trim()+'</td>').join('')+'</tr>';
+  });
+  html = html.replace(/(<tr>.*<\/tr>\n?)+/g, '<table>$&</table>');
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+  html = html.replace(/\n/g, '<br>');
+  return '<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>拍摄方案</title><style>body{font-family:system-ui,-apple-system,sans-serif;max-width:800px;margin:0 auto;padding:20px;line-height:1.6;color:#333}h1{font-size:24px;border-bottom:2px solid #6366f1;padding-bottom:8px}h2{font-size:18px;color:#6366f1;margin-top:24px}h3{font-size:15px;color:#666}table{border-collapse:collapse;width:100%;margin:12px 0}td,th{border:1px solid #ddd;padding:8px;font-size:13px;text-align:left}th{background:#f5f5f5;font-weight:600}strong{color:#6366f1}li{margin:4px 0}@media print{body{max-width:100%;padding:0;font-size:12pt}h1{font-size:18pt}h2{font-size:14pt}@page{size:A4;margin:15mm}}</style></head><body>'+html+'</body></html>';
+}
+
+function exportContent(format, scope) {
+  const md = buildExportMarkdown(scope);
+  if (!md) return;
+  const p = currentPlanData.plans[0];
+  const label = currentPlanData.script_type==='without_cart'?'不挂车版':'挂车版';
+  const d=new Date(); const ds=d.getFullYear()+'.'+(d.getMonth()+1)+'.'+d.getDate();
+  const baseName = (p.product_summary||'方案')+'_'+label;
+
+  if (format==='md') {
+    const suffix = scope==='current' ? '_方案'+(currentVariantIndex+1) : scope==='platform' ? '_'+({douyin:'抖音',kuaishou:'快手',xiaohongshu:'小红书',shipinhao:'视频号'})[currentPlatformTab]+'专属' : '_合集'+currentPlanData.variant_count+'套';
+    const b=new Blob([md],{type:'text/markdown;charset=utf-8'});
+    const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download=baseName+suffix+'_'+ds+'.md'; a.click(); URL.revokeObjectURL(u);
+  } else if (format==='html') {
+    const html = buildExportHTML(md);
+    const b=new Blob([html],{type:'text/html;charset=utf-8'});
+    const u=URL.createObjectURL(b); const a=document.createElement('a'); a.href=u; a.download=baseName+'_'+ds+'.html'; a.click(); URL.revokeObjectURL(u);
+  } else if (format==='pdf') {
+    const html = buildExportHTML(md);
+    const w = window.open('', '_blank', 'width=900,height=700');
+    w.document.write(html);
+    w.document.close();
+    w.onload = () => { w.print(); };
+    setTimeout(() => { w.print(); }, 500);
+  } else if (format==='copy') {
+    navigator.clipboard.writeText(md).then(() => {
+      showToast('已复制到剪贴板！可直接粘贴到微信/钉钉/飞书', 'success');
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = md; ta.style.position='fixed'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta);
+      showToast('已复制到剪贴板！', 'success');
+    });
+  }
+}
+
+function resetForm() {
+  if (wsConnection) { wsConnection.close(); wsConnection = null; }
+  completedVariants = [];
+  selectedFiles=[];
+  slotFiles=[null,null,null,null,null];
+  document.getElementById('genBtn').disabled=true;
+  fileInput.value='';
+  document.getElementById('extraInfo').value='';
+  document.getElementById('results').style.display='none';
+  document.getElementById('results').innerHTML='';
+  document.getElementById('loading').style.display='none';
+  document.getElementById('partialResults').innerHTML='';
+  document.getElementById('inputArea').style.display='';
+  renderAngleSlots();
+  updateSlotValidation();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function switchLiveMode(mode, idx) {
+  document.getElementById('liveWei'+idx).style.display = mode==='wei' ? '' : 'none';
+  document.getElementById('livePing'+idx).style.display = mode==='ping' ? '' : 'none';
+  document.getElementById('liveTabWei'+idx).classList.toggle('active', mode==='wei');
+  document.getElementById('liveTabPing'+idx).classList.toggle('active', mode==='ping');
+}
+function switchPromoPlatform(plat) {
+  ['douyin','kuaishou','xiaohongshu','shipinhao'].forEach(p => {
+    const panel = document.getElementById('promopanel-'+p);
+    if (panel) panel.style.display = p===plat ? '' : 'none';
+    const btn = document.getElementById('protab-'+p);
+    if (btn) btn.classList.toggle('active', p===plat);
+  });
+}
+function escapeHtml(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function toggleShowcase(){
+  const content = document.getElementById('showcaseContent');
+  const arrow = document.getElementById('showcaseArrow');
+  const isOpen = content.style.display !== 'none';
+  content.style.display = isOpen ? 'none' : '';
+  arrow.style.transform = isOpen ? '' : 'rotate(180deg)';
+}
+
+async function ratePlan(planId, rating) {
+  if (!planId) { showToast('方案未保存，无法评分'); return; }
+  const msgEl = document.getElementById('rateMsg');
+  msgEl.style.display = 'none';
+
+  try {
+    const resp = await fetch(`/api/director/plans/${planId}/rate?rating=${rating}`, { method: 'POST' });
+    if (!resp.ok) throw new Error('评分失败');
+    const data = await resp.json();
+
+    // Update button states
+    ['rateGood','rateMeh','rateBad'].forEach(id => {
+      const btn = document.getElementById(id);
+      if (!btn) return;
+      btn.classList.remove('rated-good','rated-meh','rated-bad');
+      btn.style.borderColor = 'var(--border)';
+      btn.style.color = 'var(--muted)';
+      btn.style.background = 'transparent';
+    });
+
+    const activeMap = {1: ['rateGood','rated-good','var(--green)'], 0: ['rateMeh','rated-meh','#f0c56a'], "-1": ['rateBad','rated-bad','var(--red)']};
+    const [id, cls, color] = activeMap[rating];
+    const btn = document.getElementById(id);
+    if (btn) {
+      btn.classList.add(cls);
+      btn.style.borderColor = color;
+      btn.style.color = color;
+      btn.style.background = color.replace(')','') + ',.08)';
+    }
+
+    msgEl.textContent = '已记录，飞轮+1';
+    msgEl.style.color = 'var(--green)';
+    msgEl.style.display = '';
+    setTimeout(() => { msgEl.style.display = 'none'; }, 2500);
+  } catch (err) {
+    showToast('评分失败: ' + err.message);
+  }
+}
+
+function rateBtnHover(btn, rating) {
+  const currentRating = btn.classList.contains('rated-good') ? 1 : btn.classList.contains('rated-meh') ? 0 : btn.classList.contains('rated-bad') ? -1 : null;
+  if (currentRating !== null) return; // Don't override active state
+}
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js', {scope: '/'}).catch(() => {});
+}
+</script>
+
+<a href="/support" class="support-float" title="联系客服">客服</a>
+
+<script>
+(function(){
+  var nav = document.getElementById('topbar');
+  if (!nav) return;
+  var last = 0;
+  window.addEventListener('scroll', function(){
+    var s = window.scrollY;
+    nav.classList.toggle('scrolled', s > 50);
+    if (s > last && s > 400) nav.style.transform = 'translate(-50%, -120px)';
+    else nav.style.transform = 'translate(-50%, 0)';
+    last = s;
+  });
+})();
+</script>
+</body>
+</html>

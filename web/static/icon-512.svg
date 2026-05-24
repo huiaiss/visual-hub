@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="72" fill="#050505"/>
+  <g transform="translate(256,256)">
+    <!-- Outer frame — rotated square with rounded corners ("帧") -->
+    <rect x="-152" y="-152" width="304" height="304" rx="36" fill="none" stroke="#e8b45a" stroke-width="7" transform="rotate(45)"/>
+    <!-- Inner ring — lens/aperture -->
+    <circle cx="0" cy="0" r="82" fill="none" stroke="#e8b45a" stroke-width="6"/>
+    <!-- Center dot — focus point -->
+    <circle cx="0" cy="0" r="16" fill="#e8b45a" opacity="0.45"/>
+    <!-- Crosshair guide lines — director's viewfinder -->
+    <line x1="-146" y1="0" x2="-92" y2="0" stroke="#e8b45a" stroke-width="5" stroke-linecap="round" opacity="0.8"/>
+    <line x1="92" y1="0" x2="146" y2="0" stroke="#e8b45a" stroke-width="5" stroke-linecap="round" opacity="0.8"/>
+    <line x1="0" y1="-146" x2="0" y2="-92" stroke="#e8b45a" stroke-width="5" stroke-linecap="round" opacity="0.8"/>
+    <line x1="0" y1="92" x2="0" y2="146" stroke="#e8b45a" stroke-width="5" stroke-linecap="round" opacity="0.8"/>
+    <!-- Corner accent dots — frame corners -->
+    <circle cx="-152" cy="-152" r="9" fill="#e8b45a" transform="rotate(45)"/>
+    <circle cx="152" cy="-152" r="9" fill="#e8b45a" transform="rotate(45)"/>
+    <circle cx="-152" cy="152" r="9" fill="#e8b45a" transform="rotate(45)"/>
+    <circle cx="152" cy="152" r="9" fill="#e8b45a" transform="rotate(45)"/>
+  </g>
+</svg>

@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+{% block title %}设置 — FrameCraft{% endblock %}
+
+{% block head_extra %}
+<style>
+:root {
+  --accent:#6366f1;--accent-dim:rgba(99,102,241,.06);--accent-glow:rgba(99,102,241,.12);
+}
+.bg-ambient .orb-1{background:radial-gradient(circle,rgba(99,102,241,.15),transparent)!important}
+.bg-ambient .orb-2{background:radial-gradient(circle,rgba(129,140,248,.06),transparent)!important}
+.bg-ambient .orb-3{background:radial-gradient(circle,rgba(99,102,241,.05),transparent)!important}
+.btn{background:var(--accent)!important}
+.btn:hover{background:#818cf8!important;box-shadow:0 0 48px rgba(99,102,241,.25)!important}
+.sidebar-link.active{background:rgba(99,102,241,.08)!important}
+.sidebar-link.active::before{background:var(--accent)!important}
+.card::before{background:linear-gradient(90deg,transparent,rgba(99,102,241,.15),transparent)!important}
+</style>
+{% endblock %}
+
+{% block content %}
+<div x-data="settingsPage">
+  <div style="margin-bottom:28px" class="fade-in">
+    <h1 style="font-family:var(--font-display);font-size:28px;font-weight:900;color:var(--text);margin-bottom:4px">设置</h1>
+    <p style="font-size:13px;color:var(--muted)">系统状态 · 场景模板 · 模型配置</p>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="fade-in" style="animation-delay:.05s;display:flex;gap:2px;margin-bottom:28px;border-bottom:2px solid var(--border);padding-bottom:0">
+    <button @click="currentTab = 'status'" class="settings-tab"
+            :class="currentTab === 'status' ? 'settings-tab-active' : ''">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      系统状态
+    </button>
+    <button @click="currentTab = 'templates'" class="settings-tab"
+            :class="currentTab === 'templates' ? 'settings-tab-active' : ''">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><circle cx="8" cy="8" r="2"/><path d="M14 8l4 4-4 4"/></svg>
+      场景模板
+    </button>
+    <button @click="currentTab = 'models'" class="settings-tab"
+            :class="currentTab === 'models' ? 'settings-tab-active' : ''">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><circle cx="6" cy="6" r="1" fill="currentColor"/><circle cx="6" cy="18" r="1" fill="currentColor"/></svg>
+      模型配置
+    </button>
+  </div>
+
+  <!-- Tab 1: System Status -->
+  <div x-show="currentTab === 'status'" class="fade-in" style="animation-delay:.1s">
+    <div class="p-reveal-stagger" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px">
+      <div class="p-glass-interactive" style="background:linear-gradient(135deg,rgba(62,168,106,.04),rgba(62,168,106,.01));border:1px solid rgba(62,168,106,.08);border-radius:var(--radius);padding:24px 20px;position:relative;overflow:hidden">
+        <div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(62,168,106,.04)"></div>
+        <div style="position:relative;z-index:1">
+          <p style="font-size:10px;color:var(--green);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;font-weight:600">系统状态</p>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="status-dot status-dot-green"></span>
+            <span style="font-size:20px;font-weight:700;color:var(--text)">运行中</span>
+          </div>
+          <p style="font-size:11px;color:var(--muted);margin-top:4px">v0.2.0</p>
+        </div>
+      </div>
+      <div class="p-glass-interactive" style="background:linear-gradient(135deg,rgba(99,102,241,.04),rgba(99,102,241,.01));border:1px solid rgba(99,102,241,.08);border-radius:var(--radius);padding:24px 20px;position:relative;overflow:hidden">
+        <div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(99,102,241,.04)"></div>
+        <div style="position:relative;z-index:1">
+          <p style="font-size:10px;color:#818cf8;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;font-weight:600">数据库</p>
+          <p style="font-size:13px;font-weight:500;color:var(--text);font-family:monospace;word-break:break-all">data/app.db</p>
+          <p style="font-size:11px;color:var(--muted);margin-top:4px">SQLite 本地存储</p>
+        </div>
+      </div>
+      <div class="p-glass-interactive" style="background:linear-gradient(135deg,rgba(139,92,246,.04),rgba(139,92,246,.01));border:1px solid rgba(139,92,246,.08);border-radius:var(--radius);padding:24px 20px;position:relative;overflow:hidden">
+        <div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(139,92,246,.04)"></div>
+        <div style="position:relative;z-index:1">
+          <p style="font-size:10px;color:#a78bfa;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;font-weight:600">抠图引擎</p>
+          <p style="font-size:20px;font-weight:700;color:var(--text)">rembg</p>
+          <p style="font-size:11px;color:var(--muted);margin-top:4px">U2Net 模型</p>
+        </div>
+      </div>
+      <div class="p-glass-interactive" style="background:linear-gradient(135deg,rgba(232,180,90,.04),rgba(232,180,90,.01));border:1px solid rgba(232,180,90,.08);border-radius:var(--radius);padding:24px 20px;position:relative;overflow:hidden">
+        <div style="position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:rgba(232,180,90,.04)"></div>
+        <div style="position:relative;z-index:1">
+          <p style="font-size:10px;color:var(--accent);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;font-weight:600">场景模板</p>
+          <p style="font-size:36px;font-weight:900;color:var(--accent);line-height:1" x-text="templateCount"></p>
+          <p style="font-size:11px;color:var(--muted);margin-top:4px">可用场景</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 2: Scene Templates -->
+  <div x-show="currentTab === 'templates'" class="fade-in" style="animation-delay:.1s">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <div>
+        <h2 style="font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--text)">场景模板库</h2>
+        <p style="font-size:12px;color:var(--muted);margin-top:2px">管理内置和自定义场景背景</p>
+      </div>
+      <button @click="showUpload = !showUpload"
+              style="padding:10px 20px;border-radius:999px;background:var(--accent);color:#0a0a0a;
+                     font-size:12px;font-weight:600;cursor:pointer;transition:all .3s;font-family:var(--font-body);border:none;
+                     box-shadow:0 4px 16px rgba(232,180,90,.15)"
+              onmouseover="this.style.boxShadow='0 6px 24px rgba(232,180,90,.3)'"
+              onmouseout="this.style.boxShadow='0 4px 16px rgba(232,180,90,.15)'">
+        + 上传场景
+      </button>
+    </div>
+
+    <!-- Upload Form -->
+    <div x-show="showUpload" x-cloak
+         style="margin-bottom:18px;padding:20px 22px;border-radius:var(--radius);background:rgba(255,255,255,.012);border:1px solid rgba(232,180,90,.08)">
+      <form @submit.prevent="uploadScene()" style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;gap:12px">
+          <input type="text" x-model="newScene.name" placeholder="场景名称" required
+                 style="flex:1;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:var(--radius-sm);
+                        padding:10px 14px;font-size:13px;color:var(--text);font-family:var(--font-body);outline:none;
+                        transition:border-color .3s"
+                 onfocus="this.style.borderColor='rgba(232,180,90,.25)'"
+                 onblur="this.style.borderColor=''" />
+          <input type="text" x-model="newScene.category" placeholder="分类"
+                 style="width:120px;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:var(--radius-sm);
+                        padding:10px 14px;font-size:13px;color:var(--text);font-family:var(--font-body);outline:none;
+                        transition:border-color .3s"
+                 onfocus="this.style.borderColor='rgba(232,180,90,.25)'"
+                 onblur="this.style.borderColor=''" />
+        </div>
+        <div style="display:flex;gap:12px;align-items:center">
+          <input type="file" @change="handleSceneFile($event)" accept="image/*" required
+                 style="flex:1;font-size:13px;color:var(--text)" class="scene-file-input" />
+          <button type="submit" class="btn btn-sm">确认上传</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Scene Grid - tighter, more visual -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+      <template x-for="scene in allScenes" :key="scene.id">
+        <div style="background:rgba(255,255,255,.015);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;
+                    transition:transform .3s, border-color .3s;cursor:default"
+             onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='rgba(255,255,255,.08)'"
+             onmouseout="this.style.transform='';this.style.borderColor=''">
+          <div style="position:relative;aspect-ratio:4/3;overflow:hidden">
+            <img :src="scene.image_url" style="width:100%;height:100%;object-fit:cover;display:block" />
+            <div style="position:absolute;bottom:0;left:0;right:0;padding:20px 10px 8px;
+                        background:linear-gradient(to top,rgba(0,0,0,.7),transparent)">
+              <span x-show="scene.is_builtin"
+                    style="font-size:9px;padding:2px 8px;border-radius:999px;background:rgba(99,102,241,.15);color:#a5b4fc">内置</span>
+              <span x-show="!scene.is_builtin"
+                    style="font-size:9px;padding:2px 8px;border-radius:999px;background:rgba(232,180,90,.15);color:var(--accent)">自定义</span>
+            </div>
+          </div>
+          <div style="padding:10px 12px;display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <p style="font-size:12px;font-weight:500;color:var(--text)" x-text="scene.name"></p>
+              <p style="font-size:10px;color:var(--muted)" x-text="scene.category || '未分类'"></p>
+            </div>
+            <button x-show="!scene.is_builtin" @click="deleteScene(scene.id)"
+                    style="width:26px;height:26px;border-radius:50%;background:rgba(200,90,90,.08);color:var(--red);
+                           border:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;
+                           transition:all .2s;font-family:var(--font-body)"
+                    onmouseover="this.style.background='rgba(200,90,90,.18)'"
+                    onmouseout="this.style.background='rgba(200,90,90,.08)'">&#x2715;</button>
+          </div>
+        </div>
+      </template>
+    </div>
+
+    <!-- Empty State -->
+    <template x-if="allScenes.length === 0">
+      <div style="text-align:center;padding:48px 0">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width=".5" style="margin:0 auto 12px;opacity:.3">
+          <rect x="2" y="3" width="20" height="14" rx="2"/><circle cx="8" cy="8" r="2"/><path d="M14 8l4 4-4 4"/>
+        </svg>
+        <p style="font-size:13px;color:var(--muted)">暂无场景模板，上传第一张自定义场景</p>
+      </div>
+    </template>
+  </div>
+
+  <!-- Tab 3: Model Config -->
+  <div x-show="currentTab === 'models'" class="fade-in" style="animation-delay:.1s">
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <!-- Vision Model -->
+      <div class="card-sm" style="display:flex;align-items:center;gap:16px">
+        <div style="width:40px;height:40px;border-radius:10px;background:rgba(99,102,241,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
+        </div>
+        <div style="flex:1">
+          <p style="font-size:14px;font-weight:600;color:var(--text)">产品识别模型</p>
+          <p style="font-size:11px;color:var(--muted)">用于分析产品图片、识别品类和风格特征</p>
+        </div>
+        <span class="tag" style="background:rgba(99,102,241,.1);color:#a5b4fc">DeepSeek Vision</span>
+      </div>
+
+      <!-- LLM -->
+      <div class="card-sm" style="display:flex;align-items:center;gap:16px">
+        <div style="width:40px;height:40px;border-radius:10px;background:rgba(139,92,246,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <div style="flex:1">
+          <p style="font-size:14px;font-weight:600;color:var(--text)">创意大纲模型</p>
+          <p style="font-size:11px;color:var(--muted)">生成拍摄脚本、场景描述和构图建议</p>
+        </div>
+        <span class="tag" style="background:rgba(139,92,246,.1);color:#c4b5fd">DeepSeek Chat</span>
+      </div>
+
+      <!-- BG Removal -->
+      <div class="card-sm" style="display:flex;align-items:center;gap:16px">
+        <div style="width:40px;height:40px;border-radius:10px;background:rgba(62,168,106,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+        </div>
+        <div style="flex:1">
+          <p style="font-size:14px;font-weight:600;color:var(--text)">抠图引擎</p>
+          <p style="font-size:11px;color:var(--muted)">AI 背景移除与主体提取</p>
+        </div>
+        <span class="tag" style="background:rgba(62,168,106,.1);color:#6cc98a">rembg / U2Net</span>
+      </div>
+
+      <!-- Scene Generation -->
+      <div class="card-sm" style="display:flex;align-items:center;gap:16px">
+        <div style="width:40px;height:40px;border-radius:10px;background:rgba(232,180,90,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><circle cx="8" cy="8" r="2"/><path d="M14 8l4 4-4 4"/></svg>
+        </div>
+        <div style="flex:1">
+          <p style="font-size:14px;font-weight:600;color:var(--text)">场景生成模型</p>
+          <p style="font-size:11px;color:var(--muted)">根据创意描述生成场景背景图</p>
+        </div>
+        <span class="tag" style="background:rgba(232,180,90,.1);color:#f0c56a">程序化纹理</span>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;padding:16px;border-radius:var(--radius-sm);background:rgba(99,102,241,.04);border:1px solid rgba(99,102,241,.08)">
+      <p style="font-size:11px;color:#818cf8;letter-spacing:.04em;text-transform:uppercase;margin-bottom:6px;font-weight:600">扩展规划</p>
+      <p style="font-size:12px;color:var(--muted);line-height:1.7">后续将接入 SeedDream / ChatGPT 生图 API 以支持更丰富的创意场景生成。当前版本使用程序化纹理 + 参数调整实现场景背景的多样化。</p>
+    </div>
+  </div>
+</div>
+
+<style>
+.settings-tab{
+  display:inline-flex;align-items:center;gap:6px;padding:10px 18px;
+  background:transparent;border:none;border-bottom:2px solid transparent;
+  color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;
+  font-family:var(--font-body);transition:all .2s;margin-bottom:-2px;
+}
+.settings-tab:hover{color:var(--text)}
+.settings-tab-active{color:var(--accent)!important;border-bottom-color:var(--accent)!important}
+.scene-file-input::file-selector-button{
+  margin-right:10px;padding:7px 14px;border-radius:999px;border:1px solid var(--border);
+  font-size:11px;cursor:pointer;font-family:var(--font-body);
+  background:rgba(255,255,255,.02);color:var(--muted);
+  transition:all .3s;
+}
+.scene-file-input::file-selector-button:hover{background:rgba(255,255,255,.06);color:var(--text)}
+[x-cloak]{display:none!important}
+@media(max-width:768px){
+  div[style*="grid-template-columns:repeat(4,1fr)"]{grid-template-columns:repeat(2,1fr)!important}
+}
+@media(max-width:480px){
+  div[style*="grid-template-columns:repeat(4,1fr)"]{grid-template-columns:repeat(1,1fr)!important}
+}
+</style>
+{% endblock %}

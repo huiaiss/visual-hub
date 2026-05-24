@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><title>AI场景测试结果</title>
+<style>
+  body { background: #0c0c14; color: #e2e8f0; font-family: system-ui; padding: 20px; max-width: 1400px; margin: 0 auto; }
+  h1 { color: #818cf8; }
+  h2 { color: #a5b4fc; margin-top: 30px; border-bottom: 1px solid #1e1e32; padding-bottom: 8px; }
+  .grid { display: flex; flex-wrap: wrap; gap: 16px; }
+  .card { background: #131320; border: 1px solid #1e1e32; border-radius: 12px; overflow: hidden; width: 400px; }
+  .card img { width: 100%; display: block; }
+  .label { padding: 10px 14px; font-size: 13px; color: #94a3b8; }
+  .score { float: right; color: #fbbf24; font-weight: bold; }
+</style></head><body>
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+  <svg width="36" height="36" viewBox="0 0 192 192" style="display:inline-block;vertical-align:middle;flex-shrink:0">
+    <rect width="192" height="192" rx="28" fill="transparent"/>
+    <g transform="translate(96,96)">
+      <rect x="-54" y="-54" width="108" height="108" rx="14" fill="none" stroke="#818cf8" stroke-width="8" transform="rotate(45)"/>
+      <circle cx="0" cy="0" r="30" fill="none" stroke="#818cf8" stroke-width="7"/>
+      <circle cx="0" cy="0" r="6" fill="#818cf8" opacity="0.45"/>
+      <line x1="-52" y1="0" x2="-34" y2="0" stroke="#818cf8" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+      <line x1="34" y1="0" x2="52" y2="0" stroke="#818cf8" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+      <line x1="0" y1="-52" x2="0" y2="-34" stroke="#818cf8" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+      <line x1="0" y1="34" x2="0" y2="52" stroke="#818cf8" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+    </g>
+  </svg>
+  <span style="font-size:20px;font-weight:700;color:#818cf8">FrameCraft</span>
+  <span style="color:#94a3b8;font-size:14px">— 测试结果</span>
+</div>
+<h1>SeedDream AI 场景生成 — 测试结果</h1>
+<p>产品: 凯妮芬一字拖 | 模型: doubao-seedream-4-0 | 成本: ¥0.2/张</p>
+
+<h2>5 张 AI 场景背景</h2>
+<div class="grid">
+<div class="card"><img src="/data/scenes/generated/test_6ba87044/scene_01_街角咖啡馆的午后_94598a.png" /><div class="label">scene 01 街角咖啡馆的午后 94598a</div></div>
+<div class="card"><img src="/data/scenes/generated/test_6ba87044/scene_02_通勤地铁站的瞬间_7b56b8.png" /><div class="label">scene 02 通勤地铁站的瞬间 7b56b8</div></div>
+<div class="card"><img src="/data/scenes/generated/test_6ba87044/scene_03_公园草坪上的野餐_f2d9de.png" /><div class="label">scene 03 公园草坪上的野餐 f2d9de</div></div>
+<div class="card"><img src="/data/scenes/generated/test_6ba87044/scene_04_韩式公寓的窗边_b4280d.png" /><div class="label">scene 04 韩式公寓的窗边 b4280d</div></div>
+<div class="card"><img src="/data/scenes/generated/test_6ba87044/scene_05_创意书店的过道_c25672.png" /><div class="label">scene 05 创意书店的过道 c25672</div></div>
+
+</div>
+
+<h2>合成效果 (产品 + 场景)</h2>
+<div class=grid>
+<div class="card"><img src="/data/processed/composed_f8a96050b2324633aa970532d69fe13e.png" /><div class="label">合成图 — 抠图产品 + AI场景</div></div>
+
+</div>
+</body></html>

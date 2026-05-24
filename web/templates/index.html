@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+{% block title %}工作台 — FrameCraft{% endblock %}
+
+{% block head_extra %}
+<style>
+  .sidebar{display:none!important}
+  .page-wrap{margin-left:0!important;max-width:720px;margin:0 auto;padding:48px 24px 60px}
+  .mobile-topbar{display:flex!important}
+  @media(min-width:769px){
+    .mobile-topbar{display:none!important}
+    body{padding-top:0}
+  }
+  @media(max-width:768px){
+    .page-wrap{padding:72px 16px 40px}
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div x-data="workspace">
+  <!-- Header -->
+  <div style="margin-bottom:28px" class="fade-in">
+    <h1 style="font-family:var(--font-display);font-size:28px;font-weight:900;color:var(--text);margin-bottom:4px">主图工厂</h1>
+    <p style="font-size:13px;color:var(--muted)">上传产品图 → 去背景 → 选场景 → 多平台输出</p>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:20px;align-items:center">
+    <!-- WORKFLOW STEPS -->
+    <div class="p-reveal-stagger" style="width:100%;max-width:720px;display:flex;flex-direction:column;gap:18px">
+
+      <!-- Step 1: Upload -->
+      <div class="card p-card-3d fade-in" style="animation-delay:.1s">
+        <div class="p-card-3d-inner">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <div class="step-num step-num-amber">1</div>
+          <h2 class="section-title">上传产品图</h2>
+        </div>
+        <div style="border:2px dashed rgba(255,255,255,.06);border-radius:var(--radius);padding:36px 20px;
+                    text-align:center;transition:all .35s;background:rgba(255,255,255,.005);cursor:pointer"
+             @dragover.prevent="$el.style.borderColor='rgba(232,180,90,.3)';$el.style.background='rgba(232,180,90,.03)'"
+             @dragleave.prevent="$el.style.borderColor='';$el.style.background=''"
+             @drop.prevent="handleDrop($event);$el.style.borderColor='';$el.style.background=''">
+          <template x-if="!uploadedFile">
+            <div>
+              <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1" style="margin:0 auto 12px;opacity:.4">
+                <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+              </svg>
+              <p style="font-size:13px;color:var(--muted);margin-bottom:4px">拖拽图片到此处上传</p>
+              <p style="font-size:11px;color:rgba(255,255,255,.12);margin-bottom:14px">支持 JPG、PNG、WebP，最大 10MB</p>
+              <input type="file" @change="handleFile($event)" accept="image/*"
+                     style="display:block;margin:0 auto;font-size:13px;color:var(--text)"
+                     class="file-input" />
+            </div>
+          </template>
+          <template x-if="uploadedFile">
+            <div>
+              <img :src="uploadedPreview" style="max-height:180px;margin:0 auto 10px;border-radius:var(--radius-sm);display:block" />
+              <p style="font-size:11px;color:var(--muted)" x-text="uploadedFile.name"></p>
+              <button @click="resetAll()"
+                      style="margin-top:6px;font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;transition:color .3s"
+                      onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color=''">移除</button>
+            </div>
+          </template>
+        </div>
+      </div>
+      </div>
+
+      <!-- Step 2: Scene Selection -->
+      <div class="card fade-in" style="animation-delay:.2s">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <div class="step-num step-num-purple">2</div>
+          <h2 class="section-title">选择场景</h2>
+          <span style="font-size:11px;color:var(--muted)">可选</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+          <button @click="selectedSceneId = 0"
+                  style="border-radius:var(--radius-sm);padding:12px;text-align:center;cursor:pointer;
+                         background:rgba(255,255,255,.015);border:1px solid var(--border);
+                         transition:all .25s;font-family:var(--font-body);color:var(--text)"
+                  onmouseover="this.style.borderColor='rgba(255,255,255,.08)'"
+                  onmouseout="this.style.borderColor=''"
+                  :style="selectedSceneId === 0 ? 'border-color:var(--accent);background:rgba(232,180,90,.06);box-shadow:0 0 0 2px rgba(232,180,90,.08)' : ''">
+            <div style="width:100%;aspect-ratio:1;border-radius:8px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;
+                        background:repeating-conic-gradient(rgba(255,255,255,.02) 0% 25%,transparent 0% 50%) 50%/14px 14px">
+              <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(10,10,10,.75),rgba(15,15,15,.75));display:flex;align-items:center;justify-content:center">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+              </div>
+            </div>
+            <span style="font-size:11px;color:var(--muted)">透明背景</span>
+          </button>
+          <template x-for="scene in scenes" :key="scene.id">
+            <button @click="selectedSceneId = scene.id"
+                    style="border-radius:var(--radius-sm);padding:12px;text-align:center;cursor:pointer;
+                           background:rgba(255,255,255,.015);border:1px solid var(--border);
+                           transition:all .25s;font-family:var(--font-body);color:var(--text)"
+                    onmouseover="this.style.borderColor='rgba(255,255,255,.08)'"
+                    onmouseout="this.style.borderColor=''"
+                    :style="selectedSceneId === scene.id ? 'border-color:var(--accent);background:rgba(232,180,90,.06);box-shadow:0 0 0 2px rgba(232,180,90,.08)' : ''">
+              <div style="width:100%;aspect-ratio:1;border-radius:8px;overflow:hidden;margin-bottom:8px;position:relative">
+                <img :src="scene.image_url" style="width:100%;height:100%;object-fit:cover;transition:transform .3s"
+                     onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform=''" />
+                <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.4),transparent);opacity:0;transition:opacity .2s"
+                     onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'"></div>
+              </div>
+              <span style="font-size:11px;color:var(--muted)" x-text="scene.name"></span>
+            </button>
+          </template>
+        </div>
+      </div>
+
+      <!-- Step 3: Platforms -->
+      <div class="card fade-in" style="animation-delay:.3s">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="step-num step-num-green">3</div>
+            <h2 class="section-title">输出平台</h2>
+          </div>
+          <button @click="toggleAllPlatforms()"
+                  style="font-size:11px;color:var(--accent);background:none;border:none;cursor:pointer;transition:color .3s;font-family:var(--font-body)"
+                  onmouseover="this.style.color='#f0c56a'" onmouseout="this.style.color=''"
+                  x-text="allPlatformsSelected ? '取消全选' : '全选'"></button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+          <template x-for="p in platforms" :key="p.id">
+            <label style="border-radius:var(--radius-sm);padding:12px 14px;border:1px solid var(--border);cursor:pointer;
+                          transition:all .25s;display:block;font-size:11px"
+                   onmouseover="this.style.background='rgba(255,255,255,.02)'"
+                   onmouseout="this.style.background=''"
+                   :style="p.selected ? 'background:rgba(232,180,90,.06);border-color:rgba(232,180,90,.25);color:var(--text)' : 'background:rgba(255,255,255,.005);color:var(--muted)'">
+              <input type="checkbox" x-model="p.selected" style="display:none" />
+              <div style="font-weight:500" x-text="p.label.split(' ')[0]"></div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px" x-text="p.label.split(' ').slice(1).join(' ')"></div>
+            </label>
+          </template>
+        </div>
+      </div>
+
+      <!-- Process Button -->
+      <button @click="process()" :disabled="!uploadedFile || processing" class="btn"
+              style="width:100%;padding:16px;font-size:15px;animation-delay:.4s" class="fade-in">
+        <span x-show="!processing">开始处理</span>
+        <span x-show="processing" style="display:flex;align-items:center;justify-content:center;gap:8px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="animation:spin .8s linear infinite">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity=".25"/>
+            <path d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" fill="currentColor" opacity=".75"/>
+          </svg>
+          处理中...
+        </span>
+      </button>
+    </div>
+
+    <!-- RESULTS PANEL -->
+    <div style="width:100%;max-width:720px;display:flex;flex-direction:column;gap:18px">
+      <div class="card fade-in" style="animation-delay:.15s;min-height:360px;display:flex;align-items:center;justify-content:center">
+        <template x-if="!results.length && !processing">
+          <div style="text-align:center">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width=".5" style="margin:0 auto 12px;opacity:.3">
+              <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            <p style="font-size:13px;color:var(--muted)">上传图片后在此预览结果</p>
+          </div>
+        </template>
+        <template x-if="processing">
+          <div style="text-align:center">
+            <div class="shimmer-bg" style="width:240px;height:180px;border-radius:var(--radius-sm);margin:0 auto 14px"></div>
+            <p style="font-size:13px;color:var(--muted)">AI 正在处理您的图片...</p>
+          </div>
+        </template>
+        <template x-if="results.length && !processing">
+          <div style="width:100%">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+              <h3 style="font-size:14px;font-weight:600;color:var(--text)">处理结果</h3>
+              <button @click="downloadAll()" class="btn btn-sm">下载全部</button>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
+              <template x-for="r in results" :key="r.platform">
+                <div style="background:rgba(255,255,255,.015);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;transition:border-color .3s"
+                     onmouseover="this.style.borderColor='rgba(232,180,90,.15)'" onmouseout="this.style.borderColor=''">
+                  <div style="aspect-ratio:1;background:rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;padding:8px">
+                    <img :src="r.url" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:6px" />
+                  </div>
+                  <div style="padding:10px 14px;display:flex;align-items:center;justify-content:space-between">
+                    <div>
+                      <p style="font-size:12px;font-weight:500;color:var(--text)" x-text="r.label.split(' ')[0]"></p>
+                      <p style="font-size:10px;color:var(--muted)" x-text="r.width + '×' + r.height"></p>
+                    </div>
+                    <a :href="r.url" :download="r.filename"
+                       style="width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,.03);display:flex;align-items:center;justify-content:center;transition:all .25s;color:var(--muted)"
+                       onmouseover="this.style.background='rgba(232,180,90,.1)';this.style.color='var(--accent)'"
+                       onmouseout="this.style.background='';this.style.color=''">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+        </template>
+      </div>
+
+      <!-- Error -->
+      <div x-show="errorMsg" x-cloak class="error-msg fade-in" x-text="errorMsg"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+.file-input::file-selector-button{
+  margin-right:12px;padding:9px 18px;border-radius:999px;border:none;
+  font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);
+  background:var(--accent);color:#0a0a0a;
+  transition:all .3s;box-shadow:0 4px 16px rgba(232,180,90,.2);
+}
+.file-input::file-selector-button:hover{background:#f0c56a;box-shadow:0 6px 24px rgba(232,180,90,.3)}
+[x-cloak]{display:none!important}
+</style>
+{% endblock %}

@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FrameCraft — 创意工作室</title>
+<link rel="manifest" href="/static/manifest.json">
+<link rel="icon" type="image/svg+xml" href="/static/icon-192.svg">
+<meta name="theme-color" content="#050505">
+<style>
+  :root {
+    --bg:#050505;--surface:#0b0b0b;--card:#0f0f0f;--border:rgba(255,255,255,.04);
+    --text:#e8e2d6;--muted:#706a60;
+    --accent:#e8b45a;--accent-dim:rgba(232,180,90,.06);--accent-glow:rgba(232,180,90,.12);
+    --accent2:#818cf8;--accent2-dim:rgba(129,140,248,.06);--accent2-glow:rgba(129,140,248,.12);
+    --green:#3ea86a;--red:#c05555;--amber:#f0c56a;
+    --font-display:'STXingkai','STZhongsong','Noto Serif SC','SimSun','STSong',serif;
+    --font-body:'PingFang SC','Microsoft YaHei','Noto Sans SC','Hiragino Sans GB','Microsoft JhengHei','WenQuanYi Micro Hei',sans-serif;
+    --radius:16px;--radius-sm:10px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--bg);color:var(--text);font-family:var(--font-body);
+    min-height:100vh;position:relative;overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  .bg-ambient{position:fixed;inset:0;pointer-events:none;z-index:0}
+  .bg-ambient .orb{position:absolute;border-radius:50%;filter:blur(140px)}
+  .bg-ambient .orb-1{width:650px;height:650px;background:radial-gradient(circle,rgba(232,180,90,.12),transparent);top:-20%;left:-12%}
+  .bg-ambient .orb-2{width:500px;height:500px;background:radial-gradient(circle,rgba(129,140,248,.06),transparent);bottom:-15%;right:-10%}
+  .bg-ambient .orb-3{width:350px;height:350px;background:radial-gradient(circle,rgba(232,180,90,.05),transparent);top:55%;left:55%}
+  .grain-overlay{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.018;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+  /* Top bar */
+  .topbar{
+    position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:1000;
+    display:flex;align-items:center;gap:2px;padding:5px 6px;
+    background:rgba(10,10,18,.88);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+    border:1px solid rgba(255,255,255,.05);border-radius:999px;
+  }
+  .topbar-brand{
+    display:flex;align-items:center;gap:7px;padding:6px 12px;
+    font-family:var(--font-display);font-weight:900;font-size:13px;
+    color:var(--accent);letter-spacing:.04em;text-decoration:none;white-space:nowrap;
+  }
+  .topbar-link{
+    color:var(--muted);text-decoration:none;font-size:12px;padding:6px 12px;
+    border-radius:999px;font-weight:500;transition:all .3s;
+  }
+  .topbar-link:hover{color:var(--text);background:rgba(255,255,255,.04)}
+  .topbar-link.active{color:var(--accent);background:rgba(232,180,90,.08)}
+
+  .page-wrap{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:80px 20px 60px}
+
+  /* Cards */
+  .card{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:24px;position:relative;overflow:hidden;
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+    transition:border-color .3s;
+  }
+  .card::before{
+    content:'';position:absolute;top:0;left:20%;right:20%;height:1px;
+    background:linear-gradient(90deg,transparent,rgba(232,180,90,.15),transparent);
+  }
+  .card+.card{margin-top:16px}
+
+  /* Buttons */
+  .btn{
+    background:var(--accent);color:#0a0a0a;border:none;border-radius:999px;
+    padding:13px 28px;font-size:14px;font-weight:600;cursor:pointer;
+    font-family:var(--font-body);letter-spacing:.04em;
+    transition:all .4s cubic-bezier(.16,1,.3,1);
+    position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:6px;
+  }
+  .btn:hover{background:#f0c56a;box-shadow:0 0 48px rgba(232,180,90,.25);transform:translateY(-2px)}
+  .btn:active{transform:scale(.97)}
+  .btn::after{
+    content:'';position:absolute;inset:0;
+    background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.2) 50%,transparent 60%);
+    transform:translateX(-100%) skewX(-12deg);transition:transform .8s;
+  }
+  .btn:hover::after{transform:translateX(200%) skewX(-12deg)}
+  .btn:disabled{background:#1f1d18;color:var(--muted);cursor:not-allowed;box-shadow:none;transform:none}
+  .btn:disabled::after{display:none}
+  .btn-sm{font-size:11px;padding:6px 14px;letter-spacing:.05em}
+  .btn-outline{
+    background:transparent;border:1px solid var(--border);color:var(--text);
+    border-radius:999px;padding:12px 24px;font-size:13px;font-weight:500;cursor:pointer;
+    font-family:var(--font-body);transition:all .3s;
+  }
+  .btn-outline:hover{background:var(--accent-dim);border-color:var(--accent)}
+  .btn-accent2{background:var(--accent2);color:#fff}
+  .btn-accent2:hover{background:#a5b4fc;box-shadow:0 0 48px rgba(129,140,248,.25)}
+
+  /* Tags */
+  .tag{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;margin:2px;font-family:var(--font-body);letter-spacing:.03em;font-weight:500}
+  .tag-purple{background:rgba(167,139,250,.1);color:#a78bfa}
+  .tag-green{background:rgba(62,168,106,.12);color:#6cc98a}
+  .tag-amber{background:rgba(232,180,90,.08);color:#f0c56a}
+  .tag-red{background:rgba(192,85,85,.12);color:#e07070}
+  .tag-blue{background:rgba(59,130,246,.1);color:#60a5fa}
+
+  /* Forms */
+  select,input[type="text"],textarea{
+    background:rgba(255,255,255,.02);border:1px solid var(--border);
+    border-radius:var(--radius-sm);color:var(--text);padding:11px 14px;
+    font-size:14px;width:100%;font-family:var(--font-body);
+    transition:border-color .3s,box-shadow .3s;outline:none;
+  }
+  select:focus,input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(232,180,90,.08)}
+  select{appearance:none;-webkit-appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23706a60' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+  select option{background:var(--card);color:var(--text)}
+  label.block-label{display:block;font-size:11px;color:var(--muted);margin-bottom:6px;letter-spacing:.04em;font-weight:500;text-transform:uppercase}
+
+  /* Upload zone */
+  .upload-zone{
+    border:2px dashed var(--border);border-radius:var(--radius);
+    padding:40px 20px;text-align:center;cursor:pointer;
+    transition:all .3s;position:relative;
+  }
+  .upload-zone:hover,.upload-zone.dragover{border-color:var(--accent);background:var(--accent-dim)}
+  .upload-zone .upload-icon{font-size:40px;margin-bottom:8px;opacity:.5}
+  .upload-zone .upload-text{font-size:14px;color:var(--muted)}
+  .upload-zone .upload-hint{font-size:11px;color:var(--muted);margin-top:4px;opacity:.6}
+  .upload-zone input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer}
+
+  /* Thumbnail grid */
+  .thumb-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .thumb-item{width:72px;height:72px;border-radius:var(--radius-sm);overflow:hidden;position:relative;border:2px solid var(--border);flex-shrink:0}
+  .thumb-item img{width:100%;height:100%;object-fit:cover}
+  .thumb-item .thumb-del{position:absolute;top:2px;right:2px;width:18px;height:18px;background:var(--red);color:#fff;border:none;border-radius:50%;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;opacity:0;transition:opacity .2s}
+  .thumb-item:hover .thumb-del{opacity:1}
+
+  /* Platform chips */
+  .platform-chip{
+    padding:7px 14px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);
+    border-radius:999px;cursor:pointer;font-size:12px;transition:all .25s;
+    display:flex;align-items:center;gap:6px;user-select:none;font-weight:500;
+  }
+  .platform-chip:hover{border-color:rgba(232,180,90,.25)}
+  .platform-chip.active{background:rgba(232,180,90,.12);border-color:rgba(232,180,90,.35);color:var(--accent)}
+
+  /* Radio cards */
+  .radio-card{
+    cursor:pointer;border:2px solid var(--border);border-radius:var(--radius-sm);
+    padding:10px 14px;transition:all .25s;display:flex;align-items:center;gap:8px;
+    background:transparent;
+  }
+  .radio-card:hover{border-color:var(--muted)}
+  .radio-card.selected{border-color:var(--accent);background:rgba(232,180,90,.05)}
+  .radio-card input{display:none}
+
+  /* Mode tabs */
+  .mode-tab{
+    cursor:pointer;padding:10px 24px;border-radius:999px;border:1px solid var(--border);
+    font-size:14px;font-weight:600;transition:all .25s;text-align:center;
+    background:transparent;color:var(--muted);font-family:var(--font-body);
+  }
+  .mode-tab:hover{border-color:var(--accent);color:var(--text)}
+  .mode-tab.active{background:var(--accent);color:#0a0a0a;border-color:var(--accent)}
+
+  /* Loading & Progress */
+  .loading-spinner{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .fade-in{animation:fadeIn .5s ease}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  .progress-wrap{max-width:480px;margin:0 auto 20px;position:relative}
+  .progress-track{width:100%;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width .5s cubic-bezier(.16,1,.3,1);width:0%}
+  .progress-pct{text-align:right;font-size:11px;color:var(--muted);margin-top:6px;font-family:var(--font-body)}
+  .progress-msg{text-align:center;font-size:13px;color:var(--muted);margin-top:8px}
+
+  /* Section cards */
+  .section-header{
+    display:flex;align-items:center;gap:8px;margin-bottom:12px;
+    font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);
+  }
+  .section-header .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0}
+
+  .info-row{display:flex;align-items:flex-start;gap:8px;padding:6px 0;font-size:13px}
+  .info-row .info-label{color:var(--muted);flex-shrink:0;min-width:60px;font-size:11px}
+  .info-row .info-val{color:var(--text);line-height:1.5}
+
+  /* Scene cards */
+  .scene-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+  .scene-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+  .scene-card img{width:100%;aspect-ratio:9/16;object-fit:cover;display:block}
+  .scene-card .scene-name{padding:8px 10px;font-size:12px;font-weight:500}
+
+  /* Plan cards */
+  .plan-card{
+    border:1px solid var(--border);border-radius:var(--radius);padding:20px;
+    background:rgba(255,255,255,.01);transition:border-color .3s;
+  }
+  .plan-card:hover{border-color:rgba(232,180,90,.15)}
+  .plan-card+.plan-card{margin-top:12px}
+  .plan-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .plan-title{font-size:15px;font-weight:700;color:var(--text)}
+  .plan-score{font-size:13px;font-weight:700;padding:4px 10px;border-radius:999px}
+  .score-high{background:rgba(62,168,106,.12);color:var(--green)}
+  .score-mid{background:rgba(232,180,90,.08);color:var(--amber)}
+  .score-low{background:rgba(192,85,85,.12);color:var(--red)}
+
+  /* Mini table */
+  .mini-table{width:100%;font-size:13px;border-collapse:collapse}
+  .mini-table th{text-align:left;color:var(--muted);font-weight:500;padding:8px 12px;border-bottom:1px solid var(--border);font-size:10px;text-transform:uppercase;letter-spacing:.06em}
+  .mini-table td{padding:10px 12px;border-bottom:1px solid rgba(31,29,24,.4);vertical-align:top;line-height:1.5}
+  .mini-table tr:hover td{background:var(--accent-dim)}
+
+  /* Toast */
+  .toast{position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:9999;padding:14px 24px;border-radius:var(--radius-sm);font-size:14px;max-width:480px;text-align:center;animation:toastIn .3s ease;pointer-events:none}
+  .toast.error{background:rgba(220,60,60,.15);border:1px solid rgba(220,60,60,.3);color:#e88888}
+  .toast.success{background:rgba(62,168,106,.15);border:1px solid rgba(62,168,106,.3);color:#7ecb9a}
+  @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(-12px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+  .support-float{position:fixed;bottom:28px;right:28px;z-index:999;
+    width:48px;height:48px;border-radius:50%;background:var(--accent);color:#0a0a0a;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    font-size:12px;font-weight:700;letter-spacing:.04em;
+    box-shadow:0 4px 24px rgba(232,180,90,.3);
+    transition:all .4s cubic-bezier(.16,1,.3,1);text-decoration:none;
+    font-family:var(--font-body)}
+  .support-float:hover{transform:scale(1.08);box-shadow:0 8px 36px rgba(232,180,90,.45)}
+
+  ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:3px}
+
+  .text-muted{color:var(--muted);font-size:12px}
+  .mt-12{margin-top:12px}.mt-16{margin-top:16px}.mt-20{margin-top:20px}.mt-24{margin-top:24px}
+  .mb-8{margin-bottom:8px}.mb-12{margin-bottom:12px}.mb-16{margin-bottom:16px}.mb-20{margin-bottom:20px}
+  .gap-8{gap:8px}.gap-12{gap:12px}.gap-16{gap:16px}
+  .flex{display:flex}.flex-wrap{flex-wrap:wrap}.items-center{align-items:center}.justify-between{justify-content:space-between}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .text-center{text-align:center}
+  .truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+  @media(max-width:640px){
+    .page-wrap{padding:72px 12px 40px}
+    .card{padding:18px}
+    .grid-2{grid-template-columns:1fr}
+    .scene-grid{grid-template-columns:repeat(2,1fr)}
+    .topbar{top:8px;padding:4px 5px}
+    .topbar-link{font-size:11px;padding:5px 8px}
+    .topbar-brand{font-size:12px;padding:5px 8px}
+    .mode-tab{font-size:12px;padding:8px 16px}
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-ambient">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+<div class="grain-overlay"></div>
+
+<header class="topbar" id="topbar">
+  <a href="/" class="topbar-brand">
+    <svg width="22" height="22" viewBox="0 0 192 192" style="display:inline-block;vertical-align:middle;flex-shrink:0">
+      <rect width="192" height="192" rx="28" fill="transparent"/>
+      <g transform="translate(96,96)">
+        <rect x="-54" y="-54" width="108" height="108" rx="14" fill="none" stroke="#e8b45a" stroke-width="8" transform="rotate(45)"/>
+        <circle cx="0" cy="0" r="30" fill="none" stroke="#e8b45a" stroke-width="7"/>
+        <circle cx="0" cy="0" r="6" fill="#e8b45a" opacity="0.45"/>
+        <line x1="-52" y1="0" x2="-34" y2="0" stroke="#e8b45a" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+        <line x1="34" y1="0" x2="52" y2="0" stroke="#e8b45a" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+        <line x1="0" y1="-52" x2="0" y2="-34" stroke="#e8b45a" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+        <line x1="0" y1="34" x2="0" y2="52" stroke="#e8b45a" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+      </g>
+    </svg>
+    FrameCraft
+  </a>
+  <a href="/" class="topbar-link">首页</a>
+  <a href="/director" class="topbar-link">方案生成</a>
+  <a href="/creative" class="topbar-link active">创意工作室</a>
+</header>
+
+<main class="page-wrap" x-data="creativeStudio()">
+
+  <!-- Page Header -->
+  <div style="text-align:center;margin-bottom:32px">
+    <h1 style="font-family:var(--font-display);font-size:32px;font-weight:900;letter-spacing:.04em;color:var(--accent);margin-bottom:6px">创意工作室</h1>
+    <p style="font-size:13px;color:var(--muted);max-width:520px;margin:0 auto;line-height:1.7">
+      AI 自动分析产品属性 → 生成创意大纲 → 定制场景 → 批量输出多平台拍摄方案<br>
+      上传 3-10 张多角度产品实拍图开始
+    </p>
+  </div>
+
+  <!-- Mode Tabs -->
+  <div class="flex justify-between items-center mb-20" style="max-width:320px;margin-left:auto;margin-right:auto">
+    <button class="mode-tab" :class="{active:mode==='analyze'}" @click="mode='analyze'">快速分析</button>
+    <button class="mode-tab" :class="{active:mode==='batch'}" @click="mode='batch'">批量生成</button>
+  </div>
+
+  <!-- UPLOAD SECTION -->
+  <div class="card mb-16">
+    <div class="section-header"><span class="dot"></span> 上传产品图</div>
+
+    <div class="upload-zone"
+         :class="{dragover:dragover}"
+         @dragover.prevent="dragover=true"
+         @dragleave.prevent="dragover=false"
+         @drop.prevent="handleDrop($event)">
+      <div class="upload-icon">&#x1F4F7;</div>
+      <div class="upload-text">拖拽图片到此处，或点击选择文件</div>
+      <div class="upload-hint">支持 JPG / PNG / WebP，至少 3 张（多角度识别更准），最多 10 张</div>
+      <input type="file" accept="image/jpeg,image/png,image/webp" multiple
+             @change="handleFiles($event)" x-ref="fileInput">
+    </div>
+
+    <div class="thumb-grid" x-show="files.length > 0">
+      <template x-for="(f,i) in files" :key="i">
+        <div class="thumb-item">
+          <img :src="f.preview" :alt="f.name">
+          <button class="thumb-del" @click="removeFile(i)">&times;</button>
+        </div>
+      </template>
+    </div>
+    <div class="text-muted mt-12" x-show="files.length > 0">
+      已选择 <span x-text="files.length" style="color:var(--accent);font-weight:600"></span> 张图片
+      <span x-show="files.length < 3" style="color:var(--red)">（至少需要 3 张）</span>
+    </div>
+  </div>
+
+  <!-- CONFIG SECTION -->
+  <div class="card mb-16">
+    <div class="section-header"><span class="dot"></span> 生成参数</div>
+
+    <div class="grid-2">
+      <div>
+        <label class="block-label">产品品类</label>
+        <select x-model="industry">
+          <option value="鞋类">鞋类</option>
+          <option value="服装">服装</option>
+          <option value="美妆">美妆</option>
+          <option value="食品">食品</option>
+          <option value="3C数码">3C数码</option>
+          <option value="家居">家居</option>
+        </select>
+      </div>
+      <div>
+        <label class="block-label">脚本类型</label>
+        <select x-model="scriptType">
+          <option value="with_cart">挂车版（带货）</option>
+          <option value="no_cart">非挂车版（种草）</option>
+          <option value="live">直播切片版</option>
+        </select>
+      </div>
+      <div>
+        <label class="block-label">方案数量</label>
+        <select x-model="variantCount">
+          <option value="1">1 套方案</option>
+          <option value="2">2 套方案</option>
+          <option value="3">3 套方案</option>
+          <option value="4">4 套方案</option>
+          <option value="5">5 套方案</option>
+        </select>
+      </div>
+      <div>
+        <label class="block-label">补充说明（可选）</label>
+        <input type="text" x-model="extraInfo" placeholder="如：秒杀价 89 元、主打透气、受众 18-25 岁...">
+      </div>
+    </div>
+
+    <!-- Batch-specific config -->
+    <template x-if="mode==='batch'">
+      <div class="mt-16" style="padding-top:16px;border-top:1px solid var(--border)">
+        <div class="grid-2">
+          <div>
+            <label class="block-label">场景模式</label>
+            <div class="flex gap-8">
+              <label class="radio-card" :class="{selected:sceneMode==='brief'}" style="flex:1">
+                <input type="radio" x-model="sceneMode" value="brief">
+                <span style="font-size:13px">智能推荐</span>
+              </label>
+              <label class="radio-card" :class="{selected:sceneMode==='custom'}" style="flex:1">
+                <input type="radio" x-model="sceneMode" value="custom">
+                <span style="font-size:13px">自定义场景</span>
+              </label>
+            </div>
+            <input type="text" x-model="sceneNames" x-show="sceneMode==='custom'" placeholder="窗边白墙,咖啡厅,旧城区斑马线" class="mt-12">
+          </div>
+          <div>
+            <label class="block-label">目标平台</label>
+            <div class="flex flex-wrap gap-8">
+              <div class="platform-chip" :class="{active:platforms.includes('douyin')}" @click="togglePlatform('douyin')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                抖音
+              </div>
+              <div class="platform-chip" :class="{active:platforms.includes('kuaishou')}" @click="togglePlatform('kuaishou')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                快手
+              </div>
+              <div class="platform-chip" :class="{active:platforms.includes('xiaohongshu')}" @click="togglePlatform('xiaohongshu')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                小红书
+              </div>
+              <div class="platform-chip" :class="{active:platforms.includes('shipinhao')}" @click="togglePlatform('shipinhao')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                视频号
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+  </div>
+
+  <!-- ACTION BUTTONS -->
+  <div class="text-center mb-20">
+    <template x-if="mode==='analyze'">
+      <button class="btn" @click="runAnalyze()" :disabled="loading || files.length < 3">
+        <span x-show="!loading">开始分析</span>
+        <span x-show="loading" style="display:flex;align-items:center;gap:8px">
+          <span style="width:16px;height:16px;border:2px solid rgba(0,0,0,.2);border-top-color:#0a0a0a;border-radius:50%;animation:spin .6s linear infinite;display:inline-block"></span>
+          分析中...
+        </span>
+      </button>
+    </template>
+    <template x-if="mode==='batch'">
+      <button class="btn btn-accent2" @click="runBatch()" :disabled="loading || files.length < 3">
+        <span x-show="!loading">开始批量生成</span>
+        <span x-show="loading" style="display:flex;align-items:center;gap:8px">
+          <span style="width:16px;height:16px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:inline-block"></span>
+          生成中...
+        </span>
+      </button>
+    </template>
+  </div>
+
+  <!-- PROGRESS BAR (batch mode) -->
+  <div class="card mb-16" x-show="jobStatus" style="text-align:center">
+    <div class="section-header" style="justify-content:center"><span class="dot"></span> 任务进度</div>
+    <div class="progress-wrap">
+      <div class="progress-track">
+        <div class="progress-fill" :style="'width:'+jobProgress+'%'"></div>
+      </div>
+      <div class="progress-pct">
+        <span x-text="jobProgress"></span>%
+      </div>
+    </div>
+    <div class="progress-msg" x-text="jobMessage"></div>
+    <div class="mt-8">
+      <span class="tag" :class="'tag-'+(jobStatus==='completed'?'green':jobStatus==='failed'?'red':'amber')" x-text="statusLabel(jobStatus)"></span>
+    </div>
+    <div class="mt-12" x-show="jobStatus==='completed'">
+      <span class="text-muted">结果已保存，可在下方查看</span>
+    </div>
+  </div>
+
+  <!-- PREVIEW LOADING -->
+  <div class="text-center mt-20" x-show="loading && !jobStatus">
+    <div class="loading-spinner"></div>
+    <p class="text-muted mt-12">AI 正在分析产品特征并生成创意方案...</p>
+  </div>
+
+  <!-- RESULTS: PRODUCT ANALYSIS -->
+  <div class="card mb-16 fade-in" x-show="result.product_analysis">
+    <div class="section-header"><span class="dot"></span> 产品分析</div>
+    <div class="grid-2">
+      <template x-for="(v,k) in result.product_analysis" :key="k">
+        <div class="info-row" x-show="typeof v === 'string' && v">
+          <span class="info-label" x-text="k"></span>
+          <span class="info-val" x-text="v"></span>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <!-- RESULTS: CREATIVE BRIEF -->
+  <div class="card mb-16 fade-in" x-show="result.creative_brief">
+    <div class="section-header"><span class="dot"></span> 创意大纲</div>
+    <div x-show="result.creative_brief.concept_name" class="mb-12">
+      <span class="tag tag-purple" style="font-size:14px;padding:6px 14px" x-text="'&#x1F4A1; ' + result.creative_brief.concept_name"></span>
+    </div>
+    <div class="info-row" x-show="result.creative_brief.concept_description">
+      <span class="info-label">概念</span>
+      <span class="info-val" x-text="result.creative_brief.concept_description"></span>
+    </div>
+    <div class="info-row" x-show="result.creative_brief.target_audience">
+      <span class="info-label">受众</span>
+      <span class="info-val" x-text="result.creative_brief.target_audience"></span>
+    </div>
+    <div class="info-row" x-show="result.creative_brief.model_direction">
+      <span class="info-label">模特</span>
+      <span class="info-val" x-text="result.creative_brief.model_direction"></span>
+    </div>
+    <div class="mt-12" x-show="result.creative_brief.color_palette">
+      <span class="text-muted">配色方案：</span>
+      <template x-for="(v,k) in result.creative_brief.color_palette" :key="k">
+        <span class="tag tag-amber" x-text="k+': '+v" style="margin:2px"></span>
+      </template>
+    </div>
+    <div class="mt-8" x-show="result.creative_brief.style_keywords">
+      <template x-for="kw in (Array.isArray(result.creative_brief.style_keywords) ? result.creative_brief.style_keywords : [])" :key="kw">
+        <span class="tag tag-blue" x-text="kw"></span>
+      </template>
+    </div>
+    <div class="mt-8" x-show="result.creative_brief.scene_descriptions">
+      <span class="text-muted">推荐场景：</span>
+      <template x-for="s in (Array.isArray(result.creative_brief.scene_descriptions) ? result.creative_brief.scene_descriptions : [])" :key="s">
+        <span class="tag tag-green" x-text="typeof s === 'string' ? s : s.name || s.scene" style="margin:2px"></span>
+      </template>
+    </div>
+  </div>
+
+  <!-- RESULTS: SCENE IMAGES -->
+  <div class="card mb-16 fade-in" x-show="result.scene_images && result.scene_images.length > 0">
+    <div class="section-header"><span class="dot"></span> 生成的场景</div>
+    <div class="scene-grid">
+      <template x-for="s in result.scene_images" :key="s.path">
+        <div class="scene-card">
+          <img :src="s.path" :alt="s.name" loading="lazy">
+          <div class="scene-name" x-text="s.name"></div>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <!-- RESULTS: PLANS -->
+  <template x-if="result.plans && result.plans.length > 0">
+    <div>
+      <div class="section-header mb-12"><span class="dot"></span> 拍摄方案（<span x-text="result.plans.length"></span> 套）</div>
+
+      <template x-for="(plan,i) in result.plans" :key="i">
+        <div class="plan-card fade-in">
+          <div class="plan-header">
+            <div class="plan-title" x-text="(plan.titles||'方案 '+(i+1))"></div>
+            <div x-show="plan._qa">
+              <span class="plan-score"
+                    :class="plan._qa.score >= 85 ? 'score-high' : plan._qa.score >= 70 ? 'score-mid' : 'score-low'"
+                    x-text="'QA: '+plan._qa.score+'分'"></span>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-8 mb-12">
+            <span class="tag tag-purple" x-text="plan.shooting_tier"></span>
+            <span class="tag tag-amber" x-text="plan.hook_type" x-show="plan.hook_type"></span>
+            <span class="tag tag-green" x-show="plan._qa && plan._qa.pass">PASS</span>
+            <span class="tag tag-red" x-show="plan._qa && !plan._qa.pass">需修改</span>
+          </div>
+
+          <div x-show="plan._qa" class="mb-12">
+            <p class="text-muted" x-text="plan._qa.summary"></p>
+          </div>
+
+          <!-- Storyboard preview -->
+          <div x-show="plan.script && plan.script.storyboard" style="overflow-x:auto">
+            <table class="mini-table">
+              <thead>
+                <tr><th>#</th><th>画面</th><th>L1口播</th><th>L2口播</th><th>怎么拍</th><th>Tier</th></tr>
+              </thead>
+              <tbody>
+                <template x-for="shot in plan.script.storyboard" :key="shot.shot">
+                  <tr>
+                    <td><span x-text="shot.shot" style="font-weight:700;color:var(--accent)"></span></td>
+                    <td x-text="shot.visual?.substring(0,40)||''" style="max-width:140px" class="truncate"></td>
+                    <td x-text="(shot.audio_l1||'').substring(0,50)" style="max-width:160px" class="truncate"></td>
+                    <td x-text="(shot.audio_l2||'').substring(0,50)" style="max-width:160px" class="truncate"></td>
+                    <td x-text="(shot.how_to_shoot||'').substring(0,30)" style="max-width:120px" class="truncate"></td>
+                    <td><span class="tag tag-purple" x-text="shot.tier"></span></td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Shooting card -->
+          <div class="mt-16" x-show="plan.shooting_template_card" style="padding:14px;border-radius:var(--radius-sm);background:rgba(232,180,90,.04)">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:6px;letter-spacing:.04em">拍摄指导</div>
+            <div style="font-size:13px" x-text="plan.shooting_template_card.tier_label"></div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px" x-text="plan.shooting_template_card.equipment_needed"></div>
+            <div style="font-size:12px;color:var(--muted)" x-text="plan.shooting_template_card.best_scene"></div>
+            <div style="font-size:12px;color:var(--muted)" x-text="plan.shooting_template_card.time_needed"></div>
+            <div style="font-size:12px;color:var(--red);margin-top:4px" x-text="plan.shooting_template_card.pitfall_alert"></div>
+          </div>
+        </div>
+      </template>
+    </div>
+  </template>
+
+  <!-- RESULTS: QA Reports Summary -->
+  <div class="card mb-16 fade-in" x-show="result.qa_reports && result.qa_reports.length > 0">
+    <div class="section-header"><span class="dot"></span> QA 质检报告</div>
+    <table class="mini-table">
+      <thead>
+        <tr><th>方案</th><th>分数</th><th>结果</th><th>摘要</th></tr>
+      </thead>
+      <tbody>
+        <template x-for="r in result.qa_reports" :key="r.plan_index">
+          <tr>
+            <td x-text="'方案 '+r.plan_index"></td>
+            <td><span class="plan-score" :class="r.score>=85?'score-high':r.score>=70?'score-mid':'score-low'" x-text="r.score+'分'"></span></td>
+            <td><span class="tag" :class="r.pass?'tag-green':'tag-red'" x-text="r.pass?'通过':'未通过'"></span></td>
+            <td x-text="r.summary?.substring(0,60)" class="truncate" style="max-width:200px"></td>
+          </tr>
+        </template>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" :class="toastType" x-show="toastMsg" x-text="toastMsg" @click="toastMsg=''"></div>
+
+  <a href="/support" class="support-float" title="联系客服">客服</a>
+
+</main>
+
+<script>
+function creativeStudio() {
+  return {
+    mode: 'analyze',
+    files: [],
+    dragover: false,
+    industry: '鞋类',
+    scriptType: 'with_cart',
+    variantCount: 2,
+    extraInfo: '',
+    sceneMode: 'brief',
+    sceneNames: '',
+    platforms: ['douyin'],
+    loading: false,
+    result: {},
+    jobId: null,
+    jobStatus: '',
+    jobProgress: 0,
+    jobMessage: '',
+    jobWs: null,
+    toastMsg: '',
+    toastType: 'success',
+
+    handleDrop(e) {
+      this.dragover = false;
+      const dt = e.dataTransfer;
+      if (dt.files) this.addFiles(dt.files);
+    },
+
+    handleFiles(e) {
+      if (e.target.files) this.addFiles(e.target.files);
+    },
+
+    addFiles(fileList) {
+      for (let f of fileList) {
+        if (this.files.length >= 10) break;
+        if (!f.type.match(/image\/(jpeg|png|webp)/)) continue;
+        if (this.files.find(x => x.name === f.name && x.size === f.size)) continue;
+        f.preview = URL.createObjectURL(f);
+        this.files.push(f);
+      }
+    },
+
+    removeFile(i) {
+      URL.revokeObjectURL(this.files[i].preview);
+      this.files.splice(i, 1);
+    },
+
+    togglePlatform(p) {
+      const idx = this.platforms.indexOf(p);
+      if (idx >= 0) this.platforms.splice(idx, 1);
+      else this.platforms.push(p);
+    },
+
+    async runAnalyze() {
+      if (this.files.length < 3) return this.showToast('请至少上传 3 张图片', 'error');
+      this.loading = true;
+      this.result = {};
+      try {
+        const fd = new FormData();
+        this.files.forEach(f => fd.append('files', f, f.name));
+        fd.append('industry', this.industry);
+        fd.append('extra_info', this.extraInfo);
+        fd.append('script_type', this.scriptType);
+        fd.append('variant_count', this.variantCount);
+        fd.append('generate_scenes', 'true');
+
+        const resp = await fetch('/api/creative/analyze', { method: 'POST', body: fd });
+        if (!resp.ok) {
+          const err = await resp.json();
+          throw new Error(err.detail || '请求失败');
+        }
+        this.result = await resp.json();
+        this.showToast('分析完成！生成 ' + (this.result.plans||[]).length + ' 套方案', 'success');
+      } catch (e) {
+        this.showToast(e.message, 'error');
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async runBatch() {
+      if (this.files.length < 3) return this.showToast('请至少上传 3 张图片', 'error');
+      this.loading = true;
+      this.jobStatus = '';
+      this.jobProgress = 0;
+      this.jobMessage = '';
+      this.result = {};
+      try {
+        const fd = new FormData();
+        this.files.forEach(f => fd.append('files', f, f.name));
+        fd.append('industry', this.industry);
+        fd.append('extra_info', this.extraInfo);
+        fd.append('script_type', this.scriptType);
+        fd.append('variant_count', this.variantCount);
+        fd.append('scene_mode', this.sceneMode);
+        fd.append('scene_names', this.sceneNames);
+        fd.append('platforms', this.platforms.join(','));
+
+        const resp = await fetch('/api/creative/batch-generate', { method: 'POST', body: fd });
+        if (!resp.ok) {
+          const err = await resp.json();
+          throw new Error(err.detail || '请求失败');
+        }
+        const data = await resp.json();
+        this.jobId = data.job_id;
+        this.jobMessage = data.message;
+        this.connectWS(data.ws_url);
+      } catch (e) {
+        this.showToast(e.message, 'error');
+        this.loading = false;
+      }
+    },
+
+    connectWS(wsUrl) {
+      const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const url = proto + '//' + location.host + wsUrl;
+      const ws = new WebSocket(url);
+      this.jobWs = ws;
+
+      ws.onopen = () => {
+        this.jobStatus = 'pending';
+        this.jobProgress = 0;
+      };
+
+      ws.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        this.jobProgress = data.progress || this.jobProgress;
+        this.jobMessage = data.message || this.jobMessage;
+
+        if (data.status === 'analyzing') this.jobStatus = 'analyzing';
+        else if (data.status === 'generating') this.jobStatus = 'generating';
+        else if (data.status === 'reviewing') this.jobStatus = 'reviewing';
+        else if (data.status === 'saving') this.jobStatus = 'saving';
+        else if (data.status === 'complete') {
+          this.jobStatus = 'completed';
+          this.jobProgress = 100;
+          this.result = data.result || data;
+          this.loading = false;
+          this.showToast('批量生成完成！', 'success');
+          ws.close();
+        } else if (data.status === 'failed') {
+          this.jobStatus = 'failed';
+          this.loading = false;
+          this.showToast(data.error || '任务失败', 'error');
+          ws.close();
+        }
+      };
+
+      ws.onerror = () => {
+        if (this.jobStatus !== 'completed' && this.jobStatus !== 'failed') {
+          this.jobStatus = 'failed';
+          this.loading = false;
+          this.showToast('WebSocket 连接失败', 'error');
+        }
+      };
+
+      ws.onclose = () => {};
+    },
+
+    statusLabel(s) {
+      const map = { pending: '等待中', analyzing: '分析中', generating: '生成中', reviewing: '质检中', saving: '保存中', completed: '已完成', failed: '失败' };
+      return map[s] || s;
+    },
+
+    showToast(msg, type) {
+      this.toastMsg = msg;
+      this.toastType = type;
+      setTimeout(() => { this.toastMsg = ''; }, 4000);
+    },
+
+    // Cleanup
+    destroy() {
+      if (this.jobWs) this.jobWs.close();
+      this.files.forEach(f => URL.revokeObjectURL(f.preview));
+    }
+  };
+}
+</script>
+</body>
+</html>

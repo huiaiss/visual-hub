@@ -1,0 +1,24 @@
+{
+  "title": "155穿出170既视感！这双厚",
+  "beats": 7,
+  "total_duration_s": 32.5,
+  "component_set": "ecommerce",
+  "canvas": "1080x1920",
+  "html_path": "C:\\Users\\Administrator\\visual-hub\\data\\videos\\e2e_test_d3d3fb\\index.html",
+  "output_dir": "C:\\Users\\Administrator\\visual-hub\\data\\videos\\e2e_test_d3d3fb",
+  "validation": {
+    "DOCTYPE": true,
+    "GSAP CDN": true,
+    "Brand primary CSS": true,
+    "Brand accent CSS": true,
+    "Hook reveal component": true,
+    "CTA outro component": true,
+    "Scan overlay": true,
+    "Progress bar": true,
+    "GSAP timeline": true,
+    "Audio element": true,
+    "Scene visibility": true,
+    "No AI components leaked": true,
+    "Ecommerce components present": false
+  }
+}

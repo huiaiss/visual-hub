@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>SeedDream 直接生成套图 v2</title>
+<style>
+  :root { --bg: #0a0a10; --card: #12121c; --border: #1e1e30; --text: #e2e8f0; --muted: #94a3b8; --accent: #818cf8; --green: #4ade80; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; padding: 24px; max-width: 1400px; margin: 0 auto; }
+  h1 { font-size: 22px; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+  h2 { font-size: 16px; font-weight: 600; color: #a5b4fc; margin: 28px 0 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  .subtitle { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 24px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .card img { width: 100%; display: block; aspect-ratio: 1; object-fit: cover; }
+  .card .info { padding: 10px 14px; }
+  .card .name { font-size: 13px; font-weight: 600; }
+  .card .score { font-size: 11px; margin-top: 3px; color: var(--green); }
+  .concept { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border: 1px solid #2a2a4a; border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; font-size: 14px; }
+  .concept .label { font-size: 11px; color: var(--muted); }
+  .fixes { font-size: 12px; color: #fbbf24; margin-bottom: 20px; padding: 10px 14px; background: #1a1a10; border: 1px solid #3a3a10; border-radius: 8px; }
+</style>
+</head>
+<body>
+
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+  <svg width="36" height="36" viewBox="0 0 192 192" style="display:inline-block;vertical-align:middle;flex-shrink:0">
+    <rect width="192" height="192" rx="28" fill="transparent"/>
+    <g transform="translate(96,96)">
+      <rect x="-54" y="-54" width="108" height="108" rx="14" fill="none" stroke="#818cf8" stroke-width="8" transform="rotate(45)"/>
+      <circle cx="0" cy="0" r="30" fill="none" stroke="#818cf8" stroke-width="7"/>
+      <circle cx="0" cy="0" r="6" fill="#818cf8" opacity="0.45"/>
+      <line x1="-52" y1="0" x2="-34" y2="0" stroke="#818cf8" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+      <line x1="34" y1="0" x2="52" y2="0" stroke="#818cf8" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+      <line x1="0" y1="-52" x2="0" y2="-34" stroke="#818cf8" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+      <line x1="0" y1="34" x2="0" y2="52" stroke="#818cf8" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+    </g>
+  </svg>
+  <span style="font-size:20px;font-weight:700;color:#818cf8">FrameCraft</span>
+</div>
+<h1>SeedDream 4.5 — init_image + strength=0.35</h1>
+<p class="subtitle">修复颜色映射 | 场景匹配拖鞋品类 | 3 颜色 x 3 场景 = 9 张 | ¥0.2/张</p>
+
+<div class="fixes">
+  <strong>v2 修复：</strong>纯黑款映射 paths[2]（之前错用白色鞋）| 场景改为沙滩/泳池/街头（匹配拖鞋品类）| 构图要求鞋子占画面40-50%
+</div>
+
+<div class="concept">
+  <span class="label">AI 创意概念</span><br>
+  夏日甜酷街头度假风
+</div>
+
+<h2>原始产品图（3 种颜色 — 已修正）</h2>
+<div class="grid">
+  <div class="card">
+    <img src="/data/uploads/batch_4fbd4ef00b8e4ca2ab9f753999499303.JPG" loading="lazy" />
+    <div class="info"><div class="name">米白 — 白色PU面</div></div>
+  </div>
+  <div class="card">
+    <img src="/data/uploads/batch_f6513f8e87c74274ac10f0cd823caacc.JPG" loading="lazy" />
+    <div class="info"><div class="name">纯黑 — 黑色PU面</div></div>
+  </div>
+  <div class="card">
+    <img src="/data/uploads/batch_ed6e32cd42244e17bdcbe85692fcaf45.JPG" loading="lazy" />
+    <div class="info"><div class="name">豹纹 — 豹纹PU面</div></div>
+  </div>
+</div>
+
+<h2>场景一：沙滩日光浴</h2>
+<div class="grid">
+  <div class="card">
+    <img src="/data/final_output/%E7%B1%B3%E7%99%BD_%E6%B2%99%E6%BB%A9%E6%97%A5%E5%85%89%E6%B5%B4.jpg" loading="lazy" />
+    <div class="info"><div class="name">米白 × 沙滩日光浴</div><div class="score">Vision: 8/10</div></div>
+  </div>
+  <div class="card">
+    <img src="/data/final_output/%E7%BA%AF%E9%BB%91_%E6%B2%99%E6%BB%A9%E6%97%A5%E5%85%89%E6%B5%B4.jpg" loading="lazy" />
+    <div class="info"><div class="name">纯黑 × 沙滩日光浴</div><div class="score">Vision: 9/10</div></div>
+  </div>
+  <div class="card">
+    <img src="/data/final_output/%E8%B1%B9%E7%BA%B9_%E6%B2%99%E6%BB%A9%E6%97%A5%E5%85%89%E6%B5%B4.jpg" loading="lazy" />
+    <div class="info"><div class="name">豹纹 × 沙滩日光浴</div><div class="score">Vision: 8/10</div></div>
+  </div>
+</div>
+
+<h2>场景二：泳池边木甲板</h2>
+<div class="grid">
+  <div class="card">
+    <img src="/data/final_output/%E7%B1%B3%E7%99%BD_%E6%B3%B3%E6%B1%A0%E8%BE%B9%E6%9C%A8%E7%94%B2%E6%9D%BF.jpg" loading="lazy" />
+    <div class="info"><div class="name">米白 × 泳池边木甲板</div><div class="score">Vision: 8/10</div></div>
+  </div>
+  <div class="card">
+    <img src="/data/final_output/%E7%BA%AF%E9%BB%91_%E6%B3%B3%E6%B1%A0%E8%BE%B9%E6%9C%A8%E7%94%B2%E6%9D%BF.jpg" loading="lazy" />
+    <div class="info"><div class="name">纯黑 × 泳池边木甲板</div><div class="score">Vision: 9/10</div></div>
+  </div>
+  <div class="card">
+    <img src="/data/final_output/%E8%B1%B9%E7%BA%B9_%E6%B3%B3%E6%B1%A0%E8%BE%B9%E6%9C%A8%E7%94%B2%E6%9D%BF.jpg" loading="lazy" />
+    <div class="info"><div class="name">豹纹 × 泳池边木甲板</div><div class="score">Vision: 9/10</div></div>
+  </div>
+</div>
+
+<h2>场景三：街头涂鸦角落</h2>
+<div class="grid">
+  <div class="card">
+    <img src="/data/final_output/%E7%B1%B3%E7%99%BD_%E8%A1%97%E5%A4%B4%E6%B6%82%E9%B8%A6%E8%A7%92%E8%90%BD.jpg" loading="lazy" />
+    <div class="info"><div class="name">米白 × 街头涂鸦角落</div><div class="score">Vision: 8/10</div></div>
+  </div>
+  <div class="card">
+    <img src="/data/final_output/%E7%BA%AF%E9%BB%91_%E8%A1%97%E5%A4%B4%E6%B6%82%E9%B8%A6%E8%A7%92%E8%90%BD.jpg" loading="lazy" />
+    <div class="info"><div class="name">纯黑 × 街头涂鸦角落</div><div class="score">Vision: 8/10</div></div>
+  </div>
+  <div class="card">
+    <img src="/data/final_output/%E8%B1%B9%E7%BA%B9_%E8%A1%97%E5%A4%B4%E6%B6%82%E9%B8%A6%E8%A7%92%E8%90%BD.jpg" loading="lazy" />
+    <div class="info"><div class="name">豹纹 × 街头涂鸦角落</div><div class="score">Vision: 7/10</div></div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><title>效果预览</title>
+<style>
+  body { background: #0c0c14; color: #e2e8f0; font-family: system-ui; padding: 20px; }
+  h2 { color: #818cf8; margin-top: 30px; }
+  .gallery { display: flex; flex-wrap: wrap; gap: 16px; }
+  .card { background: #131320; border: 1px solid #1e1e32; border-radius: 12px; overflow: hidden; width: 280px; }
+  .card img { width: 100%; height: auto; display: block; }
+  .card .label { padding: 8px 12px; font-size: 12px; color: #94a3b8; }
+  .compare { display: flex; gap: 16px; flex-wrap: wrap; }
+  .compare .item { text-align: center; }
+  .compare img { max-width: 400px; max-height: 400px; border-radius: 8px; border: 1px solid #1e1e32; }
+</style></head><body>
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+  <svg width="36" height="36" viewBox="0 0 192 192" style="display:inline-block;vertical-align:middle;flex-shrink:0">
+    <rect width="192" height="192" rx="28" fill="transparent"/>
+    <g transform="translate(96,96)">
+      <rect x="-54" y="-54" width="108" height="108" rx="14" fill="none" stroke="#818cf8" stroke-width="8" transform="rotate(45)"/>
+      <circle cx="0" cy="0" r="30" fill="none" stroke="#818cf8" stroke-width="7"/>
+      <circle cx="0" cy="0" r="6" fill="#818cf8" opacity="0.45"/>
+      <line x1="-52" y1="0" x2="-34" y2="0" stroke="#818cf8" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+      <line x1="34" y1="0" x2="52" y2="0" stroke="#818cf8" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+      <line x1="0" y1="-52" x2="0" y2="-34" stroke="#818cf8" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+      <line x1="0" y1="34" x2="0" y2="52" stroke="#818cf8" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+    </g>
+  </svg>
+  <span style="font-size:20px;font-weight:700;color:#818cf8">FrameCraft</span>
+  <span style="color:#94a3b8;font-size:14px">— 效果预览</span>
+</div>
+<h1>创意工作室 - 效果预览</h1>
+<p>上次批处理: 凯妮芬一字拖, 5个产品 x 5个场景 x 6个平台 = 150张输出</p>
+
+<h2>生成的场景背景 (5个)</h2>
+<div class="gallery">
+<div class="card"><img src="/data/scenes/generated/job_57845c39/scene_01_街角咖啡外摆_4ad7d5.png" loading="lazy"/><div class="label">scene_01_街角咖啡外摆_4ad7d5.png</div></div>
+<div class="card"><img src="/data/scenes/generated/job_57845c39/scene_02_城市街头斑马线_39e538.png" loading="lazy"/><div class="label">scene_02_城市街头斑马线_39e538.png</div></div>
+<div class="card"><img src="/data/scenes/generated/job_57845c39/scene_03_公园木质长椅_ebbf00.png" loading="lazy"/><div class="label">scene_03_公园木质长椅_ebbf00.png</div></div>
+<div class="card"><img src="/data/scenes/generated/job_57845c39/scene_04_极简艺术展厅入口_e9f248.png" loading="lazy"/><div class="label">scene_04_极简艺术展厅入口_e9f248.png</div></div>
+<div class="card"><img src="/data/scenes/generated/job_57845c39/scene_05_天台泳池边_f123c5.png" loading="lazy"/><div class="label">scene_05_天台泳池边_f123c5.png</div></div>
+</div><h2>合成图抽样 (产品+场景)</h2><div class="gallery"><div class="card"><img src="/data/processed/composed_bdbb317758de4c43990cda8529167734.png" loading="lazy"/><div class="label">composed_bdbb317758de4c43990cda8529167734.png</div></div>
+<div class="card"><img src="/data/processed/composed_d3a502d7c33449539720376bf9e5f463.png" loading="lazy"/><div class="label">composed_d3a502d7c33449539720376bf9e5f463.png</div></div>
+<div class="card"><img src="/data/processed/composed_bdde5348046842ae87b189faa6c7cfc9.png" loading="lazy"/><div class="label">composed_bdde5348046842ae87b189faa6c7cfc9.png</div></div>
+<div class="card"><img src="/data/processed/composed_eedec04917a94b7eba2a71470dd19e52.png" loading="lazy"/><div class="label">composed_eedec04917a94b7eba2a71470dd19e52.png</div></div>
+<div class="card"><img src="/data/processed/composed_fca50dd2523e4b87aeb104ddc434f62d.png" loading="lazy"/><div class="label">composed_fca50dd2523e4b87aeb104ddc434f62d.png</div></div>
+<div class="card"><img src="/data/processed/composed_fd8a935d4ba64ed4b6289d9fbc26aa09.png" loading="lazy"/><div class="label">composed_fd8a935d4ba64ed4b6289d9fbc26aa09.png</div></div>
+</div><h2>各平台输出对比 (同一产品)</h2><div class="compare"><div class="item"><img src="/data/processed/taobao_fa78b1cba6674ab9a8387ae315e59f36.jpg" loading="lazy"/><p>taobao</p></div>
+<div class="item"><img src="/data/processed/douyin_square_f8892cd80d2b4c4b82a743247205c568.jpg" loading="lazy"/><p>douyin_square</p></div>
+<div class="item"><img src="/data/processed/douyin_vertical_effb778992904a2aa4727111903386a7.jpg" loading="lazy"/><p>douyin_vertical</p></div>
+<div class="item"><img src="/data/processed/pinduoduo_e324ebe9912745b0bdc131664e8dc34a.jpg" loading="lazy"/><p>pinduoduo</p></div>
+<div class="item"><img src="/data/processed/jd_f2f4213ac3b74eecb3a170ccfe204946.jpg" loading="lazy"/><p>jd</p></div>
+<div class="item"><img src="/data/processed/xiaohongshu_e8385933ee254f9fa82b5641d56e2847.jpg" loading="lazy"/><p>xiaohongshu</p></div>
+</div></body></html>

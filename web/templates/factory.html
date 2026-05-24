@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>一键出图 — FrameCraft 帧导</title>
+<link rel="manifest" href="/static/manifest.json">
+<link rel="icon" type="image/svg+xml" href="/static/icon-192.svg">
+<meta name="theme-color" content="#2563EB">
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+<style>
+  :root {
+    --bg: #F8FAFC; --surface: #FFFFFF; --brand: #2563EB; --brand-hover: #1D4ED8;
+    --brand-light: #EFF6FF; --text: #0F172A; --text2: #475569; --text3: #94A3B8;
+    --border: #E2E8F0; --border-light: #F1F5F9;
+    --radius: 10px; --radius-lg: 14px; --radius-xl: 18px;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow: 0 1px 3px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+    --green: #10B981; --red: #EF4444; --amber: #F59E0B;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;-webkit-font-smoothing:antialiased;line-height:1.6;font-size:14px}
+
+  /* Top bar */
+  .topbar{position:sticky;top:0;z-index:100;background:rgba(255,255,255,0.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:12px 28px;display:flex;align-items:center;justify-content:space-between}
+  .topbar-left{display:flex;align-items:center;gap:16px}
+  .topbar-brand{font-size:16px;font-weight:800;color:var(--text);letter-spacing:-0.01em;text-decoration:none;display:flex;align-items:center;gap:6px}
+  .topbar-brand span{color:var(--brand)}
+  .topbar-badge{font-size:11px;padding:3px 10px;background:var(--brand-light);color:var(--brand);border-radius:999px;font-weight:600}
+  .topbar-nav{display:flex;gap:2px}
+  .topbar-nav a{color:var(--text2);text-decoration:none;font-size:13px;padding:6px 12px;border-radius:8px;transition:all .15s}
+  .topbar-nav a:hover{color:var(--text);background:var(--bg)}
+  .topbar-nav a.active{color:var(--brand);background:var(--brand-light);font-weight:600}
+
+  /* Layout */
+  .page{max-width:1080px;margin:0 auto;padding:28px 28px 60px}
+  .page-header{margin-bottom:28px}
+  .page-header h1{font-size:22px;font-weight:700;letter-spacing:-0.01em;margin-bottom:4px}
+  .page-header p{font-size:13px;color:var(--text3)}
+
+  /* Steps */
+  .steps{display:flex;margin-bottom:32px}
+  .step{flex:1;padding:12px 0;font-size:13px;color:var(--text3);border-bottom:2px solid var(--border);display:flex;align-items:center;gap:8px;transition:all .2s}
+  .step.active{color:var(--brand);border-color:var(--brand)}
+  .step.done{color:var(--green);border-color:var(--green)}
+  .step-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;background:var(--border-light);color:var(--text3);flex-shrink:0}
+  .step.active .step-num{background:var(--brand);color:#fff}
+  .step.done .step-num{background:var(--green);color:#fff}
+
+  /* Upload */
+  .upload-zone{border:2px dashed var(--border);border-radius:var(--radius-xl);padding:48px;text-align:center;cursor:pointer;transition:all .2s;background:var(--surface)}
+  .upload-zone:hover,.upload-zone.drag{border-color:var(--brand);background:var(--brand-light)}
+  .upload-zone.has-files{border-style:solid;padding:24px;text-align:left}
+  .upload-icon{width:48px;height:48px;margin:0 auto 12px;color:var(--text3)}
+  .upload-title{font-size:15px;font-weight:600;margin-bottom:4px}
+  .upload-hint{font-size:12px;color:var(--text3)}
+
+  /* File grid */
+  .file-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:16px}
+  .file-thumb{position:relative;aspect-ratio:1;border-radius:var(--radius);overflow:hidden;background:var(--bg);border:1px solid var(--border-light)}
+  .file-thumb img{width:100%;height:100%;object-fit:cover}
+  .file-remove{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.55);color:#fff;border:none;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s}
+  .file-thumb:hover .file-remove{opacity:1}
+  .file-badge{position:absolute;bottom:4px;left:4px;font-size:10px;padding:2px 6px;background:rgba(0,0,0,0.5);color:#fff;border-radius:4px}
+
+  /* Cards */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;margin-bottom:16px}
+  .card-title{font-size:15px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+
+  /* Buttons */
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;font-size:13px;font-weight:600;border-radius:var(--radius);border:1px solid transparent;cursor:pointer;transition:all .15s;font-family:inherit;line-height:1.5;text-decoration:none}
+  .btn:disabled{opacity:0.5;cursor:not-allowed}
+  .btn-primary{background:var(--brand);color:#fff}
+  .btn-primary:hover:not(:disabled){background:var(--brand-hover)}
+  .btn-secondary{background:var(--surface);color:var(--text);border-color:var(--border)}
+  .btn-secondary:hover:not(:disabled){background:var(--bg)}
+  .btn-ghost{background:transparent;color:var(--text2)}
+  .btn-ghost:hover:not(:disabled){background:var(--bg);color:var(--text)}
+  .btn-lg{padding:14px 28px;font-size:15px}
+  .btn-xl{padding:16px 32px;font-size:16px;border-radius:var(--radius-lg)}
+
+  /* Analysis */
+  .analysis-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+  .analysis-item{padding:14px 16px;background:var(--bg);border-radius:var(--radius)}
+  .analysis-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+  .analysis-value{font-size:14px;font-weight:600}
+  .color-dots{display:flex;gap:6px;margin-top:4px}
+  .color-dot{width:22px;height:22px;border-radius:50%;border:2px solid #fff;box-shadow:var(--shadow-sm)}
+
+  /* Scene cards */
+  .scene-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+  .scene-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+  .scene-card img{width:100%;aspect-ratio:16/10;object-fit:cover;background:var(--bg)}
+  .scene-name{padding:10px 12px;font-size:12px;font-weight:600}
+  .scene-desc{padding:0 12px 10px;font-size:11px;color:var(--text3);line-height:1.4}
+
+  /* Platform tags */
+  .platform-tags{display:flex;flex-wrap:wrap;gap:8px}
+  .platform-tag{padding:8px 16px;font-size:13px;border-radius:999px;border:1px solid var(--border);cursor:pointer;transition:all .15s;background:var(--surface);color:var(--text2);user-select:none;font-weight:500}
+  .platform-tag:hover{border-color:var(--brand);color:var(--brand)}
+  .platform-tag.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+
+  /* Results */
+  .result-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
+  .result-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:all .2s}
+  .result-card:hover{box-shadow:var(--shadow-md)}
+  .result-card img{width:100%;aspect-ratio:1;object-fit:cover;background:var(--bg)}
+  .result-info{padding:8px 10px;font-size:11px;color:var(--text3);display:flex;justify-content:space-between;align-items:center}
+
+  /* Progress */
+  .progress-wrap{margin-top:16px}
+  .progress-bar{height:4px;background:var(--border-light);border-radius:2px;overflow:hidden}
+  .progress-fill{height:100%;background:var(--brand);border-radius:2px;transition:width .5s}
+  .progress-text{font-size:11px;color:var(--text3);margin-top:4px;text-align:right}
+
+  /* Toast */
+  .toast-ctr{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+  .toast{padding:10px 18px;border-radius:var(--radius);font-size:13px;box-shadow:var(--shadow-md);animation:toastIn .3s ease;max-width:340px}
+  .toast-success{background:#059669;color:#fff}
+  .toast-error{background:#DC2626;color:#fff}
+  @keyframes toastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+
+  .spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--brand);border-radius:50%;animation:spin .6s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  [x-cloak]{display:none!important}
+
+  @media(max-width:640px){
+    .steps{flex-wrap:wrap}
+    .step{flex:0 0 50%}
+  }
+</style>
+</head>
+<body>
+
+<div x-data="factory()" x-cloak>
+
+<!-- Top Bar -->
+<nav class="topbar">
+  <div class="topbar-left">
+    <a href="/" class="topbar-brand">FrameCraft<span>帧导</span></a>
+    <span class="topbar-badge">一键出图</span>
+  </div>
+  <div class="topbar-nav">
+    <a href="/factory" class="active">一键出图</a>
+    <a href="/director">帧导短视频</a>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <h1>一键出图 · 商品套图工坊</h1>
+    <p>上传产品原图 → AI 分析 → 场景合成 → 六平台套图下载</p>
+  </div>
+
+  <!-- Steps -->
+  <div class="steps">
+    <div class="step" :class="{active:step===1, done:step>1}"><span class="step-num">1</span> 上传产品图</div>
+    <div class="step" :class="{active:step===2, done:step>2}"><span class="step-num">2</span> AI 分析</div>
+    <div class="step" :class="{active:step===3, done:step>3}"><span class="step-num">3</span> 生成套图</div>
+    <div class="step" :class="{active:step===4, done:step>4}"><span class="step-num">4</span> 下载</div>
+  </div>
+
+  <!-- STEP 1: Upload -->
+  <div x-show="step===1">
+    <div class="upload-zone" :class="{'drag':dragOver, 'has-files':files.length>0}"
+         @dragover.prevent="dragOver=true" @dragleave.prevent="dragOver=false"
+         @drop.prevent="handleDrop($event)" @click="$refs.fileInput.click()">
+      <input type="file" x-ref="fileInput" accept="image/jpeg,image/png,image/webp" multiple
+             @change="handleFiles($event)" hidden>
+
+      <div x-show="files.length===0">
+        <div class="upload-icon">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" width="44" height="44">
+            <path d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+          </svg>
+        </div>
+        <div class="upload-title">拖拽产品图片到此处，或点击上传</div>
+        <div class="upload-hint">支持 JPG / PNG / WebP，建议 3-10 张多角度实拍（正面/侧面/鞋底/细节/上脚）</div>
+      </div>
+      <div x-show="files.length>0">
+        <div style="font-size:14px;font-weight:600">已选择 <span x-text="files.length"></span> 张 · 点击更换或继续拖拽</div>
+      </div>
+    </div>
+
+    <div class="file-grid" x-show="files.length>0">
+      <template x-for="(f,i) in files" :key="i">
+        <div class="file-thumb">
+          <img :src="preview(f)" :alt="f.name">
+          <button class="file-remove" @click.stop="removeFile(i)">&times;</button>
+          <span class="file-badge" x-text="angleLabel(i)"></span>
+        </div>
+      </template>
+    </div>
+
+    <div style="margin-top:18px;display:flex;gap:12px;align-items:end;flex-wrap:wrap">
+      <div>
+        <label style="display:block;font-size:12px;color:var(--text3);margin-bottom:4px">行业品类</label>
+        <select x-model="industry" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--surface);min-width:120px">
+          <option value="鞋类">鞋类</option><option value="服装">服装</option>
+          <option value="美妆">美妆</option><option value="食品">食品</option>
+          <option value="3C数码">3C数码</option><option value="家居">家居</option>
+        </select>
+      </div>
+      <div style="flex:1;min-width:180px">
+        <label style="display:block;font-size:12px;color:var(--text3);margin-bottom:4px">补充说明（可选）</label>
+        <input type="text" x-model="extraInfo" placeholder="如：春季新款、主打透气舒适..."
+               style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--surface)">
+      </div>
+    </div>
+
+    <div style="margin-top:20px">
+      <button class="btn btn-primary btn-lg" :disabled="files.length<3||analyzing" @click="startAnalysis()">
+        <span x-show="!analyzing">开始 AI 分析</span>
+        <span x-show="analyzing"><span class="spinner"></span> 分析中...</span>
+      </button>
+      <span style="margin-left:10px;font-size:12px;color:var(--text3)" x-show="files.length<3">至少 3 张图片</span>
+    </div>
+  </div>
+
+  <!-- STEP 2: Analysis Results -->
+  <div x-show="step===2">
+    <div class="card" x-show="analysis.category">
+      <div class="card-title">产品分析</div>
+      <div class="analysis-grid">
+        <div class="analysis-item">
+          <div class="analysis-label">品类</div>
+          <div class="analysis-value" x-text="analysis.category + ' / ' + (analysis.sub_category||'')"></div>
+        </div>
+        <div class="analysis-item">
+          <div class="analysis-label">风格</div>
+          <div class="analysis-value" x-text="(analysis.style_keywords||[]).join(' · ')"></div>
+        </div>
+        <div class="analysis-item">
+          <div class="analysis-label">材质</div>
+          <div class="analysis-value" x-text="(analysis.materials||[]).join(' / ')"></div>
+        </div>
+        <div class="analysis-item">
+          <div class="analysis-label">目标受众</div>
+          <div class="analysis-value" x-text="analysis.target_audience?.gender + ' ' + analysis.target_audience?.age_range"></div>
+        </div>
+        <div class="analysis-item">
+          <div class="analysis-label">配色方案</div>
+          <div class="color-dots">
+            <template x-for="c in (analysis.colors||[])">
+              <span class="color-dot" :style="'background:'+(c.hex_guess||c.hex||'#ccc')" :title="c.name"></span>
+            </template>
+          </div>
+        </div>
+        <div class="analysis-item">
+          <div class="analysis-label">价格定位</div>
+          <div class="analysis-value" x-text="analysis.price_perception||'—'"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" x-show="brief.concept_name">
+      <div class="card-title">创意方案：<span x-text="brief.concept_name" style="color:var(--brand)"></span></div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:10px" x-text="brief.concept_story"></p>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
+        <template x-for="tag in (brief.mood_keywords||[])">
+          <span style="font-size:11px;padding:3px 10px;background:var(--brand-light);color:var(--brand);border-radius:999px" x-text="tag"></span>
+        </template>
+      </div>
+      <div style="font-size:13px;color:var(--text3);margin-bottom:8px">配色: <span x-text="brief.color_palette?.rationale"></span></div>
+      <div style="font-size:13px;color:var(--text3)" x-text="brief.visual_tone"></div>
+    </div>
+
+    <div class="card" x-show="sceneImages.length>0">
+      <div class="card-title">AI 生成场景（<span x-text="sceneImages.length"></span>个）</div>
+      <div class="scene-grid">
+        <template x-for="s in sceneImages">
+          <div class="scene-card">
+            <img :src="'/data/scenes/custom/' + s.path.split('/').pop()" :alt="s.name" loading="lazy"
+                 @error="$el.style.display='none'">
+            <div class="scene-name" x-text="s.name"></div>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;display:flex;gap:10px">
+      <button class="btn btn-primary btn-lg" @click="step=3">继续 → 生成套图</button>
+      <button class="btn btn-secondary btn-lg" @click="step=1">返回修改</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Generate -->
+  <div x-show="step===3">
+    <div class="card">
+      <div class="card-title">目标平台</div>
+      <div class="platform-tags">
+        <template x-for="p in platforms" :key="p.name">
+          <span class="platform-tag" :class="{active:p.selected}" @click="p.selected=!p.selected" x-text="p.label"></span>
+        </template>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;display:flex;gap:10px">
+      <button class="btn btn-primary btn-xl" :disabled="generating" @click="startGenerate()">
+        <span x-show="!generating">开始生成套图</span>
+        <span x-show="generating"><span class="spinner"></span> <span x-text="progressMsg"></span></span>
+      </button>
+      <button class="btn btn-secondary btn-lg" @click="step=2" :disabled="generating">返回</button>
+    </div>
+
+    <div class="progress-wrap" x-show="generating">
+      <div class="progress-bar"><div class="progress-fill" :style="'width:'+progress+'%'"></div></div>
+      <div class="progress-text" x-text="progress+'%'"></div>
+    </div>
+  </div>
+
+  <!-- STEP 4: Results -->
+  <div x-show="step===4">
+    <div class="card" x-show="results.length>0">
+      <div class="card-title" style="justify-content:space-between">
+        <span>生成结果 · <span x-text="results.length"></span> 张套图</span>
+        <button class="btn btn-primary" @click="downloadAll()">打包下载全部</button>
+      </div>
+      <div class="result-grid">
+        <template x-for="(img,i) in results" :key="i">
+          <a :href="img.url" target="_blank" class="result-card" style="text-decoration:none;color:inherit">
+            <img :src="img.url" :alt="img.platform" loading="lazy"
+                 @error="$el.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect fill=%22%23f1f5f9%22 width=%22200%22 height=%22200%22/%3E%3Ctext fill=%22%2394a3b8%22 x=%22100%22 y=%22100%22 text-anchor=%22middle%22 font-size=%2212%22%3E生成中%3C/text%3E%3C/svg%3E'">
+            <div class="result-info">
+              <span x-text="img.platform"></span>
+              <span x-text="img.scene?.slice(0,8)"></span>
+            </div>
+          </a>
+        </template>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;display:flex;gap:10px">
+      <button class="btn btn-primary btn-lg" @click="resetAll()">开始新的出图</button>
+      <button class="btn btn-secondary btn-lg" @click="step=3">调整平台</button>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<div class="toast-ctr" id="toasts"></div>
+
+<script>
+function factory() {
+  return {
+    step: 1,
+    files: [], dragOver: false,
+    industry: '鞋类', extraInfo: '',
+    analyzing: false,
+    analysis: {},
+    brief: {},
+    sceneImages: [],
+    platforms: [
+      {name:'douyin',label:'抖音 1080×1920',selected:true},
+      {name:'xiaohongshu',label:'小红书 1080×1440',selected:true},
+      {name:'taobao',label:'淘宝 800×800',selected:true},
+      {name:'jingdong',label:'京东 800×800',selected:false},
+      {name:'pdd',label:'拼多多 1080×1440',selected:false},
+      {name:'kuaishou',label:'快手 1080×1920',selected:false},
+    ],
+    generating: false, progress: 0, progressMsg: '',
+    results: [],
+
+    preview(f) { return f._url || (f._url = URL.createObjectURL(f)); },
+    angleLabel(i) {
+      const labels = ['正面','侧面','鞋底','细节','上脚','附加','附加','附加','附加','附加'];
+      return labels[i] || '图片'+(i+1);
+    },
+    handleDrop(e) { this.dragOver=false; this.addFiles(e.dataTransfer.files); },
+    handleFiles(e) { this.addFiles(e.target.files); e.target.value=''; },
+    addFiles(fl) {
+      for(let f of fl) {
+        if(!f.type.match(/image\/(jpeg|png|webp)/) && !f.name.match(/\.(jpg|jpeg|png|webp)$/i)) continue;
+        if(this.files.length>=10) break;
+        if(!this.files.find(x=>x.name===f.name&&x.size===f.size)) this.files.push(f);
+      }
+    },
+    removeFile(i) { this.files.splice(i,1); },
+
+    async startAnalysis() {
+      if(this.files.length<3) return;
+      this.analyzing=true;
+      try {
+        const fd=new FormData();
+        this.files.forEach(f=>fd.append('files',f));
+        fd.append('industry',this.industry);
+        fd.append('extra_info',this.extraInfo);
+        fd.append('script_type','with_cart');
+        fd.append('variant_count','1');
+        fd.append('generate_scenes','true');
+
+        const r=await fetch('/api/creative/analyze',{method:'POST',body:fd});
+        if(!r.ok){const e=await r.json();throw new Error(e.detail||'分析失败')}
+        const d=await r.json();
+        this.analysis=d.product_analysis||{};
+        this.brief=d.creative_brief||{};
+        this.sceneImages=d.scene_images||[];
+        this.step=2;
+        this.toast('AI 分析完成','success');
+      }catch(e){this.toast(e.message,'error')}
+      finally{this.analyzing=false}
+    },
+
+    async startGenerate() {
+      const sel=this.platforms.filter(p=>p.selected).map(p=>p.name);
+      if(sel.length===0){this.toast('请至少选择一个平台','error');return}
+
+      this.step=4; this.generating=true; this.progress=5;
+      this.progressMsg='正在合成套图...';
+
+      try {
+        const fd=new FormData();
+        this.files.forEach(f=>fd.append('files',f));
+        fd.append('industry',this.industry);
+        fd.append('extra_info',this.extraInfo);
+        fd.append('platforms',sel.join(','));
+        fd.append('scene_mode','brief');
+        fd.append('variant_count','1');
+
+        this.progress=10; this.progressMsg='提交生成任务...';
+        const r=await fetch('/api/creative/batch-generate',{method:'POST',body:fd});
+        if(!r.ok){const e=await r.json();throw new Error(e.detail||'生成失败')}
+        const {job_id}=await r.json();
+
+        // Poll
+        for(let i=0;i<120;i++){
+          await new Promise(resolve=>setTimeout(resolve,2000));
+          const jr=await fetch('/api/creative/jobs/'+job_id);
+          const jd=await jr.json();
+          if(jd.progress){this.progress=Math.min(jd.progress,95);this.progressMsg=jd.message||'处理中...'}
+          if(jd.status==='completed'){this.progress=100;this.progressMsg='完成';
+
+            // Build result list
+            const files=jd.output_files||[];
+            this.results=files.filter(f=>f.match(/\.(png|jpg|jpeg|webp)$/i)).map(f=>({
+              path:f, url:'/data/scenes/custom/'+f.split('/').pop(),
+              platform:f.match(/douyin|xiaohongshu|taobao|jingdong|pdd|kuaishou/)||'unknown',
+              scene:f.split('_on_')[1]?.split('_')[0]||'',
+            }));
+            if(this.results.length===0 && jd.brief){
+              // Fallback: show scene images
+              const br=await fetch('/api/creative/briefs/'+jd.brief.brief_id);
+              const bd=await br.json();
+              this.results=(bd.scene_images||[]).map(p=>({
+                path:p, url:'/data/scenes/custom/'+p.split('/').pop(),
+                platform:'scene', scene:'background'
+              }));
+            }
+            this.toast('套图生成完成，共 '+this.results.length+' 张','success');
+            return;
+          }
+          if(jd.status==='failed'){throw new Error(jd.message||'任务失败')}
+        }
+        throw new Error('任务超时，请重试');
+      }catch(e){this.toast(e.message,'error');this.step=3}
+      finally{this.generating=false}
+    },
+
+    resetAll() {
+      this.step=1; this.files=[]; this.analysis={}; this.brief={};
+      this.sceneImages=[]; this.results=[]; this.generating=false; this.progress=0;
+    },
+
+    downloadAll() {
+      this.results.forEach(img=>{
+        const a=document.createElement('a');
+        a.href=img.url; a.download=img.path.split('/').pop(); a.click();
+      });
+    },
+
+    toast(msg,type) {
+      const c=document.getElementById('toasts');
+      const t=document.createElement('div');
+      t.className='toast toast-'+(type||'');
+      t.textContent=msg; c.appendChild(t);
+      setTimeout(()=>t.remove(),3500);
+    }
+  };
+}
+</script>
+</body>
+</html>

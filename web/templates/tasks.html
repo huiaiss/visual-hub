@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+{% block title %}任务历史 — FrameCraft{% endblock %}
+
+{% block head_extra %}
+<style>
+:root {
+  --accent:#14b8a6;--accent-dim:rgba(20,184,166,.06);--accent-glow:rgba(20,184,166,.12);
+}
+.bg-ambient .orb-1{background:radial-gradient(circle,rgba(20,184,166,.15),transparent)!important}
+.bg-ambient .orb-2{background:radial-gradient(circle,rgba(45,212,191,.06),transparent)!important}
+.bg-ambient .orb-3{background:radial-gradient(circle,rgba(20,184,166,.05),transparent)!important}
+.btn{background:var(--accent)!important}
+.btn:hover{background:#2dd4bf!important;box-shadow:0 0 48px rgba(20,184,166,.25)!important}
+.sidebar-link.active{background:rgba(20,184,166,.08)!important}
+.sidebar-link.active::before{background:var(--accent)!important}
+.card::before{background:linear-gradient(90deg,transparent,rgba(20,184,166,.15),transparent)!important}
+a[style*="color:var(--accent)"]{color:var(--accent)!important}
+</style>
+{% endblock %}
+
+{% block content %}
+<div x-data="taskHistory">
+  <div style="margin-bottom:28px" class="fade-in">
+    <h1 style="font-family:var(--font-display);font-size:28px;font-weight:900;color:var(--text);margin-bottom:4px">任务历史</h1>
+    <p style="font-size:13px;color:var(--muted)">查看和下载之前的处理结果</p>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="fade-in" style="animation-delay:.05s;margin-bottom:20px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+    <div style="flex:1;min-width:180px;position:relative">
+      <svg style="position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input type="text" x-model="searchQuery" placeholder="搜索文件名..."
+             style="width:100%;padding:10px 14px 10px 36px;background:rgba(255,255,255,.02);border:1px solid var(--border);
+                    border-radius:999px;color:var(--text);font-size:13px;font-family:var(--font-body);outline:none;
+                    transition:border-color .3s"
+             onfocus="this.style.borderColor='rgba(255,255,255,.12)'" onblur="this.style.borderColor=''">
+    </div>
+    <select x-model="filterType"
+            style="padding:10px 32px 10px 14px;background:rgba(255,255,255,.02);border:1px solid var(--border);
+                   border-radius:999px;color:var(--text);font-size:12px;font-family:var(--font-body);outline:none;
+                   appearance:none;-webkit-appearance:none;cursor:pointer;
+                   background-image:url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2710%27 height=%276%27%3E%3Cpath d=%27M1 1l4 4 4-4%27 stroke=%27%236e6962%27 fill=%27none%27 stroke-width=%271.5%27/%3E%3C/svg%3E');
+                   background-repeat:no-repeat;background-position:right 12px center;
+                   transition:border-color .3s"
+            onfocus="this.style.borderColor='rgba(255,255,255,.12)'" onblur="this.style.borderColor=''">
+      <option value="all">全部类型</option>
+      <option value="remove_bg">去背景</option>
+      <option value="scene_compose">场景合成</option>
+      <option value="multi_platform">多平台</option>
+      <option value="buyer_convert">买家秀</option>
+    </select>
+    <select x-model="filterStatus"
+            style="padding:10px 32px 10px 14px;background:rgba(255,255,255,.02);border:1px solid var(--border);
+                   border-radius:999px;color:var(--text);font-size:12px;font-family:var(--font-body);outline:none;
+                   appearance:none;-webkit-appearance:none;cursor:pointer;
+                   background-image:url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2710%27 height=%276%27%3E%3Cpath d=%27M1 1l4 4 4-4%27 stroke=%27%236e6962%27 fill=%27none%27 stroke-width=%271.5%27/%3E%3C/svg%3E');
+                   background-repeat:no-repeat;background-position:right 12px center;
+                   transition:border-color .3s"
+            onfocus="this.style.borderColor='rgba(255,255,255,.12)'" onblur="this.style.borderColor=''">
+      <option value="all">全部状态</option>
+      <option value="completed">已完成</option>
+      <option value="processing">处理中</option>
+      <option value="failed">失败</option>
+      <option value="pending">等待中</option>
+    </select>
+    <select x-model="sortOrder"
+            style="padding:10px 32px 10px 14px;background:rgba(255,255,255,.02);border:1px solid var(--border);
+                   border-radius:999px;color:var(--text);font-size:12px;font-family:var(--font-body);outline:none;
+                   appearance:none;-webkit-appearance:none;cursor:pointer;
+                   background-image:url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2710%27 height=%276%27%3E%3Cpath d=%27M1 1l4 4 4-4%27 stroke=%27%236e6962%27 fill=%27none%27 stroke-width=%271.5%27/%3E%3C/svg%3E');
+                   background-repeat:no-repeat;background-position:right 12px center;
+                   transition:border-color .3s"
+            onfocus="this.style.borderColor='rgba(255,255,255,.12)'" onblur="this.style.borderColor=''">
+      <option value="newest">最新优先</option>
+      <option value="oldest">最早优先</option>
+    </select>
+    <span style="font-size:11px;color:var(--muted);white-space:nowrap" x-text="filteredTasks.length + ' / ' + tasks.length + ' 条'"></span>
+  </div>
+
+  <!-- Loading -->
+  <template x-if="loading">
+    <div style="text-align:center;padding:80px 0" class="fade-in">
+      <div class="loading-spinner" style="margin-bottom:16px"></div>
+      <p style="font-size:13px;color:var(--muted)">加载任务列表...</p>
+    </div>
+  </template>
+
+  <!-- Empty -->
+  <template x-if="!loading && filteredTasks.length === 0">
+    <div style="text-align:center;padding:80px 0" class="fade-in">
+      <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width=".5" style="margin:0 auto 14px;opacity:.3">
+        <path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+      </svg>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:6px">暂无任务记录</p>
+      <p style="font-size:12px;color:rgba(255,255,255,.1)">
+        <a href="/" style="color:var(--accent);text-decoration:none;font-weight:500">去工作台</a> 处理第一张图片
+      </p>
+    </div>
+  </template>
+
+  <!-- Task Cards -->
+  <template x-if="!loading && filteredTasks.length">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <template x-for="(t, idx) in filteredTasks" :key="t.id">
+        <div class="fade-in"
+             style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+                    padding:20px 24px;position:relative;overflow:hidden;
+                    transition:border-color .3s,transform .3s;
+                    animation-delay:.03s"
+             :style="'animation-delay:' + (idx * .04) + 's'"
+             onmouseover="this.style.borderColor='rgba(255,255,255,.06)';this.style.transform='translateX(4px)'"
+             onmouseout="this.style.borderColor='';this.style.transform=''">
+          <div style="display:flex;align-items:center;gap:20px">
+
+            <!-- Status indicator -->
+            <div style="flex-shrink:0;text-align:center">
+              <div style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center"
+                   :style="{
+                     completed: 'background:rgba(62,168,106,.08)',
+                     failed: 'background:rgba(200,90,90,.08)',
+                     processing: 'background:rgba(232,180,90,.08)'
+                   }[t.status] || 'background:rgba(255,255,255,.02)'">
+                <span class="status-dot" style="width:10px;height:10px"
+                      :class="t.status === 'completed' ? 'status-dot-green' :
+                              t.status === 'failed' ? 'status-dot-red' :
+                              t.status === 'processing' ? 'status-dot-amber' : 'status-dot-slate'">
+                </span>
+              </div>
+            </div>
+
+            <!-- File info -->
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+                <span style="font-size:14px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:260px"
+                      x-text="t.original_filename"></span>
+                <span style="font-size:10px;padding:2px 8px;border-radius:999px;font-weight:500;flex-shrink:0"
+                      :style="{
+                        'remove_bg': 'background:rgba(59,130,246,.1);color:#60a5fa',
+                        'scene_compose': 'background:rgba(139,92,246,.1);color:#a78bfa',
+                        'multi_platform': 'background:rgba(62,168,106,.1);color:var(--green)',
+                        'buyer_convert': 'background:rgba(232,180,90,.1);color:var(--accent)'
+                      }[t.task_type] || 'background:rgba(255,255,255,.03);color:var(--muted)'"
+                      x-text="{
+                        remove_bg: '去背景', scene_compose: '场景合成',
+                        multi_platform: '多平台', buyer_convert: '买家秀'
+                      }[t.task_type] || t.task_type">
+                </span>
+              </div>
+              <div style="display:flex;align-items:center;gap:14px">
+                <span style="font-size:11px;color:var(--muted)" x-text="formatTime(t.created_at)"></span>
+                <span style="font-size:11px;font-weight:500"
+                      :style="{
+                        completed: 'color:var(--green)', failed: 'color:var(--red)',
+                        processing: 'color:var(--accent)'
+                      }[t.status] || 'color:var(--muted)'"
+                      x-text="{ pending: '等待中', processing: '处理中', completed: '已完成', failed: '失败' }[t.status]">
+                </span>
+              </div>
+            </div>
+
+            <!-- Output links -->
+            <div style="display:flex;gap:5px;flex-wrap:wrap;flex-shrink:0">
+              <template x-for="o in t.outputs" :key="o.id">
+                <a :href="o.url" :download="o.filename"
+                   style="font-size:10px;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.02);
+                          color:var(--muted);text-decoration:none;border:1px solid var(--border);
+                          transition:all .25s;white-space:nowrap"
+                   onmouseover="this.style.background='rgba(232,180,90,.08)';this.style.color='var(--accent)';this.style.borderColor='rgba(232,180,90,.18)'"
+                   onmouseout="this.style.background='';this.style.color='';this.style.borderColor=''"
+                   x-text="o.label.split(' ')[0]"></a>
+              </template>
+            </div>
+
+            <!-- Delete -->
+            <button @click="deleteTask(t.id)"
+                    style="flex-shrink:0;width:32px;height:32px;border-radius:50%;background:transparent;
+                           border:1px solid transparent;color:var(--muted);cursor:pointer;font-size:16px;
+                           transition:all .25s;display:flex;align-items:center;justify-content:center;
+                           font-family:var(--font-body)"
+                    onmouseover="this.style.color='var(--red)';this.style.background='rgba(200,90,90,.06)';this.style.borderColor='rgba(200,90,90,.12)'"
+                    onmouseout="this.style.color='';this.style.background='';this.style.borderColor=''">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </template>
+    </div>
+  </template>
+</div>
+
+<style>
+@media(max-width:768px){
+  [style*="flex-direction:column"][style*="gap:8px"] > div > div {
+    flex-wrap:wrap;gap:12px;
+  }
+}
+</style>
+{% endblock %}

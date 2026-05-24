@@ -1,0 +1,26 @@
+{
+  "name": "FrameCraft — AI 电商拍摄方案生成器",
+  "short_name": "FrameCraft",
+  "description": "上传产品图，AI 自动生成抖音/快手/小红书/视频号全套拍摄脚本",
+  "start_url": "/director",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#050505",
+  "background_color": "#050505",
+  "icons": [
+    {
+      "src": "/static/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "lang": "zh-CN",
+  "categories": ["productivity", "utilities", "business"]
+}

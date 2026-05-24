@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>服务协议 — FrameCraft</title>
+<link rel="manifest" href="/static/manifest.json">
+<link rel="icon" type="image/svg+xml" href="/static/icon-192.svg">
+<meta name="theme-color" content="#050505">
+<style>
+  :root {
+    --bg:#050505;--surface:#0b0b0b;--card:#0f0f0f;--border:rgba(255,255,255,.05);
+    --text:#e8e2d6;--muted:#706a60;
+    --accent:#e8b45a;
+    --font-display:'STXingkai','STZhongsong','Noto Serif SC','SimSun','STSong',serif;
+    --font-body:'PingFang SC','Microsoft YaHei','Noto Sans SC','Hiragino Sans GB','Microsoft JhengHei','WenQuanYi Micro Hei',sans-serif;
+    --radius-lg:24px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--bg);color:var(--text);font-family:var(--font-body);
+    min-height:100vh;-webkit-font-smoothing:antialiased;
+    display:flex;flex-direction:column;align-items:center;
+  }
+  .bg-ambient{position:fixed;inset:0;pointer-events:none;z-index:0}
+  .bg-ambient .orb{position:absolute;border-radius:50%;filter:blur(140px)}
+  .bg-ambient .orb-1{width:650px;height:650px;background:radial-gradient(circle,rgba(232,180,90,.15),transparent);top:-25%;left:-15%}
+
+  .page-wrap{position:relative;z-index:1;width:100%;max-width:760px;padding:48px 24px 80px}
+  .card{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);
+    padding:48px 40px;position:relative;overflow:hidden;
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+  .card::before{content:'';position:absolute;top:0;left:20%;right:20%;height:1px;
+    background:linear-gradient(90deg,transparent,var(--accent),transparent)}
+
+  .logo-row{display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:32px}
+  .logo-row .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent)}
+  .logo-row span{font-family:var(--font-display);font-size:18px;font-weight:900;color:var(--accent);letter-spacing:.04em}
+
+  h1{font-family:var(--font-display);font-size:28px;font-weight:900;text-align:center;margin-bottom:8px}
+  .update-date{text-align:center;font-size:12px;color:var(--muted);margin-bottom:40px}
+
+  h2{font-family:var(--font-display);font-size:18px;font-weight:700;margin-top:36px;margin-bottom:12px;color:var(--accent)}
+  h2:first-of-type{margin-top:0}
+  p{font-size:14px;color:var(--muted);line-height:1.9;margin-bottom:12px}
+  ul{margin-bottom:12px;padding-left:20px}
+  ul li{font-size:14px;color:var(--muted);line-height:2;list-style-type:disc}
+
+  .back-link{display:block;text-align:center;margin-top:28px;font-size:13px;color:var(--muted);text-decoration:none;transition:color .3s}
+  .back-link:hover{color:var(--accent)}
+
+  @media(max-width:480px){
+    .card{padding:32px 22px 28px}
+    h1{font-size:22px}
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-ambient">
+  <div class="orb orb-1"></div>
+</div>
+
+<div class="page-wrap">
+  <div class="card">
+    <div class="logo-row">
+      <svg width="36" height="36" viewBox="0 0 192 192" style="display:inline-block;vertical-align:middle;flex-shrink:0">
+        <rect width="192" height="192" rx="28" fill="transparent"/>
+        <g transform="translate(96,96)">
+          <rect x="-54" y="-54" width="108" height="108" rx="14" fill="none" stroke="#e8b45a" stroke-width="8" transform="rotate(45)"/>
+          <circle cx="0" cy="0" r="30" fill="none" stroke="#e8b45a" stroke-width="7"/>
+          <circle cx="0" cy="0" r="6" fill="#e8b45a" opacity="0.45"/>
+          <line x1="-52" y1="0" x2="-34" y2="0" stroke="#e8b45a" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+          <line x1="34" y1="0" x2="52" y2="0" stroke="#e8b45a" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+          <line x1="0" y1="-52" x2="0" y2="-34" stroke="#e8b45a" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+          <line x1="0" y1="34" x2="0" y2="52" stroke="#e8b45a" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+        </g>
+      </svg>
+      <span>FrameCraft</span>
+    </div>
+    <h1>服务协议</h1>
+    <p class="update-date">生效日期：2026 年 5 月 20 日</p>
+
+    <h2>一、服务说明</h2>
+    <p>FrameCraft（以下简称"本服务"）是一款 AI 驱动的电商拍摄方案生成工具。本服务通过分析您上传的产品图片，利用人工智能技术自动生成适用于抖音、快手、小红书、视频号等平台的电商拍摄方案（包括但不限于分镜脚本、BGM 建议、剪辑指南、发布策略、直播话术、投流方案）。</p>
+    <p><strong>重要提示：</strong>本服务生成的方案内容由 AI 自动生成，仅供参考和创意启发。实际拍摄执行由您自行完成，您拍摄发布的视频属于真人原创内容。</p>
+
+    <h2>二、用户注册与账号</h2>
+    <ul>
+      <li>您需要提供手机号码完成注册。请确保所提供信息的真实性。</li>
+      <li>您应对账号下的所有操作负责，请妥善保管账号信息。</li>
+      <li>如发现账号异常，请及时联系我们处理。</li>
+    </ul>
+
+    <h2>三、服务费用与退款</h2>
+    <p>本服务提供以下收费方式：</p>
+    <ul>
+      <li><strong>新人礼遇</strong>：免费 1 次，全功能开放</li>
+      <li><strong>灵感加速</strong>：¥9.9 / 次</li>
+      <li><strong>创作达人</strong>：¥69 / 10 次</li>
+      <li><strong>运营无忧</strong>：¥149 / 30 次</li>
+    </ul>
+    <p><strong>退款政策：</strong>套餐购买后 7 天内，如您对服务不满意且未使用的方案次数超过购买次数的 80%，您可申请退款。退款需联系客服处理，我们将在 7 个工作日内完成退款审核及返还。按次购买的方案一经生成，不予退款。</p>
+
+    <h2>四、用户行为规范</h2>
+    <p>您在使用本服务时，承诺不从事以下行为：</p>
+    <ul>
+      <li>上传含有违法、淫秽、暴力、侵权等内容的产品图片</li>
+      <li>利用本服务生成违法或侵权内容</li>
+      <li>对服务进行反向工程、破解或未经授权的修改</li>
+      <li>利用本服务从事任何违反法律法规的活动</li>
+      <li>恶意批量注册账号或滥用免费额度</li>
+    </ul>
+
+    <h2>五、知识产权</h2>
+    <ul>
+      <li>本服务的网站界面、LOGO、软件代码的知识产权归服务提供方所有。</li>
+      <li>您上传至本服务的产品图片的知识产权仍归您所有。</li>
+      <li>由本服务生成的拍摄方案内容，您有权在自身电商业务中使用。未经许可，不得将方案内容打包转售或二次分发。</li>
+      <li>由于方案内容由 AI 自动生成，我们不保证其绝对的原创性，也不对潜在的与其他内容的相似性承担法律责任。</li>
+    </ul>
+
+    <h2>六、免责声明</h2>
+    <ul>
+      <li>本服务按"现状"提供，不保证方案内容能保证特定商业效果（如播放量、转化率等）。案例数据仅供参考，实际效果因产品、执行质量和平台算法而异。</li>
+      <li>因网络故障、第三方 AI 服务中断、系统维护等原因导致的服务暂时不可用，我们将在合理时间内恢复，但不对由此造成的损失承担责任。</li>
+      <li>您应自行判断方案内容的合规性和适用性，并对实际拍摄和发布的内容承担全部责任。</li>
+    </ul>
+
+    <h2>七、平台独立性声明</h2>
+    <p>本服务中提及的抖音、快手、小红书、视频号等平台名称均为第三方商标，归各平台运营方所有。FrameCraft与上述平台不存在任何隶属、投资或合作关系。我们在方案中针对各平台的内容策略建议，系基于公开信息和行业经验的 AI 生成内容，不代表相关平台的官方立场。</p>
+
+    <h2>八、AI 生成内容声明</h2>
+    <p>本服务基于人工智能大模型技术生成内容。根据《生成式人工智能服务管理暂行办法》及《人工智能生成合成内容标识办法》（国信办通字〔2025〕2 号）等相关法规要求，本服务生成的方案内容均属于 AI 生成合成内容。您在发布基于本方案拍摄的视频时，该视频本身为真人原创内容，无需标注 AI 生成标识。</p>
+
+    <h2>九、法律适用与争议解决</h2>
+    <p>本协议适用中华人民共和国法律。因本协议引起的争议，双方应友好协商解决；协商不成的，提交服务提供方所在地有管辖权的人民法院诉讼解决。</p>
+
+    <h2>十、协议修改</h2>
+    <p>我们可能不时更新本协议。更新版本将在本页面发布，重大变更我们将通过适当方式通知您。如您在协议更新后继续使用本服务，视为您同意更新后的协议。</p>
+  </div>
+
+  <a href="/" class="back-link">← 返回首页</a>
+</div>
+</body>
+</html>

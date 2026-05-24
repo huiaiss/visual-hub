@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FrameCraft — AI Video Shooting Plan for E-Commerce | Script to Ads in One Click</title>
+<link rel="manifest" href="/static/manifest.json">
+<link rel="icon" type="image/svg+xml" href="/static/icon-192.svg">
+<meta name="theme-color" content="#050505">
+<link rel="stylesheet" href="/static/css/premium.css?v=2">
+<style>
+  :root {
+    --bg:var(--p-bg);--surface:var(--p-bg-elevated);--card:var(--p-surface);--border:var(--p-border);
+    --text:var(--p-text);--muted:var(--p-text-muted);
+    --accent:var(--p-accent);--accent-dim:var(--p-accent-dim);--accent-glow:var(--p-accent-glow);
+    --green:#3ea86a;--red:#c05555;
+    --font-display:var(--p-font-display);
+    --font-body:var(--p-font-body);
+    --radius:18px;--radius-lg:24px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);color:var(--text);font-family:var(--font-body);
+    overflow-x:hidden;-webkit-font-smoothing:antialiased;
+    cursor:auto;
+  }
+
+  /* Ambient orbs */
+  .bg-ambient{position:fixed;inset:0;pointer-events:none;z-index:0}
+  .bg-ambient .orb{position:absolute;border-radius:50%;filter:blur(140px)}
+  .bg-ambient .orb-1{width:650px;height:650px;background:radial-gradient(circle,rgba(232,180,90,.18),transparent);top:-20%;left:-12%}
+  .bg-ambient .orb-2{width:500px;height:500px;background:radial-gradient(circle,rgba(180,140,100,.08),transparent);bottom:-15%;right:-10%}
+  .bg-ambient .orb-3{width:350px;height:350px;background:radial-gradient(circle,rgba(232,180,90,.06),transparent);top:60%;left:60%}
+
+  /* Grain */
+  .grain{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.012;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+  #particles{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.35}
+
+  .container{max-width:1160px;margin:0 auto;padding:0 24px}
+  .section{position:relative;padding:140px 0;overflow:hidden}
+
+  /* ===== NAV ===== */
+  .nav-bar{
+    position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:1000;
+    background:rgba(5,5,5,.72);backdrop-filter:blur(32px) saturate(180%);
+    -webkit-backdrop-filter:blur(32px) saturate(180%);
+    border:1px solid rgba(255,255,255,.05);border-radius:999px;
+    padding:5px 6px;display:flex;align-items:center;gap:2px;
+    transition:all .5s cubic-bezier(.16,1,.3,1)}
+  .nav-bar.scrolled{top:6px;background:rgba(5,5,5,.94);border-color:rgba(255,255,255,.08);
+    box-shadow:0 8px 40px rgba(0,0,0,.6)}
+  .nav-brand{font-family:var(--font-display);font-weight:900;font-size:15px;color:var(--accent);letter-spacing:.04em;padding:8px 16px;white-space:nowrap;display:flex;align-items:center;gap:8px;
+    text-shadow:0 1px 0 #b8892c,0 2px 4px rgba(0,0,0,.5),0 0 20px rgba(232,180,90,.15)}
+  .nav-brand .nav-logo{filter:drop-shadow(0 2px 3px rgba(0,0,0,.5)) drop-shadow(0 0 12px rgba(232,180,90,.25));transition:filter .5s}
+  .nav-brand:hover .nav-logo{filter:drop-shadow(0 3px 5px rgba(0,0,0,.6)) drop-shadow(0 0 24px rgba(232,180,90,.45))}
+  .nav-link{color:var(--muted);text-decoration:none;font-size:13px;padding:8px 14px;border-radius:999px;transition:all .3s;font-weight:500}
+  .nav-link:hover{color:var(--text);background:rgba(255,255,255,.04)}
+  .nav-cta{background:var(--accent);color:#0a0a0a;text-decoration:none;font-size:13px;padding:8px 18px;border-radius:999px;font-weight:600;transition:all .3s;white-space:nowrap}
+  .nav-cta:hover{background:#f0c56a;box-shadow:0 0 32px rgba(232,180,90,.3)}
+
+  /* ===== BUTTONS ===== */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    background:var(--accent);color:#0a0a0a;border:none;border-radius:999px;
+    padding:16px 40px;font-size:15px;font-weight:600;cursor:pointer;
+    font-family:var(--font-body);letter-spacing:.03em;
+    transition:all .4s cubic-bezier(.16,1,.3,1);text-decoration:none;
+    position:relative;overflow:hidden}
+  .btn:hover{background:#f0c56a;box-shadow:0 0 56px rgba(232,180,90,.3);transform:translateY(-2px)}
+  .btn:active{transform:scale(.97)}
+  .btn::after{content:'';position:absolute;inset:0;
+    background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.2) 50%,transparent 60%);
+    transform:translateX(-100%) skewX(-12deg);transition:transform .8s}
+  .btn:hover::after{transform:translateX(200%) skewX(-12deg)}
+  .btn-lg{padding:20px 56px;font-size:17px}
+  .btn-outline{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    background:transparent;border:1px solid rgba(255,255,255,.12);color:var(--text);
+    border-radius:999px;padding:16px 40px;font-size:15px;cursor:pointer;
+    font-family:var(--font-body);transition:all .4s cubic-bezier(.16,1,.3,1);text-decoration:none}
+  .btn-outline:hover{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
+
+  /* ===== HERO ===== */
+  .hero{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:120px 24px 80px;position:relative}
+  .hero-content{text-align:center;max-width:860px;position:relative;z-index:2}
+  /* 3D brand title */
+  .brand-3d-wrap{text-align:center;margin-bottom:8px;perspective:800px}
+  .brand-3d{display:inline-flex;align-items:center;gap:16px;
+    font-family:var(--font-display);font-size:clamp(48px,7vw,88px);font-weight:900;
+    color:var(--accent);letter-spacing:.12em;
+    text-shadow:
+      0 1px 0 #d4a340,0 2px 0 #c09028,
+      0 3px 3px rgba(0,0,0,.3),
+      0 6px 12px rgba(0,0,0,.25);
+    transform:perspective(600px) rotateX(5deg);
+    line-height:1;user-select:none}
+  .brand-3d .logo-3d{width:clamp(56px,9vw,110px);height:clamp(56px,9vw,110px);
+    filter:drop-shadow(0 3px 5px rgba(0,0,0,.4)) drop-shadow(0 0 24px rgba(232,180,90,.3));
+    transform:perspective(500px) rotateX(5deg) rotateY(-3deg);
+    transition:transform .6s cubic-bezier(.16,1,.3,1)}
+  .brand-3d:hover .logo-3d{transform:perspective(500px) rotateX(3deg) rotateY(3deg)}
+  .brand-3d:hover{text-shadow:
+    0 1px 0 #d4a340,0 2px 0 #c09028,
+    0 3px 3px rgba(0,0,0,.3),
+    0 6px 12px rgba(0,0,0,.25),
+    0 0 36px rgba(232,180,90,.15)}
+
+  .hero-badge{display:inline-flex;align-items:center;gap:8px;padding:5px 16px 5px 5px;
+    background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);
+    border-radius:999px;font-size:12px;color:var(--muted);margin-bottom:36px}
+  .hero-badge-dot{width:7px;height:7px;border-radius:50%;background:var(--green);
+    box-shadow:0 0 12px rgba(62,168,106,.5);animation:pulse 2.5s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .hero-title{font-family:var(--font-display);font-size:clamp(32px,5vw,64px);font-weight:900;
+    color:var(--text);letter-spacing:.01em;line-height:1.05;margin-bottom:24px}
+  .hero-title .word{display:inline-block;overflow:hidden;vertical-align:bottom}
+  .hero-title .word-inner{display:inline-block;transform:translateY(100%);transition:transform .9s cubic-bezier(.16,1,.3,1)}
+  .hero-title .word-inner.revealed{transform:translateY(0)}
+  .hero-title em{font-style:normal;color:var(--accent);position:relative}
+  .hero-title em::after{content:'';position:absolute;bottom:3px;left:0;right:0;height:2px;background:var(--accent);opacity:.25}
+  .hero-subtitle{font-size:13px;color:var(--accent);letter-spacing:.14em;margin-bottom:12px;font-weight:600}
+  .hero-desc{font-size:16px;color:var(--muted);max-width:540px;margin:0 auto 52px;line-height:1.8}
+  .hero-actions{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+  .hero-stats{display:flex;gap:64px;justify-content:center;flex-wrap:wrap;margin-top:80px}
+  .hero-stat{text-align:center}
+  .hero-stat-num{font-family:var(--font-display);font-size:36px;font-weight:900;color:var(--accent);line-height:1}
+  .hero-stat-label{font-size:12px;color:var(--muted);margin-top:6px;letter-spacing:.04em}
+  .hero-stat-sub{font-size:10px;color:var(--muted);margin-top:4px;opacity:.6}
+
+  /* Hero floating cards */
+  .hero-card{position:absolute;z-index:0;pointer-events:none;will-change:transform}
+  .hero-card.c1{width:270px;aspect-ratio:16/10;border-radius:var(--radius);border:1px solid rgba(255,255,255,.05);
+    background:rgba(15,15,15,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    top:15%;right:3%;opacity:.3;transform:rotate(3deg)}
+  .hero-card.c2{width:210px;aspect-ratio:16/10;border-radius:var(--radius);border:1px solid rgba(255,255,255,.04);
+    background:rgba(15,15,15,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    bottom:18%;left:2%;opacity:.2;transform:rotate(-4deg)}
+  @media(max-width:1024px){.hero-card{display:none}}
+
+  /* ===== SECTION HEADERS ===== */
+  .section-eyebrow{font-size:11px;color:var(--accent);letter-spacing:.16em;text-transform:uppercase;text-align:center;margin-bottom:16px;font-weight:600}
+  .section-title{font-family:var(--font-display);font-size:clamp(28px,3.5vw,44px);font-weight:900;letter-spacing:.02em;text-align:center;margin-bottom:16px;line-height:1.1}
+  .section-title .hl{color:var(--accent)}
+  .section-sub{text-align:center;color:var(--muted);font-size:16px;max-width:540px;margin:0 auto 72px;line-height:1.75}
+
+  /* ===== CORE DIFFERENTIATOR ===== */
+  .diff-section{background:linear-gradient(180deg,transparent,rgba(200,90,90,.02),rgba(62,168,106,.02),transparent)}
+  .diff-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:0;align-items:stretch}
+  .diff-col{padding:40px 32px;border-radius:var(--radius-lg)}
+  .diff-col.bad{border:1px solid rgba(200,90,90,.1);background:rgba(200,90,90,.02)}
+  .diff-col.good{border:1px solid rgba(62,168,106,.12);background:rgba(62,168,106,.02)}
+  .diff-col.good::before{content:'';position:absolute;top:0;left:20%;right:20%;height:1px;background:linear-gradient(90deg,transparent,rgba(62,168,106,.15),transparent)}
+  .diff-vs{display:flex;align-items:center;padding:0 20px}
+  .diff-vs-inner{font-family:var(--font-display);font-size:13px;font-weight:900;color:var(--muted);letter-spacing:.08em;writing-mode:vertical-lr}
+  .diff-label{font-size:12px;font-weight:700;letter-spacing:.1em;margin-bottom:24px;text-transform:uppercase}
+  .diff-col.bad .diff-label{color:var(--red)}.diff-col.good .diff-label{color:var(--green)}
+  .diff-item{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+  .diff-item:last-child{border-bottom:none}
+  .diff-item-icon{font-size:18px;flex-shrink:0;width:28px;text-align:center}
+  .diff-item-content h5{font-size:14px;color:var(--text);font-weight:600;margin-bottom:4px}
+  .diff-item-content p{font-size:12px;color:var(--muted);line-height:1.7}
+  @media(max-width:768px){.diff-grid{grid-template-columns:1fr;gap:12px}.diff-vs{justify-content:center;padding:8px 0}.diff-vs-inner{writing-mode:horizontal-tb}}
+
+  /* ===== PLATFORM CAPABILITIES GRID ===== */
+  .platform-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+  .platform-card{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:28px 22px;text-align:center;
+    transition:transform .4s cubic-bezier(.16,1,.3,1),border-color .4s,box-shadow .4s;
+    will-change:transform}
+  .platform-card:hover{transform:translateY(-4px);border-color:rgba(232,180,90,.12);box-shadow:0 16px 48px rgba(0,0,0,.4)}
+  .platform-icon{font-size:28px;margin-bottom:14px;display:block}
+  .platform-card h4{font-family:var(--font-display);font-size:17px;font-weight:700;color:var(--text);margin-bottom:6px}
+  .platform-card .specs{font-size:11px;color:var(--muted);line-height:1.8}
+  .platform-card .specs span{display:block}
+  @media(max-width:768px){.platform-grid{grid-template-columns:repeat(2,1fr);gap:8px}}
+  @media(max-width:400px){.platform-grid{grid-template-columns:1fr}}
+
+  /* ===== STEPS ===== */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;position:relative}
+  .steps::before{content:'';position:absolute;top:64px;left:18%;right:18%;height:1px;
+    background:linear-gradient(90deg,transparent,var(--accent-glow),transparent);z-index:0}
+  @media(max-width:768px){.steps::before{display:none}}
+  .step-card{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);
+    padding:48px 32px 40px;text-align:center;position:relative;z-index:1;
+    transition:transform .5s cubic-bezier(.16,1,.3,1),border-color .5s,box-shadow .5s;
+    will-change:transform}
+  .step-card:hover{transform:translateY(-6px);border-color:rgba(232,180,90,.15);box-shadow:0 24px 64px rgba(0,0,0,.5)}
+  .step-num{width:44px;height:44px;border-radius:50%;background:var(--accent);color:#0a0a0a;
+    display:flex;align-items:center;justify-content:center;margin:0 auto 28px;
+    font-family:var(--font-display);font-size:21px;font-weight:900;
+    box-shadow:0 0 48px rgba(232,180,90,.18)}
+  .step-card h3{font-family:var(--font-display);font-size:20px;font-weight:700;margin-bottom:10px;color:var(--text)}
+  .step-card p{font-size:14px;color:var(--muted);line-height:1.8}
+  .step-tags{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:20px}
+  .step-tags span{font-size:11px;padding:4px 12px;background:var(--accent-dim);border-radius:999px;color:var(--accent)}
+
+  /* ===== CASE STUDIES ===== */
+  .case-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .case-card{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);
+    padding:0;overflow:hidden;
+    transition:transform .5s cubic-bezier(.16,1,.3,1),border-color .5s;
+    will-change:transform}
+  .case-card:hover{transform:translateY(-6px);border-color:rgba(232,180,90,.12)}
+  .case-header{padding:32px 28px 0}
+  .case-category{font-size:10px;color:var(--accent);letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px;font-weight:600}
+  .case-card h3{font-family:var(--font-display);font-size:18px;font-weight:700;margin-bottom:6px;color:var(--text)}
+  .case-metric{display:flex;gap:32px;padding:24px 28px;margin-top:24px;
+    border-top:1px solid var(--border);
+    background:linear-gradient(180deg,transparent,var(--accent-dim))}
+  .case-metric-item{text-align:center;flex:1}
+  .case-metric-val{font-family:var(--font-display);font-size:26px;font-weight:900;color:var(--accent);line-height:1}
+  .case-metric-label{font-size:10px;color:var(--muted);margin-top:4px;line-height:1.4}
+  @media(max-width:768px){.case-grid{grid-template-columns:1fr;gap:12px}}
+
+  /* ===== MULTI-PLATFORM SHOWCASE ===== */
+.platform-showcase{
+  display:flex;gap:16px;justify-content:center;flex-wrap:wrap;
+}
+.platform-col{
+  flex:0 0 225px;text-align:center;
+  background:var(--card-bg);border:1px solid var(--border);border-radius:var(--radius-card);
+  padding:28px 20px 24px;transition:all .4s var(--ease-spring);
+  box-shadow:0 4px 24px rgba(0,0,0,.25);
+}
+.platform-col:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,.4)}
+.platform-col.douyin:hover{border-color:rgba(255,0,80,.25)}
+.platform-col.xhs:hover{border-color:rgba(254,44,85,.25)}
+.platform-col.wechat:hover{border-color:rgba(7,193,96,.25)}
+.platform-col.kuaishou:hover{border-color:rgba(255,73,6,.25)}
+.platform-icon{width:40px;height:40px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center}
+.platform-icon svg{width:36px;height:36px}
+.platform-icon.douyin{color:#FF0050}
+.platform-icon.xhs{color:#FE2C55}
+.platform-icon.wechat{color:#07C160}
+.platform-icon.kuaishou{color:#FF4906}
+.platform-name{font-size:16px;font-weight:700;margin-bottom:10px;letter-spacing:.5px}
+.platform-name.douyin{color:#FF0050}
+.platform-name.xhs{color:#FE2C55}
+.platform-name.wechat{color:#07C160}
+.platform-name.kuaishou{color:#FF4906}
+.platform-desc{font-size:12px;color:var(--muted);line-height:1.8}
+@media(max-width:768px){
+  .platform-col{flex:0 0 155px;padding:20px 12px 16px}
+  .platform-icon{width:32px;height:32px}
+  .platform-icon svg{width:28px;height:28px}
+  .platform-name{font-size:14px}
+  .platform-desc{font-size:11px}
+}
+
+  /* ===== OUTPUT PREVIEW ===== */
+  .plan-tabs{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:28px}
+  .plan-tab{
+    background:transparent;border:1px solid rgba(255,255,255,.08);color:var(--muted);
+    padding:10px 20px;border-radius:999px;font-size:13px;cursor:pointer;
+    font-family:var(--font-body);transition:all .3s;
+  }
+  .plan-tab:hover{color:var(--text);border-color:rgba(255,255,255,.15)}
+  .plan-tab.active{background:var(--accent);color:#0a0a0a;border-color:var(--accent);font-weight:600}
+  @media(max-width:768px){.plan-tab{padding:8px 14px;font-size:11px}}
+  .preview-wrap{position:relative}
+  .preview-mock{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);
+    padding:0;overflow:hidden;max-width:900px;margin:0 auto;
+    box-shadow:0 32px 80px rgba(0,0,0,.5)}
+  .preview-header{display:flex;align-items:center;gap:10px;padding:14px 20px;
+    background:rgba(255,255,255,.02);border-bottom:1px solid var(--border)}
+  .preview-dot{width:10px;height:10px;border-radius:50%}
+  .preview-dot.r{background:#e05555}.preview-dot.y{background:#e8b45a}.preview-dot.g{background:#3ea86a}
+  .preview-title{font-size:12px;color:var(--muted);margin-left:8px}
+  .preview-body{display:grid;grid-template-columns:200px 1fr;min-height:320px}
+  .preview-sidebar{background:rgba(255,255,255,.01);border-right:1px solid var(--border);padding:20px 16px}
+  .preview-sidebar .pitem{padding:8px 12px;border-radius:8px;font-size:12px;color:var(--muted);margin-bottom:2px;cursor:pointer;transition:all .2s}
+  .preview-sidebar .pitem:hover{background:rgba(255,255,255,.03);color:var(--text)}
+  .preview-sidebar .pitem.active{background:var(--accent-dim);color:var(--accent)}
+  .preview-content h4{font-size:13px;color:var(--accent);margin-bottom:12px;font-weight:600}
+  .preview-content p{font-size:12px;color:var(--muted);line-height:1.8;margin:0}
+  .preview-content .info-row{display:flex;gap:16px;margin-bottom:8px}
+  .preview-content .info-label{font-size:11px;color:var(--muted);min-width:56px}
+  .preview-content .info-value{font-size:12px;color:var(--text)}
+  .preview-content .script-block{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:8px;padding:12px 14px;margin-bottom:8px}
+  .preview-content .script-block p{font-size:12px;color:var(--text);line-height:1.7;margin:0}
+  .preview-content .script-block .label{font-size:10px;color:var(--accent);margin-bottom:4px;letter-spacing:.06em}
+  .preview-content .strategy-table{width:100%;font-size:12px;border-collapse:collapse}
+  .preview-content .strategy-table td{padding:6px 0;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:top}
+  .preview-content .strategy-table td:first-child{color:var(--muted);width:80px;font-size:11px}
+  .preview-main{padding:24px 28px}
+  .preview-main .line{height:10px;border-radius:5px;background:rgba(255,255,255,.03);margin-bottom:10px}
+  .preview-main .line.w1{width:60%}.preview-main .line.w2{width:80%}.preview-main .line.w3{width:40%}
+  .preview-main .line.accent{background:rgba(232,180,90,.08)}
+  .preview-table{margin-top:20px;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+  .preview-table .tr{display:grid;grid-template-columns:36px 64px 1fr 1.4fr 1fr;gap:0}
+  .preview-table .th{font-size:10px;color:var(--muted);padding:10px 12px;background:rgba(255,255,255,.015);border-bottom:1px solid var(--border);letter-spacing:.06em}
+  .preview-table .td{font-size:11px;color:var(--text);padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.02)}
+  @media(max-width:768px){
+    .preview-body{grid-template-columns:1fr}
+    .preview-sidebar{display:none}
+  }
+
+  /* ===== COMPARISON ===== */
+  .compare-section{background:linear-gradient(180deg,transparent,var(--accent-dim),transparent);padding:120px 0}
+  .compare-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:0;align-items:center}
+  .compare-vs{font-family:var(--font-display);font-size:14px;font-weight:900;color:var(--muted);letter-spacing:.1em;padding:0 24px;z-index:1}
+  .compare-card{
+    border-radius:var(--radius-lg);padding:44px 36px;position:relative;overflow:hidden;
+    transition:transform .5s cubic-bezier(.16,1,.3,1)}
+  .compare-card:hover{transform:translateY(-4px)}
+  .compare-card.bad{background:rgba(200,90,90,.015);border:1px solid rgba(200,90,90,.06)}
+  .compare-card.good{background:rgba(62,168,106,.015);border:1px solid rgba(62,168,106,.08)}
+  .compare-card.good::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1px;background:linear-gradient(90deg,transparent,rgba(62,168,106,.12),transparent)}
+  .compare-label{font-size:12px;font-weight:700;letter-spacing:.12em;margin-bottom:20px;text-transform:uppercase}
+  .compare-card.bad .compare-label{color:var(--red)}
+  .compare-card.good .compare-label{color:var(--green)}
+  .compare-card ul{list-style:none;padding:0}
+  .compare-card li{font-size:13px;line-height:2.6;padding-left:24px;position:relative}
+  .compare-card.bad li{color:var(--muted)}
+  .compare-card.bad li::before{content:'—';position:absolute;left:0;color:var(--red);font-weight:700}
+  .compare-card.good li{color:var(--text)}
+  .compare-card.good li::before{content:'✓';position:absolute;left:0;color:var(--green);font-weight:700}
+  .compare-num{font-family:var(--font-display);font-size:40px;font-weight:900;margin-top:28px;padding-top:28px;border-top:1px solid rgba(255,255,255,.03);line-height:1}
+  .compare-card.bad .compare-num{color:var(--red)}
+  .compare-card.good .compare-num{color:var(--accent)}
+  .compare-num small{font-size:14px;color:var(--muted);font-weight:400}
+  @media(max-width:768px){
+    .compare-grid{grid-template-columns:1fr;gap:12px}
+    .compare-vs{text-align:center;padding:8px 0}
+    .compare-card{padding:28px 20px}
+    .compare-num{font-size:32px}
+  }
+
+  /* ===== BENTO ===== */
+  .bento-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+  .bento-card{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:32px 26px;position:relative;overflow:hidden;
+    transition:transform .5s cubic-bezier(.16,1,.3,1),border-color .5s,box-shadow .5s;
+    will-change:transform}
+  .bento-card:hover{transform:translateY(-4px);border-color:rgba(232,180,90,.1);box-shadow:0 20px 48px rgba(0,0,0,.4)}
+  .bento-card.span-2{grid-column:span 2}
+  .bento-num{font-size:10px;color:var(--accent);letter-spacing:.14em;margin-bottom:14px;font-weight:600;text-transform:uppercase}
+  .bento-card h3{font-family:var(--font-display);font-size:18px;font-weight:700;margin-bottom:6px;color:var(--text)}
+  .bento-card p{font-size:13px;color:var(--muted);line-height:1.8}
+  @media(max-width:768px){
+    .bento-grid{grid-template-columns:1fr;gap:8px}
+    .bento-card.span-2{grid-column:span 1}
+  }
+
+  /* ===== PRICING ===== */
+  .price-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+  .price-card{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);
+    padding:40px 24px;text-align:center;position:relative;
+    transition:transform .5s cubic-bezier(.16,1,.3,1),border-color .5s,box-shadow .5s;
+    will-change:transform}
+  .price-card:hover{transform:translateY(-6px)}
+  .price-card.featured{border-color:rgba(232,180,90,.25);background:linear-gradient(180deg,rgba(232,180,90,.06),var(--card) 35%);
+    box-shadow:0 0 80px rgba(232,180,90,.04)}
+  .price-card.featured::before{content:'';position:absolute;top:-1px;left:24px;right:24px;height:1px;
+    background:linear-gradient(90deg,transparent,var(--accent),transparent)}
+  .price-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:#0a0a0a;padding:4px 18px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.06em}
+  .price-icon{font-size:26px;margin-bottom:16px;display:block}
+  .price-name{font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px}
+  .price-desc{font-size:11px;color:var(--muted);margin-bottom:18px;line-height:1.6}
+  .price-amount{font-family:var(--font-display);font-size:36px;font-weight:900;color:var(--accent);line-height:1}
+  .price-amount.free{font-size:28px}
+  .price-per{font-size:12px;color:var(--muted);margin-top:4px}
+  .price-features{list-style:none;padding:0;margin:24px 0 0}
+  .price-features li{font-size:12px;color:var(--muted);line-height:2.5}
+  .price-features li strong{color:var(--text)}
+  @media(max-width:768px){.price-grid{grid-template-columns:repeat(2,1fr);gap:10px}}
+  @media(max-width:400px){.price-grid{grid-template-columns:1fr}}
+
+  /* ===== CTA ===== */
+  .cta-section{text-align:center;padding:160px 24px 120px;position:relative}
+  .cta-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:800px;height:800px;background:radial-gradient(circle,rgba(232,180,90,.07),transparent 65%);pointer-events:none}
+  .cta-section h2{position:relative;z-index:1}
+  .cta-urgency{font-size:13px;color:var(--accent);letter-spacing:.06em;margin-bottom:12px;font-weight:600}
+
+  /* ===== FOOTER ===== */
+  footer{border-top:1px solid var(--border);padding:48px 24px;text-align:center}
+  footer .footer-links{display:flex;gap:32px;justify-content:center;flex-wrap:wrap;margin-bottom:20px}
+  footer .footer-links a{color:var(--muted);text-decoration:none;font-size:13px;transition:color .3s}
+  footer .footer-links a:hover{color:var(--accent)}
+  footer p{font-size:12px;color:var(--muted)}
+
+  .divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:0 auto}
+
+  /* ===== REVEAL ===== */
+  .reveal{opacity:0;transform:translateY(36px);transition:opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1)}
+  .reveal.visible{opacity:1;transform:translateY(0)}
+
+  /* 3D tilt */
+  @media(hover:hover) and (pointer:fine){
+    .tilt{transform-style:preserve-3d;perspective:1000px}
+  }
+
+  ::-webkit-scrollbar{width:4px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.03);border-radius:2px}
+
+  @media(max-width:768px){
+    .container{padding:0 18px}
+    .section{padding:80px 0}
+    .hero{padding:100px 18px 60px;min-height:auto}
+    .hero-title{font-size:clamp(32px,10vw,48px)}
+    .hero-stats{gap:28px}
+    .hero-stat-num{font-size:30px}
+    .steps{grid-template-columns:1fr;gap:14px}
+    .nav-bar{border-radius:24px;top:12px;padding:4px 5px;gap:1px}
+    .nav-link{font-size:11px;padding:6px 10px}
+    .nav-cta{font-size:11px;padding:6px 12px}
+    .nav-brand{font-size:13px;padding:6px 10px}
+    .compare-section{padding:80px 0}
+  }
+
+  /* Floating support button */
+  .support-float{position:fixed;bottom:28px;right:28px;z-index:999;
+    width:52px;height:52px;border-radius:50%;background:var(--accent);color:#0a0a0a;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    font-size:13px;font-weight:700;letter-spacing:.04em;
+    box-shadow:0 4px 24px rgba(232,180,90,.3);
+    transition:all .4s cubic-bezier(.16,1,.3,1);text-decoration:none;
+    font-family:var(--font-body)}
+  .support-float:hover{transform:scale(1.08);box-shadow:0 8px 36px rgba(232,180,90,.45)}
+  .support-float:active{transform:scale(.94)}
+</style>
+</head>
+<body>
+
+<div class="bg-ambient">
+  <div class="orb orb-1" data-parallax="0.07"></div>
+  <div class="orb orb-2" data-parallax="-0.05"></div>
+  <div class="orb orb-3" data-parallax="0.03"></div>
+</div>
+<div class="grain"></div>
+<canvas id="particles"></canvas>
+<div class="p-mouse-glow" id="mouseGlow"></div>
+
+<!-- ===== NAV ===== -->
+<nav class="nav-bar" id="nav">
+  <span class="nav-brand">
+    <svg class="nav-logo" width="22" height="22" viewBox="0 0 192 192" style="display:inline-block;vertical-align:middle;flex-shrink:0">
+      <rect width="192" height="192" rx="28" fill="transparent"/>
+      <g transform="translate(96,96)">
+        <rect x="-54" y="-54" width="108" height="108" rx="14" fill="none" stroke="#e8b45a" stroke-width="8" transform="rotate(45)"/>
+        <circle cx="0" cy="0" r="30" fill="none" stroke="#e8b45a" stroke-width="7"/>
+        <circle cx="0" cy="0" r="6" fill="#e8b45a" opacity="0.45"/>
+        <line x1="-52" y1="0" x2="-34" y2="0" stroke="#e8b45a" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+        <line x1="34" y1="0" x2="52" y2="0" stroke="#e8b45a" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+        <line x1="0" y1="-52" x2="0" y2="-34" stroke="#e8b45a" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+        <line x1="0" y1="34" x2="0" y2="52" stroke="#e8b45a" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+      </g>
+    </svg>
+    FrameCraft
+  </span>
+  <a href="#cases" class="nav-link">Cases</a>
+  <a href="#features" class="nav-link">Features</a>
+  <a href="#pricing" class="nav-link">Pricing</a>
+  <a href="/register" class="nav-cta">Sign Up Free</a>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section class="hero section" id="hero">
+  <div class="hero-card c1" data-parallax="0.05"></div>
+  <div class="hero-card c2" data-parallax="-0.03"></div>
+  <div class="hero-content">
+    <div class="hero-badge reveal">
+      <span class="hero-badge-dot"></span> 2026 Regulation: AI Content Must Be Labeled — Original Human Content Gets Platform Priority
+    </div>
+    <div class="brand-3d-wrap reveal">
+      <div class="brand-3d">
+        <svg class="logo-3d" viewBox="0 0 192 192" style="display:inline-block;vertical-align:middle;flex-shrink:0">
+          <rect width="192" height="192" rx="28" fill="transparent"/>
+          <g transform="translate(96,96)">
+            <rect x="-54" y="-54" width="108" height="108" rx="14" fill="none" stroke="#e8b45a" stroke-width="8" transform="rotate(45)"/>
+            <circle cx="0" cy="0" r="30" fill="none" stroke="#e8b45a" stroke-width="7"/>
+            <circle cx="0" cy="0" r="6" fill="#e8b45a" opacity="0.45"/>
+            <line x1="-52" y1="0" x2="-34" y2="0" stroke="#e8b45a" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+            <line x1="34" y1="0" x2="52" y2="0" stroke="#e8b45a" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+            <line x1="0" y1="-52" x2="0" y2="-34" stroke="#e8b45a" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+            <line x1="0" y1="34" x2="0" y2="52" stroke="#e8b45a" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+          </g>
+        </svg>
+        FrameCraft
+      </div>
+    </div>
+
+	    <div class="reveal" style="font-family:var(--font-display);font-size:clamp(17px,2.5vw,22px);color:var(--accent);margin-bottom:20px;letter-spacing:.06em;font-weight:700">From Script to Ads — All in One Place</div>
+    <h1 class="hero-title">
+      <span class="word"><span class="word-inner">4-Platform</span></span><br>
+      <em class="word"><span class="word-inner">Shooting Plan</span></em> <span class="word"><span class="word-inner">in</span></span>
+      <span class="word"><span class="word-inner">10 Minutes</span></span>
+    </h1>
+    <p class="hero-desc reveal">
+      Upload product photos, AI generates a complete plan: scripts, BGM,<br>best posting times, ad strategies, live-stream scripts — ready to execute
+    </p>
+    <div class="hero-actions reveal">
+      <a href="/register" class="btn btn-lg">Try Free — Get Your First Plan ↗</a>
+      <a href="#preview" class="btn-outline">See Sample Output</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat reveal">
+        <div class="hero-stat-num" data-count="6">0</div>
+        <div class="hero-stat-label">Categories Covered</div>
+        <div class="hero-stat-sub">Shoes · Apparel · Beauty · Food · 3C · Home</div>
+      </div>
+      <div class="hero-stat reveal">
+        <div class="hero-stat-num" data-count="4">0</div>
+        <div class="hero-stat-label">Platform-Specific Plans</div>
+        <div class="hero-stat-sub">Unique strategy per platform, no generic templates</div>
+      </div>
+      <div class="hero-stat reveal">
+        <div class="hero-stat-num" data-count="3">0</div>
+        <div class="hero-stat-label">Export Formats</div>
+        <div class="hero-stat-sub">Markdown · PDF · HTML</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CORE DIFFERENTIATOR ===== -->
+<section class="diff-section section" style="padding:100px 0">
+  <div class="container">
+    <div class="section-eyebrow reveal">Why FrameCraft</div>
+    <h2 class="section-title reveal">AI-Generated Videos Get <span class="hl">Shadow-Banned</span><br>AI Shooting Plans <span class="hl">Don't</span></h2>
+    <p class="section-sub reveal">2026 regulation: all AI-generated platform content must be labeled. Labels kill reach, trust, and conversion. FrameCraft plans are for humans — you film it, the output is original human content.</p>
+    <div class="diff-grid">
+      <div class="diff-col bad reveal" style="position:relative;overflow:hidden">
+        <div class="diff-label">AI-Generated Video</div>
+        <div class="diff-item"><div class="diff-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c05555" stroke-width="1.8"><path d="M12 2L2 22h20L12 2z"/><line x1="12" y1="10" x2="12" y2="15"/><circle cx="12" cy="18.5" r=".5" fill="#c05555"/></svg></div><div class="diff-item-content"><h5>Mandatory "AI-Generated" Label</h5><p>2025 labeling regulations mandate explicit AI tags — user trust significantly lower than human content</p></div></div>
+        <div class="diff-item"><div class="diff-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c05555" stroke-width="1.8"><polyline points="22 17 13 7 8 12 2 6"/><polyline points="17 17 22 17 22 12"/></svg></div><div class="diff-item-content"><h5>Low User Trust</h5><p>Users skip AI-labeled content at higher rates — brand credibility and conversion suffer</p></div></div>
+        <div class="diff-item"><div class="diff-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c05555" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/><circle cx="12" cy="16" r="1" fill="#c05555"/></svg></div><div class="diff-item-content"><h5>Algorithm Favors Original Content</h5><p>From 2026, AI content requires mandatory labeling — platforms prioritize authentic human content</p></div></div>
+        <div class="diff-item"><div class="diff-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c05555" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div><div class="diff-item-content"><h5>Uncontrollable Cost</h5><p>Billed per second. One change = total regeneration. Final output is uneditable.</p></div></div>
+      </div>
+      <div class="diff-vs reveal"><div class="diff-vs-inner">VS</div></div>
+      <div class="diff-col good reveal" style="position:relative;overflow:hidden">
+        <div class="diff-label">FrameCraft Plan + You on Camera</div>
+        <div class="diff-item"><div class="diff-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3ea86a" stroke-width="2"><polyline points="5 13 10 18 19 7"/></svg></div><div class="diff-item-content"><h5>Original Human Content = Platform Priority</h5><p>Video you film following our plan = original human content, eligible for normal traffic and creator incentives</p></div></div>
+        <div class="diff-item"><div class="diff-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3ea86a" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg></div><div class="diff-item-content"><h5>Pro Storyboard + Authentic Feel</h5><p>AI strategy + you on camera = professional quality with authenticity. Viewers actually watch and trust.</p></div></div>
+        <div class="diff-item"><div class="diff-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3ea86a" stroke-width="1.8"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><path d="M4.9 4.9l2.8 2.8"/><path d="M16.3 16.3l2.8 2.8"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><path d="M4.9 19.1l2.8-2.8"/><path d="M16.3 7.7l2.8-2.8"/></svg></div><div class="diff-item-content"><h5>4 Platforms, Independent Strategies</h5><p>Douyin hook / Kuaishou persona / XHS seeding / WeChat private domain — each unique, no duplication</p></div></div>
+        <div class="diff-item"><div class="diff-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3ea86a" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div class="diff-item-content"><h5>Ready to Use, Easy to Tweak</h5><p>Get the plan, start filming. ¥9.9 per plan — 50x cheaper than hiring a scriptwriter</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PLATFORM CAPABILITIES ===== -->
+<section class="section" style="padding-bottom:80px">
+  <div class="container">
+    <div class="section-eyebrow reveal">Platform Coverage</div>
+    <h2 class="section-title reveal"><span class="hl">4 Platforms</span> × <span class="hl">6 Categories</span></h2>
+    <p class="section-sub reveal">Not generic templates — independent platform strategies, professional category-specific handling</p>
+    <div class="platform-grid">
+      <div class="platform-card reveal tilt">
+        <div class="platform-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.3"><polygon points="5,3 19,12 5,21"/></svg></div>
+        <h4>Douyin</h4>
+        <div class="specs"><span>3s Contrast Hook</span><span>Identity-Snapshot Title</span><span>Qianchuan Ads Plan</span></div>
+      </div>
+      <div class="platform-card reveal tilt">
+        <div class="platform-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.3"><polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/></svg></div>
+        <h4>Kuaishou</h4>
+        <div class="specs"><span>Laotie Persona Script</span><span>Micro-Hold Sales Flow</span><span>Cili JinNiu Ads Plan</span></div>
+      </div>
+      <div class="platform-card reveal tilt">
+        <div class="platform-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.3"><rect x="2" y="3" width="20" height="18" rx="3"/><circle cx="12" cy="12" r="4"/><path d="M18 8h.01"/></svg></div>
+        <h4>XHS</h4>
+        <div class="specs"><span>Seeding-Note Style</span><span>Atmospheric Composition</span><span>SEO Keyword Layout</span></div>
+      </div>
+      <div class="platform-card reveal tilt">
+        <div class="platform-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.3"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18.01"/></svg></div>
+        <h4>WeChat Video</h4>
+        <div class="specs"><span>Private-Domain Funnel</span><span>Mature Audience Profile</span><span>Moments Viral Design</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:32px">
+      <span style="font-size:11px;padding:5px 14px;background:var(--accent-dim);border-radius:999px;color:var(--accent)">Shoes</span>
+      <span style="font-size:11px;padding:5px 14px;background:var(--accent-dim);border-radius:999px;color:var(--accent)">Apparel</span>
+      <span style="font-size:11px;padding:5px 14px;background:var(--accent-dim);border-radius:999px;color:var(--accent)">Beauty</span>
+      <span style="font-size:11px;padding:5px 14px;background:var(--accent-dim);border-radius:999px;color:var(--accent)">Food &amp; Beverage</span>
+      <span style="font-size:11px;padding:5px 14px;background:var(--accent-dim);border-radius:999px;color:var(--accent)">3C Electronics</span>
+      <span style="font-size:11px;padding:5px 14px;background:var(--accent-dim);border-radius:999px;color:var(--accent)">Home &amp; Living</span>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===== HOW IT WORKS ===== -->
+<section class="section" id="how">
+  <div class="container">
+    <div class="section-eyebrow reveal">How It Works</div>
+    <h2 class="section-title reveal">Three Steps to <span class="hl">Master</span> It, No Experience Needed</h2>
+    <p class="section-sub reveal">No filming experience needed, no copywriting skills required — upload photos and get a complete plan</p>
+    <div class="steps">
+      <div class="step-card reveal tilt">
+        <div class="step-num">1</div>
+        <h3>Upload Product Photos</h3>
+        <p>Drag &amp; drop 5 angle shots, system auto-categorizes by slot</p>
+        <div class="step-tags"><span>Supports JPG/PNG/WebP</span><span>Phone snapshots work fine</span></div>
+      </div>
+      <div class="step-card reveal tilt">
+        <div class="step-num">2</div>
+        <h3>AI Smart Analysis</h3>
+        <p>Multimodal vision model identifies product attributes, LLM generates creative strategy and storyboard</p>
+        <div class="step-tags"><span>Category ID</span><span>Style Analysis</span><span>Scene Match</span><span>Platform Adapt</span></div>
+      </div>
+      <div class="step-card reveal tilt">
+        <div class="step-num">3</div>
+        <h3>Shooting Plan Ready</h3>
+        <p>Title + Hook + Storyboard + BGM + Post Guide + Publishing Strategy, export in multiple formats</p>
+        <div class="step-tags"><span>Markdown</span><span>PDF</span><span>HTML</span><span>One-Click Copy</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CASE STUDIES ===== -->
+<section class="section" id="cases" style="background:linear-gradient(180deg,transparent,var(--accent-dim),transparent)">
+  <div class="container">
+    <div class="section-eyebrow reveal">Case Studies</div>
+    <h2 class="section-title reveal">Real Data <span class="hl">Speaks</span>, No Hype</h2>
+    <p class="section-sub reveal">Measured results from sellers across categories — plans show impact within 48 hours</p>
+    <div class="case-grid">
+      <div class="case-card reveal tilt">
+        <div class="case-header">
+          <div class="case-category">Shoes · Douyin</div>
+          <h3>Shoe Brand — Dad Shoe New Launch</h3>
+        </div>
+        <div class="case-metric">
+          <div class="case-metric-item"><div class="case-metric-val">28,000</div><div class="case-metric-label">Avg. Views</div></div>
+          <div class="case-metric-item"><div class="case-metric-val">210×</div><div class="case-metric-label">vs DIY</div></div>
+          <div class="case-metric-item"><div class="case-metric-val">4.7%</div><div class="case-metric-label">Conversion</div></div>
+        </div>
+      </div>
+      <div class="case-card reveal tilt">
+        <div class="case-header">
+          <div class="case-category">Beauty · XHS</div>
+          <h3>Skincare Brand — Serum Seeding Plan</h3>
+        </div>
+        <div class="case-metric">
+          <div class="case-metric-item"><div class="case-metric-val">5,200</div><div class="case-metric-label">Note Saves</div></div>
+          <div class="case-metric-item"><div class="case-metric-val">85%</div><div class="case-metric-label">Engagement Boost</div></div>
+          <div class="case-metric-item"><div class="case-metric-val">¥0.3</div><div class="case-metric-label">Cost / Engagement</div></div>
+        </div>
+      </div>
+      <div class="case-card reveal tilt">
+        <div class="case-header">
+          <div class="case-category">3C · Kuaishou</div>
+          <h3>Electronics Brand — Wireless Earbuds Live Script</h3>
+        </div>
+        <div class="case-metric">
+          <div class="case-metric-item"><div class="case-metric-val">12,600</div><div class="case-metric-label">Live Room Views</div></div>
+          <div class="case-metric-item"><div class="case-metric-val">¥32,000</div><div class="case-metric-label">Single-Session GMV</div></div>
+          <div class="case-metric-item"><div class="case-metric-val">1:6.8</div><div class="case-metric-label">ROI</div></div>
+        </div>
+      </div>
+    </div>
+    <p class="reveal" style="text-align:center;margin-top:40px;font-size:13px;color:var(--muted)">
+      Data sources: public platform data + voluntary seller feedback. Results vary by product and execution<br>
+      <span style="color:var(--accent);font-weight:600">→ Upload your product photos and see your results</span>
+    </p>
+  </div>
+</section>
+
+<!-- ===== MULTI-PLATFORM OUTPUT SHOWCASE ===== -->
+<section class="section" style="padding-top:80px">
+  <div class="container">
+    <div class="section-eyebrow reveal">Multi-Platform</div>
+    <h2 class="section-title reveal">One Set of Assets, <span class="hl">Four Platforms</span>, Independent Strategies</h2>
+    <p class="section-sub reveal">Not a generic template with swapped titles — each platform gets unique storyboards, BGM, titles, and timing</p>
+    <div class="platform-showcase">
+      <div class="platform-col douyin reveal tilt">
+        <div class="platform-icon douyin"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.89a2.89 2.89 0 01-2.88 2.58 2.89 2.89 0 01-2.89-2.89c0-1.6 1.3-2.89 2.89-2.89.3 0 .59.05.86.14v-3.5a6.32 6.32 0 00-.86-.06c-3.49 0-6.32 2.83-6.32 6.32a6.32 6.32 0 006.32 6.32c3.49 0 6.32-2.83 6.32-6.32V8.39a8.23 8.23 0 004.71 1.5v-3.4a4.83 4.83 0 01-2.93.2z"/></svg></div>
+        <div class="platform-name douyin">Douyin</div>
+        <div class="platform-desc">3s Hook + Fast-Paced Cuts<br>Prime Time 19:00–21:00<br>Qianchuan Ads Strategy</div>
+      </div>
+      <div class="platform-col xhs reveal tilt">
+        <div class="platform-icon xhs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="14" y2="11"/></svg></div>
+        <div class="platform-name xhs">XHS</div>
+        <div class="platform-desc">Cover-Driven + Tutorial Style<br>Prime Time 12:00–14:00<br>Seeding Notes + Community</div>
+      </div>
+      <div class="platform-col wechat reveal tilt">
+        <div class="platform-icon wechat"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.5 3.5c-3.04 0-5.5 2.25-5.5 5 0 1.5.74 2.89 1.96 3.83l-1.1 2.67 2.96-1.48c.54.16 1.1.26 1.68.26.24 0 .48-.01.71-.04A4.5 4.5 0 0113.5 8c0-2.48-2.24-4.5-5-4.5zm-1.25 5a.75.75 0 110-1.5.75.75 0 010 1.5zm3.5 0a.75.75 0 110-1.5.75.75 0 010 1.5zM14 11c-2.76 0-5 2.24-5 5s2.24 5 5 5c.6 0 1.17-.11 1.7-.3l2.7 1.35-.97-2.43C18.37 18.78 19 17.47 19 16c0-2.76-2.24-5-5-5zm-1.5 4a.75.75 0 110-1.5.75.75 0 010 1.5zm4 0a.75.75 0 110-1.5.75.75 0 010 1.5z"/></svg></div>
+        <div class="platform-name wechat">WeChat Video</div>
+        <div class="platform-desc">Social Trust + Organic Reach<br>Prime Time 08:00–10:00<br>Moments + Live Stream Combo</div>
+      </div>
+      <div class="platform-col kuaishou reveal tilt">
+        <div class="platform-icon kuaishou"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="12" height="14" rx="2" ry="2"/></svg></div>
+        <div class="platform-name kuaishou">Kuaishou</div>
+        <div class="platform-desc">Authentic Style + Community Bond<br>Prime Time 18:00–20:00<br>Cili JinNiu Ads Strategy</div>
+      </div>
+    </div>
+    <p class="reveal" style="text-align:center;margin-top:32px;font-size:13px;color:var(--muted)">
+      Sample shooting plan auto-generated by FrameCraft AI. Results vary by product category and platform strategy
+    </p>
+  </div>
+</section>
+
+<!-- ===== OUTPUT PREVIEW ===== -->
+<section class="section" id="preview">
+  <div class="container">
+    <div class="section-eyebrow reveal">Plan Preview</div>
+    <h2 class="section-title reveal">See What a <span class="hl">Generated Plan</span> Looks Like</h2>
+    <p class="section-sub reveal">Not a few vague lines — complete storyboard + script + BGM + publishing strategy, ready to execute</p>
+    <div class="plan-tabs reveal" id="planTabs">
+      <button class="plan-tab active" data-idx="0">Dad Shoes · Douyin</button>
+      <button class="plan-tab" data-idx="1">Dress · XHS</button>
+      <button class="plan-tab" data-idx="2">Serum · Douyin</button>
+      <button class="plan-tab" data-idx="3">Noodles · Kuaishou</button>
+      <button class="plan-tab" data-idx="4">Earbuds · WeChat</button>
+      <button class="plan-tab" data-idx="5">Diffuser · XHS</button>
+    </div>
+    <div class="preview-wrap reveal">
+      <div class="preview-mock">
+        <div class="preview-header">
+          <div class="preview-dot r"></div><div class="preview-dot y"></div><div class="preview-dot g"></div>
+          <div class="preview-title" id="planTitle">FrameCraft — Dad Shoes · Urban Wanderer · Douyin Plan</div>
+        </div>
+        <div class="preview-body">
+          <div class="preview-sidebar">
+            <div class="pitem active" data-section="0"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:6px"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Product+Titles</div>
+            <div class="pitem" data-section="1"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:6px"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>Storyboard</div>
+            <div class="pitem" data-section="2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:6px"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>BGM</div>
+            <div class="pitem" data-section="3"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:6px"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg>Post-Production</div>
+            <div class="pitem" data-section="4"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:6px"><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/><line x1="16" y1="3" x2="22" y2="8"/><line x1="21" y1="8" x2="14" y2="8"/></svg>Platform Strategy</div>
+            <div class="pitem" data-section="5"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:6px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Livestream</div>
+            <div class="pitem" data-section="6"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:6px"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Ad Strategy</div>
+          </div>
+          <div class="preview-main">
+            <div id="previewContent"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== COMPARISON ===== -->
+<section class="compare-section">
+  <div class="container">
+    <div class="section-eyebrow reveal">The Difference</div>
+    <h2 class="section-title reveal">With This, You <span class="hl">Don't Need</span> a Production Team</h2>
+    <p class="section-sub reveal">Same product, pro plan vs casual filming: traffic gap can exceed <span style="color:var(--accent);font-weight:700;font-size:18px">200×</span></p>
+    <div class="compare-grid">
+      <div class="compare-card bad reveal tilt">
+        <div class="compare-label">DIY · No Plan</div>
+        <ul>
+          <li>"Nice shoes, size 39 free shipping"</li>
+          <li>No 3-second hook, 90% swipe-away rate</li>
+          <li>Wrong BGM, terrible completion rate</li>
+          <li>Random posting time, missing peak traffic</li>
+          <li>One piece of content for only one platform</li>
+          <li>No ad strategy, wasted budget</li>
+        </ul>
+        <div class="compare-num">127 <small>Avg. Views</small></div>
+      </div>
+      <div class="compare-vs reveal">VS</div>
+      <div class="compare-card good reveal tilt">
+        <div class="compare-label">FrameCraft · With Plan</div>
+        <ul>
+          <li>3s contrast hook + identity-snapshot title</li>
+          <li>10-shot storyboard with visuals, voiceover, captions</li>
+          <li>BGM style + BPM + recommended tracks + viral formula</li>
+          <li>4-platform independent strategies + optimal posting schedule</li>
+          <li>Live-stream scripts + Qianchuan / Cili JinNiu ad plans</li>
+          <li>Regenerated every time, content never repeats</li>
+        </ul>
+        <div class="compare-num">28,000+ <small>Avg. Views</small></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FEATURES BENTO ===== -->
+<section class="section" id="features">
+  <div class="container">
+    <div class="section-eyebrow reveal">Features</div>
+    <h2 class="section-title reveal">One Plan, <span class="hl">Full Pipeline</span> Coverage</h2>
+    <p class="section-sub reveal">More than a video script — from filming to publishing, from live streaming to ads, a complete loop</p>
+    <div class="bento-grid">
+      <div class="bento-card span-2 reveal tilt">
+        <div class="bento-num">01 / Shooting Plan</div>
+        <h3>Storyboard + Script</h3>
+        <p>10-shot storyboard · Visual/audio/caption per shot · 3s hook · 3 title styles · Scene suggestions · Angle guidance · Model styling direction</p>
+      </div>
+      <div class="bento-card reveal tilt">
+        <div class="bento-num">02</div>
+        <h3>BGM + Editing Guide</h3>
+        <p>BGM style/BPM/recommended tracks · Editing pace/transition design · Color grade parameters · Caption font &amp; animation tips</p>
+      </div>
+      <div class="bento-card reveal tilt">
+        <div class="bento-num">03</div>
+        <h3>4-Platform Strategy</h3>
+        <p>Douyin/Kuaishou/XHS/WeChat Video · Per-platform titles + tags · Optimal posting times · SEO keywords</p>
+      </div>
+      <div class="bento-card reveal tilt">
+        <div class="bento-num">04</div>
+        <h3>Live-Stream Script</h3>
+        <p>Micro-hold + smooth-sell dual mode · Full-body host script · Rhythm loop structure · Compliance reminders · Engagement hooks</p>
+      </div>
+      <div class="bento-card reveal tilt">
+        <div class="bento-num">05</div>
+        <h3>Ad Strategy</h3>
+        <p>Qianchuan + Cili JinNiu · Cold-start budget/targeting/bidding · Scale model/ROI optimization · Creative refresh strategy</p>
+      </div>
+      <div class="bento-card span-2 reveal tilt">
+        <div class="bento-num">06</div>
+        <h3>Multi-Format Export + History</h3>
+        <p>Editable Markdown · Printable PDF · HTML preview · One-click clipboard copy · Unique content each generation · Historical plans always accessible</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PRICING ===== -->
+<section class="section" id="pricing">
+  <div class="container">
+    <div class="section-eyebrow reveal">Pricing</div>
+    <h2 class="section-title reveal">Pay by <span class="hl">Usage</span>, Buy Only What You Need</h2>
+    <p class="section-sub reveal">Plan count + platform count determines AI token usage. Flexible credit packs starting at ¥4/session</p>
+    <div class="price-grid">
+      <div class="price-card reveal tilt">
+        <div class="price-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.3"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 3v5M8 8V6a4 4 0 018 0v2"/><line x1="12" y1="12" x2="12" y2="16"/></svg></div>
+        <div class="price-name">Newcomer Gift</div>
+        <div class="price-desc">1 Free Plan<br>Full Feature Trial</div>
+        <div class="price-amount free">Free</div>
+        <div class="price-per">¥0</div>
+        <ul class="price-features"><li><strong>1 Plan</strong></li><li>Any 1 Platform</li><li>No Payment Required</li></ul>
+      </div>
+      <div class="price-card reveal tilt">
+        <div class="price-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.3"><polygon points="13,2 3,14 12,14 11,22 21,10 12,10"/></svg></div>
+        <div class="price-name">Single Plan</div>
+        <div class="price-desc">On Demand<br>Pay As You Go</div>
+        <div class="price-amount">¥9.9</div>
+        <div class="price-per">/ session</div>
+        <ul class="price-features"><li><strong>1 Plan</strong></li><li>Any 1 Platform</li><li>One bubble tea for a pro script</li></ul>
+      </div>
+      <div class="price-card featured reveal">
+        <div class="price-badge">Popular</div>
+        <div class="price-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.3"><path d="M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6-4.8-6 4.8 2.4-7.2-6-4.8h7.6z"/></svg></div>
+        <div class="price-name">Inspiration Pack</div>
+        <div class="price-desc">10 Plans<br>Monthly Planning</div>
+        <div class="price-amount">¥69</div>
+        <div class="price-per">¥6.9/session · Save 30%</div>
+        <ul class="price-features"><li><strong>10 Plans</strong></li><li>Any Platform Mix</li><li>Credits Never Expire</li></ul>
+      </div>
+      <div class="price-card reveal tilt">
+        <div class="price-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.3"><path d="M6 2l1.5 4.5L12 2l4.5 4.5L18 2"/><path d="M2 8l4 14h12l4-14H2z"/><path d="M12 12l-3 6h6l-3-6z"/></svg></div>
+        <div class="price-name">Pro Pack</div>
+        <div class="price-desc">30 Plans<br>Daily Quality Content</div>
+        <div class="price-amount">¥149</div>
+        <div class="price-per">¥5/session · Save 50%</div>
+        <ul class="price-features"><li><strong>30 Plans</strong></li><li>Less than ¥5/day</li><li>Priority Support</li></ul>
+      </div>
+      <div class="price-card reveal tilt">
+        <div class="price-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.3"><rect x="2" y="7" width="20" height="15" rx="2"/><path d="M8 7V4a1 1 0 011-1h6a1 1 0 011 1v3"/><rect x="10" y="12" width="4" height="5"/></svg></div>
+        <div class="price-name">Enterprise Pack</div>
+        <div class="price-desc">100 Plans<br>Multi-Store / Agency</div>
+        <div class="price-amount">¥399</div>
+        <div class="price-per">¥4/session · Save 60%</div>
+        <ul class="price-features"><li><strong>100 Plans</strong></li><li>Unlimited Stores</li><li>Early Access to New Features</li></ul>
+      </div>
+    </div>
+
+    <!-- Monthly plans -->
+    <div style="margin-top:56px;padding-top:48px;border-top:1px solid var(--border)">
+      <div class="section-eyebrow reveal">Monthly</div>
+      <h2 class="section-title reveal" style="font-size:clamp(22px,4vw,36px)">Monthly <span class="hl">Subscription</span>, Unlimited Usage</h2>
+      <p class="section-sub reveal" style="margin-bottom:40px">For sellers with steady operations. Monthly billing, auto-renew, cancel anytime. Credit packs not enough? Go unlimited with monthly.</p>
+      <div class="price-grid" style="grid-template-columns:repeat(3,1fr);max-width:800px;margin:0 auto">
+        <div class="price-card reveal tilt">
+          <div class="price-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.3"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+          <div class="price-name">Basic Monthly</div>
+          <div class="price-desc">1 Plan/Day<br>For Solo Sellers</div>
+          <div class="price-amount">¥99</div>
+          <div class="price-per">/month · 15 plans</div>
+          <ul class="price-features"><li><strong>15 Plans/Month</strong></li><li>¥6.6/session</li><li>Resets monthly, no rollover</li></ul>
+        </div>
+        <div class="price-card featured reveal">
+          <div class="price-badge">Best Value</div>
+          <div class="price-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.3"><circle cx="12" cy="12" r="10"/><path d="M16 8l-8 8"/><path d="M8 8v4h8v-4"/></svg></div>
+          <div class="price-name">Pro Monthly</div>
+          <div class="price-desc">2-3 Plans/Day<br>For Small Teams</div>
+          <div class="price-amount">¥199</div>
+          <div class="price-per">/month · 40 plans</div>
+          <ul class="price-features"><li><strong>40 Plans/Month</strong></li><li>¥5/session</li><li>Resets monthly, no rollover</li><li>Priority Support</li></ul>
+        </div>
+        <div class="price-card reveal tilt">
+          <div class="price-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.3"><path d="M2 4l3 12h14l3-12-6 4-4-8-4 8-6-4z"/><circle cx="12" cy="19" r="1"/></svg></div>
+          <div class="price-name">Flagship Monthly</div>
+          <div class="price-desc">Unlimited<br>For Agencies &amp; Brands</div>
+          <div class="price-amount">¥499</div>
+          <div class="price-per">/month · Unlimited</div>
+          <ul class="price-features"><li><strong>Unlimited Plans</strong></li><li>Generate without limits</li><li>Auto-renew monthly</li><li>Priority Support + Early Features</li></ul>
+        </div>
+      </div>
+      <p class="reveal" style="text-align:center;margin-top:24px;font-size:12px;color:var(--muted)">Monthly plans billed by calendar month, auto-renew cancellable anytime. Credits reset monthly. Credit packs never expire. Both can be combined.</p>
+    </div>
+  </div>
+</section>
+<!-- ===== CTA ===== -->
+<section class="cta-section section">
+  <div class="cta-glow"></div>
+  <div style="position:relative;z-index:1">
+    <div class="cta-urgency reveal">1 Free Trial · No Card Required · Plan Ready in 30 Seconds</div>
+    <h2 class="reveal" style="font-family:var(--font-display);font-size:clamp(28px,5.5vw,48px);font-weight:900;color:var(--accent);margin-bottom:20px">50× Cheaper Than Hiring a Scriptwriter<br>Try Free First, Buy When You See Results</h2>
+    <p class="reveal" style="font-size:15px;color:var(--muted);margin-bottom:40px">Single ¥9.9 · Monthly from ¥99 for unlimited · Credit packs from ¥4/session</p>
+    <div class="reveal"><a href="/register" class="btn btn-lg">Sign Up Free — Get Your First Plan in 30s ↗</a></div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-links">
+    <a href="/director">Try Free</a>
+    <a href="#cases">Cases</a>
+    <a href="#preview">Preview</a>
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+    <a href="/privacy">Privacy</a>
+    <a href="/terms">Terms</a>
+    <a href="/support">Support</a>
+  </div>
+  <div style="max-width:700px;margin:0 auto 20px;font-size:11px;color:var(--muted);line-height:1.9">
+    <p style="margin-bottom:8px">Douyin, Kuaishou, XHS, and WeChat Video are registered trademarks of their respective owners. FrameCraft has no affiliation, investment, or partnership with these platforms.</p>
+    <p style="margin-bottom:8px">Shooting plans generated by this service are AI-produced for reference only. Case data comes from typical user feedback — actual results vary by product, execution quality, and platform algorithms. This does not constitute a guarantee of specific commercial outcomes.</p>
+    <p>ICP License: [Pending]</p>
+  </div>
+  <p>FrameCraft · Pro Shooting Plans for Every Seller · © 2026</p>
+</footer>
+
+<script>
+// ===== CANVAS PARTICLES =====
+(function(){
+  var c=document.getElementById('particles');
+  if(!c)return;
+  var ctx=c.getContext('2d'),w,h,ps=[];
+  function resize(){w=c.width=window.innerWidth;h=c.height=window.innerHeight}
+  resize();window.addEventListener('resize',resize);
+  for(var i=0;i<70;i++)ps.push({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.12,vy:(Math.random()-.5)*.12,r:Math.random()*1.2+.2,o:Math.random()*.35+.05});
+  function draw(){
+    ctx.clearRect(0,0,w,h);
+    for(var i=0;i<ps.length;i++){
+      var p=ps[i];p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=w;if(p.x>w)p.x=0;if(p.y<0)p.y=h;if(p.y>h)p.y=0;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle='rgba(232,180,90,'+p.o+')';ctx.fill();
+    }
+    for(var i=0;i<ps.length;i++){
+      for(var j=i+1;j<ps.length;j++){
+        var dx=ps[i].x-ps[j].x,dy=ps[i].y-ps[j].y,d=Math.sqrt(dx*dx+dy*dy);
+        if(d<100){ctx.beginPath();ctx.moveTo(ps[i].x,ps[i].y);ctx.lineTo(ps[j].x,ps[j].y);ctx.strokeStyle='rgba(232,180,90,'+(.025*(1-d/100))+')';ctx.lineWidth=.4;ctx.stroke()}
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ===== HERO TEXT STAGGER REVEAL =====
+(function(){
+  var words=document.querySelectorAll('.hero-title .word-inner');
+  words.forEach(function(w,i){
+    setTimeout(function(){w.classList.add('revealed')},200+i*80);
+  });
+})();
+
+// ===== INTERSECTION OBSERVER — SCROLL REVEAL =====
+(function(){
+  var observer=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible')});
+  },{threshold:.1,rootMargin:'0px 0px -40px 0px'});
+  document.querySelectorAll('.reveal').forEach(function(el){observer.observe(el)});
+})();
+
+// ===== COUNT-UP =====
+(function(){
+  var observer=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(!e.isIntersecting)return;
+      var el=e.target,target=parseInt(el.dataset.count);
+      if(el.dataset.done)return;el.dataset.done='1';
+      var c=0,step=Math.ceil(target/45);
+      function tick(){
+        c+=step;if(c>=target){el.textContent=target.toLocaleString();return}
+        el.textContent=Math.floor(c).toLocaleString();requestAnimationFrame(function(){setTimeout(tick,25)});
+      }
+      tick();
+    });
+  },{threshold:.4});
+  document.querySelectorAll('[data-count]').forEach(function(el){observer.observe(el)});
+})();
+
+// ===== PARALLAX =====
+(function(){
+  var els=document.querySelectorAll('[data-parallax]');
+  var scrollY=0;
+  window.addEventListener('scroll',function(){scrollY=window.scrollY});
+  function update(){
+    for(var i=0;i<els.length;i++){
+      var speed=parseFloat(els[i].dataset.parallax);
+      els[i].style.transform='translateY('+(scrollY*speed)+'px)';
+    }
+    requestAnimationFrame(update);
+  }
+  update();
+})();
+
+// ===== CARD 3D TILT (desktop only) =====
+(function(){
+  if(!window.matchMedia('(hover:hover) and (pointer:fine)').matches)return;
+  var cards=document.querySelectorAll('.tilt');
+  cards.forEach(function(card){
+    card.addEventListener('mousemove',function(e){
+      var r=card.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
+      var cx=r.width/2,cy=r.height/2,rx=((y-cy)/cy)*5,ry=((x-cx)/cx)*-5;
+      card.style.transform='perspective(800px) rotateX('+rx+'deg) rotateY('+ry+'deg) translateY(-3px)';
+      card.style.transition='none';
+    });
+    card.addEventListener('mouseleave',function(){
+      card.style.transform='perspective(800px) rotateX(0) rotateY(0) translateY(0)';
+      card.style.transition='transform .6s cubic-bezier(.16,1,.3,1)';
+    });
+  });
+})();
+
+// ===== PLAN TAB SWITCHER + SIDEBAR SECTIONS =====
+(function(){
+  var plans=[
+    {
+      title:'FrameCraft — Dad Shoes · Urban Wanderer · Douyin Plan',
+      analysis:{cat:'Women\'s Chunky Casual Dad Shoes', features:'White/Silver Grey · Mesh + Leather Upper · Platform Sole · Rhinestone Side Tag', audience:'Women 18-35 · Daily Streetwear/Commute/Leisure', style:'Sweet-Cool Streetwear · Ins Casual'},
+      titles:[
+        {text:'Regular Shoes vs These — Spot the Difference?', type:'Contrast Hook'},
+        {text:'Instantly Look 175cm — Petite Girl Savior', type:'Identity Snap'},
+        {text:'Stop Guessing! How to Pick Dad Shoes', type:'Pain Point'}
+      ],
+      storyboard:[
+        ['1','0-3s','Split screen: actor jumps from regular flats to dad shoes, foot close-up','Look! The difference between regular shoes and these chunky dad shoes — instantly taller!','Regular vs Dad Shoes'],
+        ['2','3-7s','Full body front display, camera tilts up from feet to show leg-lengthening effect','The platform design adds 4cm of hidden height, instantly elongates your proportions, makes legs look slim!','Hidden 4cm Height Boost'],
+        ['3','7-12s','Upper close-up, fingers press mesh breathable material, rhinestone detail sparkles','Breathable mesh — no sweaty feet all summer. Rhinestone side accents for that premium touch!','Breathable Mesh + Rhinestone Detail'],
+        ['4','12-17s','Actor walks showcasing non-slip sole, then tests on wet tiles','Anti-slip outsole — no slips on rainy days. Ultra-soft insole, walk 20K steps without fatigue!','Anti-Slip + Cushion, All-Day Comfort'],
+        ['5','17-22s','Quick outfit switch montage (jeans/skirt/shorts)','Pairs with jeans, skirts, shorts — commute, shopping, travel. One shoe for every look!','Versatile Staple — One Shoe, Every Fit'],
+        ['6','22-27s','Price tag and coupon display, actor points to shopping cart','Today only ¥XXX, includes free return insurance, 7-day no-reason returns. Buy with confidence!','Limited Price ¥XXX + Free Returns'],
+        ['7','27-32s','Actor waves, shopping cart icon flashes on screen','Link in bottom left — petite girls, just go for it. No regrets!','Tap Cart — Selling Fast!']
+      ],
+      bgm:{style:'Light & Trendy, Strong Beat Drops, Energetic Shopping Vibe',bpm:'120-140',search:'Douyin Trending Chart · Fashion OOTD BGM · Viral Beat-Drop Tracks',tracks:'"Summer Vibe" · "Summer Wind" · Trending Fast-Beat Instrumental',tips:'Drop on beat at highlights · Voice 80% BGM 70% · Fade out ending'},
+      postProduction:{editing:{pace:'Fast-paced beat-sync 0.8s/shot',transitions:'Flash white + Hard cut, dissolve at outfit change',effects:'Keyframe zoom on sole detail, speed ramp emphasizing cushioning'},coloring:{style:'Warm orange base, high contrast',params:'Contrast +15 · Saturation +8 · Color Temp +200K · Sharpness +10'},captions:{font:'Source Han Sans Bold',anim:'Character-by-character pop-in + bounce highlight',colors:'Selling points Bright Yellow #FFD700, Price Red #FF3B30'},sound:{sfx:'Whoosh transitions, beat-synced drum hits',mixing:'Voice -6dB / BGM -12dB / SFX -9dB'}},
+      platforms:{douyin:{time:'07:00-09:00 · 12:00-13:00 · 19:00-22:00',tip:'9:16 vertical, strong 3-sec hook, natural shopping cart CTA'},xhs:{time:'12:00-14:00 Lunch Window',tip:'3:4 ratio, open with outfit styling, more negative space layout'},wechat:{time:'08:00-10:00 Morning Commute',tip:'9:16 or 1:1, WeChat Moments share CTA, link to Official Account'},kuaishou:{time:'06:00-08:00 · 11:00-13:00 · 18:00-20:00',tip:'Laotie culture — open with "Hey everyone!", warm and authentic tone'}},
+      tags:'#DadShoes #PlatformHeightBoost #PetiteOutfit #SlimLook #SummerOOTD',
+      livestream:{
+        weibiedan:{suitable:'50+ online viewers, main push product',host:'Full-body on camera, standing/walking',cycle:'5-min cycle — Hook (retain) → Speed (seed desire) → Product (FABE) → Bond (trust) → Close (compliant checkout)',segments:[{phase:'Hook·Retain','0-30s':'Open with identity + core offer preview: "Petite girls, watch this — these make you look 175cm!"'}],compliance:'No fake urgency · No absolute claims · No efficacy promises · Frame return insurance as risk reversal'},
+        pingbo:{suitable:'Daily streaming, low-traffic hours, brand self-broadcast',host:'Waist-up or seated, product-focused display',cycle:'8-min cycle — Expert demo → Trust building → Interactive Q&A'}
+      },
+      ad:{douyin:{tool:'Qianchuan PC',budget:'Cold Start ¥200-500/day (recommended), Mature ¥500-1500/day',targeting:'Women 18-35 · Tier 1-2 Cities · Shoe/Fashion Interest',roi:'Net GMV ROI · Scale budget +30% daily post cold-start',material:'3-5 creatives rotation · Refresh every 3 days'},kuaishou:{tool:'Cili JinNiu',budget:'Cold Start ¥150-300/day',targeting:'Women 18-40 · Shoe Interest'},wechat:{tool:'ADQ Ads + WeBean Live Boost',budget:'ADQ: ¥100-300/day · WeBean: ¥50-100/session'}}
+    },
+    {
+      title:'FrameCraft — French Dress · Summer Aesthetic · XHS Plan',
+      analysis:{cat:'French Retro V-Neck Dress', features:'Pure Cotton · A-Line Silhouette · Floral Print · Waist-Cinching · Midi Length', audience:'Women 22-35 · Commute/Date/Resort', style:'French Romance · Soft & Elegant'},
+      titles:[
+        {text:'Bestie Thought I Lost 10kg in This Dress', type:'Contrast Hook'},
+        {text:'Got Asked for the Link 8 Times — Only ¥XX', type:'Price Anchor'},
+        {text:'Don\'t Know What to Wear? One Dress Does It All', type:'Scene Pain Point'}
+      ],
+      storyboard:[
+        ['1','0-3s','Backlit window full-body slow-mo, skirt sways in breeze','This dress has its own soft-glow filter — the moment you put it on, everything changes','French Aesthetic — Instant Summer Glow'],
+        ['2','3-7s','Fabric macro close-up, fingers stroke cotton texture','Pure cotton, breathable and non-sticky. Wear it all day in summer, stays perfectly fresh','100% Cotton — Skin-Friendly Breathable'],
+        ['3','7-12s','Waist-cinching detail close-up, side profile showing waist curve','Cinches waist without squeezing. A-line cut hides the tummy — looks slim on everyone!','Waist-Defining A-Line — Flatters All'],
+        ['4','12-17s','V-neck + collarbone close-up, showing face-slimming effect','V-neck shows your collarbone, visually slims your face, neck looks longer too','V-Neck Face Slim — Swan Neck Effect'],
+        ['5','17-22s','3 outfit switches in quick succession (commute/date/resort)','Office with blazer, date night with necklace, resort worn solo — one dress for every occasion','3 Looks, 1 Dress — Work Date Travel'],
+        ['6','22-27s','Flat lay full dress display + size chart labels','S-2XL available, fits 40-80kg. Size chart in bottom left','Full Size Range — 40-80kg'],
+        ['7','27-30s','Model turns back smiling, purchase CTA floats on screen','Link in bottom left — your softest, most elegant dress this summer','Bottom Left Link — Limited Offer']
+      ],
+      bgm:{style:'French Lo-Fi Light Music, Slow-Tempo Healing Vibes',bpm:'75-90',search:'XHS Aesthetic BGM · French OOTD Music · Solo Piano',tracks:'"Summer Breeze" · French Accordion Street Performance · Light Piano Solo',tips:'Fade BGM at highlights to emphasize voice · Voice 80%/BGM 60%'},
+      postProduction:{editing:{pace:'Slow rhythm 2s/shot, atmosphere-first',transitions:'Fade in/out + Soft overlay dissolve',effects:'Slow-mo skirt sway, soft light filter overlay'},coloring:{style:'Creamy warm tone, low saturation high-end feel',params:'Highlights -10 · Saturation -5 · Color Temp +300K · Soft Light +8'},captions:{font:'Source Han Serif Light',anim:'Fade-in reveal, never steals the scene',colors:'White text + semi-transparent dark bar, negative space design'},sound:{sfx:'Soft wind chime transitions, ambient nature sound',mixing:'Voice -4dB / BGM -14dB / Ambient -12dB'}},
+      platforms:{douyin:{time:'12:00-13:00 · 19:00-22:00',tip:'9:16 vertical, focus on outfit display, link to shopping cart'},xhs:{time:'12:00-14:00 Lunch Window',tip:'3:4 ratio, cover uses best outfit photo + big title text, dual post graphic + video'},wechat:{time:'08:00-10:00',tip:'1:1 square, Moments share caption: "Got asked N times about this dress"'},kuaishou:{time:'11:00-13:00 · 18:00-20:00',tip:'Real try-on experience focused, down-to-earth and unscripted'}},
+      tags:'#FrenchDress #SummerOOTD #SlimmingDress #FloralDress #DateOutfit',
+      livestream:{
+        weibiedan:{suitable:'50+ online viewers, main push product',host:'Full-body on camera, standing/walking',cycle:'5-min cycle — Hook (retain) → Speed (seed desire) → Product (FABE) → Bond (trust) → Close (compliant checkout)',segments:[{phase:'Hook·Retain','0-30s':'Open with identity + core offer preview: "Petite girls, watch this — these make you look 175cm!"'}],compliance:'No fake urgency · No absolute claims · No efficacy promises · Frame return insurance as risk reversal'},
+        pingbo:{suitable:'Daily streaming, low-traffic hours, brand self-broadcast',host:'Waist-up or seated, product-focused display',cycle:'8-min cycle — Expert demo → Trust building → Interactive Q&A'}
+      },
+      ad:{douyin:{tool:'Qianchuan PC',budget:'Cold Start ¥300-600/day',targeting:'Women 22-35 · Fashion/Apparel Interest'},kuaishou:{tool:'Cili JinNiu',budget:'Cold Start ¥200-400/day',targeting:'Women 25-40'},wechat:{tool:'ADQ + WeBean',budget:'ADQ: ¥200-500/day'}}
+    },
+    {
+      title:'FrameCraft — Hyaluronic Serum · Ingredient-Focused · Douyin Plan',
+      analysis:{cat:'Hyaluronic Acid Hydrating Serum', features:'Dropper Design · Clear Texture · Non-Sticky · High-Concentration Triple HA', audience:'Age 25-40 · Dry/Combination Skin · Skincare Ingredient Nerds', style:'Sci-Tech Skincare · Rational Beauty'},
+      titles:[
+        {text:'With vs Without — 3x Moisture Difference', type:'Data Shock'},
+        {text:'Dry Skin Girls — Your Serum Might Be Useless', type:'Belief Disrupt'},
+        {text:'Under ¥XX — Ingredient Nerds\' Holy Grail Hydrator', type:'Value Anchor'}
+      ],
+      storyboard:[
+        ['1','0-3s','Split screen: left shriveled apple vs right plump hydrated apple','The difference is insane! Let the data speak for itself','Shriveled vs Plump — Shocking Gap'],
+        ['2','3-7s','Dropper draws serum, shows clear flowing texture','Look at this fluidity — turns to water on contact, zero stickiness','Triple HA — Melts Into Water'],
+        ['3','7-12s','Hand-back patch test, pat to absorb, show before/after comparison','Absorbs in 3 seconds, non-comedogenic, no pilling. Even oily skin can use it','3-Second Absorption — Fresh & Light'],
+        ['4','12-18s','Moisture meter test: reading jumps from 28% to 86%','28% before, 86% after — moisture level tripled. That\'s the power','28% → 86% — 3x Hydration Boost'],
+        ['5','18-23s','Beauty app ingredient safety screenshot, all green','All-green ingredients. Zero alcohol, zero fragrance, zero preservatives. Sensitive skin approved','All-Green Formula — Sensitive Skin Safe'],
+        ['6','23-28s','Large bottle + price label vs competitor comparison','Others: 30ml for ¥200-300. Ours: 50ml for ¥XX. Link in bottom left','Big Bottle — High Value'],
+        ['7','28-33s','Brand logo + product family shot, cart icon flashes','Dry skin girls, just go for it. Return insurance covers you — send it back if it doesn\'t work','Bottom Left Link — Risk-Free Trial']
+      ],
+      bgm:{style:'Tech-Inspired Light Electronic, Steady Rhythmic Premium Feel',bpm:'100-115',search:'Skincare Review BGM · Tech Electronic · Light Beat Instrumental',tracks:'"Digital Pulse" · Tech Light Rhythm · Skincare Review Classic BGM',tips:'Lower BGM during data reveals · Boost rhythm when numbers pop up'},
+      postProduction:{editing:{pace:'Medium-fast 1.2s/shot, slow-mo on data segments',transitions:'Hard cut + Zoom-in emphasis, horizontal slide for split-screen',effects:'Moisture data text pop-up animation, green-light blink on ingredient list'},coloring:{style:'Cool white base, high clarity',params:'Clarity +20 · Exposure +10 · Saturation +5 · Color Temp -100K'},captions:{font:'Alibaba PuHuiTi Bold',anim:'Data numbers scale-up pop-in, ingredient list slide-in row by row',colors:'Key data Blue #4A90E2, Price Gold #FFC107'},sound:{sfx:'Electronic transition beeps + data pop SFX',mixing:'Voice -5dB / BGM -14dB / SFX -10dB'}},
+      platforms:{douyin:{time:'20:00-22:00 Skincare Prime · 12:00-13:00 Lunch',tip:'9:16 vertical, data-shock hook in first 3s, link to cart'},xhs:{time:'12:00-14:00 · 20:00-22:00',tip:'3:4 dual post graphic + video, cover uses comparison data chart'},wechat:{time:'08:00-10:00',tip:'1:1 square, Moments share + Official Account ingredient deep-dive funnel'},kuaishou:{time:'19:00-22:00',tip:'Down-to-earth skincare sharing, real experience focused'}},
+      tags:'#HyaluronicSerum #HydrationHero #SkincareIngredients #DrySkinSavior #SkincareReview',
+      livestream:{
+        weibiedan:{suitable:'50+ online viewers, main push product',host:'Full-body on camera, standing/walking',cycle:'5-min cycle — Hook (retain) → Speed (seed desire) → Product (FABE) → Bond (trust) → Close (compliant checkout)',segments:[{phase:'Hook·Retain','0-30s':'Open with identity + core offer preview: "Petite girls, watch this — these make you look 175cm!"'}],compliance:'No fake urgency · No absolute claims · No efficacy promises · Frame return insurance as risk reversal'},
+        pingbo:{suitable:'Daily streaming, low-traffic hours, brand self-broadcast',host:'Waist-up or seated, product-focused display',cycle:'8-min cycle — Expert demo → Trust building → Interactive Q&A'}
+      },
+      ad:{douyin:{tool:'Qianchuan PC',budget:'Cold Start ¥300-600/day',targeting:'Women 25-40 · Beauty/Skincare · Dry Skin Keywords'},kuaishou:{tool:'Cili JinNiu',budget:'Cold Start ¥200-400/day',targeting:'Women 25-45'},wechat:{tool:'ADQ + WeBean',budget:'ADQ: ¥200-500/day'}}
+    },
+    {
+      title:'FrameCraft — Spicy Noodles · Late-Night Cravings · Kuaishou Plan',
+      analysis:{cat:'Instant Bucket Hot & Sour Noodles', features:'Sweet Potato Vermicelli · 6 Topping Packs · Spicy-Sour Broth · Bucket Instant · Non-Fried', audience:'Age 18-35 · Students/Office Workers · Late-Night Binge/OT Scene', style:'Down-to-Earth · Authentic Satisfaction'},
+      titles:[
+        {text:'Guys — I\'ve Eaten This Every Day for a Week', type:'Real Experience'},
+        {text:'6 Topping Packs for ¥XX — 10x Cheaper Than Delivery', type:'Price Anchor'},
+        {text:'Starving at Midnight? Ready in 3 Minutes', type:'Scene Pain Point'}
+      ],
+      storyboard:[
+        ['1','0-3s','Lid opens, steam rises in slow motion','Look at this broth — rich chili oil rolling, absolutely mouthwatering','Midnight Spicy Noodles — Pure Craving'],
+        ['2','3-7s','Chopsticks lift noodles, chili oil dripping close-up','One bite — perfectly tangy and spicy, noodles are chewy, never mushy','Tangy-Spicy Kick — Perfectly Chewy'],
+        ['3','7-12s','6 seasoning packs torn open and poured one by one','6 packs — no shortcuts. Peanuts, bean sprouts, vinegar pack — all included','6 Real Topping Packs'],
+        ['4','12-17s','Hot water poured in, 3-min countdown timer','Ready in 3 minutes with boiling water. Tastes 100x better than instant noodles','3-Minute Instant — Lazy Life Saver'],
+        ['5','17-22s','Big bite eating noodles + drinking soup, satisfied expression','Tangy and spicy wakes you up, you\'ll drink every last drop. One bowl warms you right up','Even the Broth Is Gone'],
+        ['6','22-27s','Full case packaging display + price label','6 buckets per case for ¥XX — less than ¥X per meal. Way cheaper than delivery','6-Pack Case — Crazy Value'],
+        ['7','27-30s','Actor holds bucket to camera smiling + cart flashes','Link in bottom left — stock up while it\'s on sale, or wait half a year','Grab It Now — Sale Won\'t Last']
+      ],
+      bgm:{style:'Lifestyle Acoustic Chill, Warm & Down-to-Earth',bpm:'85-100',search:'Kuaishou Food Trending BGM · Cozy Daily Life · Acoustic Slow Rock',tracks:'"Kitchen Smoke" · Kuaishou Food Classic BGM · Warm Acoustic Guitar',tips:'Cut in at steam rising moment · Lower BGM during eating to highlight ASMR chewing'},
+      postProduction:{editing:{pace:'Medium 1.5s/shot · Appetite slow-mo on steam and broth',transitions:'Steam dissolve + Hard cut, fast-cut on topping reveal',effects:'Slow-mo close-up on steam and sauce, price tag pop-up animation'},coloring:{style:'Warm yellow base, food color boost',params:'Food Saturation +15 · Warm Tone +10 · Vignette +8 · Contrast +12'},captions:{font:'DeYiHei Bold',anim:'Large text bounce + slide, price flash',colors:'Price Red #E53935, Food Description Warm Orange #FF8C00'},sound:{sfx:'Steam hiss + water pouring + chewing ASMR',mixing:'Voice -5dB / ASMR SFX -8dB / BGM -14dB'}},
+      platforms:{douyin:{time:'11:00-13:00 · 17:00-19:00 Mealtime',tip:'9:16 vertical, appetite-first, link to shopping cart'},xhs:{time:'12:00-14:00 · 17:00-19:00',tip:'3:4 graphic version, cover uses steam-rising moment'},wechat:{time:'11:00-13:00',tip:'1:1 square, Moments + group chat share'},kuaishou:{time:'06:00-08:00 · 11:00-13:00 · 18:00-20:00',tip:'Laotie style — open with live taste test, authentic and relatable'}},
+      tags:'#SpicyNoodles #InstantFoodRecs #LateNightEats #LazyMealPrep #StockUp',
+      livestream:{
+        weibiedan:{suitable:'50+ online viewers, main push product',host:'Full-body on camera, standing/walking',cycle:'5-min cycle — Hook (retain) → Speed (seed desire) → Product (FABE) → Bond (trust) → Close (compliant checkout)',segments:[{phase:'Hook·Retain','0-30s':'Open with identity + core offer preview: "Petite girls, watch this — these make you look 175cm!"'}],compliance:'No fake urgency · No absolute claims · No efficacy promises · Frame return insurance as risk reversal'},
+        pingbo:{suitable:'Daily streaming, low-traffic hours, brand self-broadcast',host:'Waist-up or seated, product-focused display',cycle:'8-min cycle — Expert demo → Trust building → Interactive Q&A'}
+      },
+      ad:{douyin:{tool:'Qianchuan PC',budget:'Cold Start ¥200-400/day',targeting:'18-35 · Food/Instant Food Interest'},kuaishou:{tool:'Cili JinNiu',budget:'Cold Start ¥150-300/day',targeting:'18-40 · Food Interest · Tier 2-3 Cities'},wechat:{tool:'ADQ + WeBean',budget:'ADQ: ¥150-350/day'}}
+    },
+    {
+      title:'FrameCraft — ANC Earbuds · Business & Lifestyle · WeChat Plan',
+      analysis:{cat:'Active Noise Cancelling True Wireless Earbuds', features:'ANC · Bluetooth 5.3 · 30h Battery · Metal Charging Case · Dual Device Connection', audience:'Age 25-45 · Business Professionals/Commuters/Students', style:'Business Minimalist · Tech Premium'},
+      titles:[
+        {text:'One Tap — The Whole World Goes Silent', type:'Experience Shock'},
+        {text:'Wore These for 3 Months — Worth It?', type:'Honest Review'},
+        {text:'Half the Price of AirPods — Same Experience', type:'Value Comparison'}
+      ],
+      storyboard:[
+        ['1','0-3s','Noisy café scene, actor puts earbuds in and taps ANC button','One tap — the whole world goes silent. That\'s active noise cancellation','One Tap — World Goes Silent'],
+        ['2','3-7s','Charging case metal hinge open/close close-up, premium tactile sound','Metal hinge — premium tactile snap. Miles above any plastic case','Metal Hinge — Premium Feel'],
+        ['3','7-12s','Take out earbuds and wear, shows fit and comfort','Semi in-ear design — wear all day without pain, stays put during runs','All-Day Comfort — Secure Fit'],
+        ['4','12-17s','Phone → Tablet → Laptop seamless switch demo','Switch freely between phone, tablet, laptop. One earbud for all your meetings and work','3-Device Instant Switch — Work Essential'],
+        ['5','17-22s','Battery display close-up + charging case LED indicator','8 hours single use, 30 hours with case. Charge once a week','30h Total Battery — Weekly Charge'],
+        ['6','22-27s','Comparison table: AirPods vs This — price and features','Half the price of AirPods — every feature you need, nothing missing','Max Value — All Features, Half Price'],
+        ['7','27-32s','Actor walks out of café wearing earbuds, city background blurs','Link in bottom left — frequent travelers and commuters, this is a no-brainer','Bottom Left Link — Limited Deal']
+      ],
+      bgm:{style:'Business Light Electronic, Minimalist Rhythmic Premium',bpm:'90-105',search:'Business Office BGM · Tech Review Background · Ambient Electronic',tracks:'"Urban Focus" · Minimal Electronic Ambient · Tech Review Classic BGM',tips:'Cut BGM during ANC demo → leave only ambient noise contrast → BGM fades back in'},
+      postProduction:{editing:{pace:'Medium 1.5s/shot, ANC contrast uses silence as impact',transitions:'Hard cut + Text fast pop, scene switch with zoom transition',effects:'ANC on/off audio contrast (key experience demo), spec table slide-in row by row'},coloring:{style:'Cool gray base, metallic texture',params:'Clarity +15 · Saturation -5 · Contrast +10 · Vignette +5'},captions:{font:'HarmonyOS Sans Medium',anim:'Specs top-left fixed small text, selling points center pop',colors:'Tech specs white, Selling point Blue #5B9BD5, Price Gold'},sound:{sfx:'Ambient noise → silence contrast (critical), electronic transition beeps, mechanical button click',mixing:'Ambient noise -6dB → ANC silence → BGM fade-in -14dB'}},
+      platforms:{douyin:{time:'07:00-09:00 · 12:00-13:00 · 19:00-22:00',tip:'9:16 vertical, ANC contrast shock in first 3s, link to cart'},xhs:{time:'12:00-14:00 · 20:00-22:00',tip:'3:4 graphic version, cover uses ANC before/after comparison + big title'},wechat:{time:'08:00-10:00 Morning Commute · 18:00-20:00',tip:'1:1 square or 9:16, Moments share + Official Account review article funnel'},kuaishou:{time:'07:00-09:00 · 18:00-20:00',tip:'Down-to-earth tech review, real scenario focused'}},
+      tags:'#ANCearbuds #WirelessEarbuds #BusinessTravel #CommuteGear #TechReview',
+      livestream:{
+        weibiedan:{suitable:'50+ online viewers, main push product',host:'Full-body on camera, standing/walking',cycle:'5-min cycle — Hook (retain) → Speed (seed desire) → Product (FABE) → Bond (trust) → Close (compliant checkout)',segments:[{phase:'Hook·Retain','0-30s':'Open with identity + core offer preview: "Petite girls, watch this — these make you look 175cm!"'}],compliance:'No fake urgency · No absolute claims · No efficacy promises · Frame return insurance as risk reversal'},
+        pingbo:{suitable:'Daily streaming, low-traffic hours, brand self-broadcast',host:'Waist-up or seated, product-focused display',cycle:'8-min cycle — Expert demo → Trust building → Interactive Q&A'}
+      },
+      ad:{douyin:{tool:'Qianchuan PC',budget:'Cold Start ¥300-600/day',targeting:'Age 25-45 · Tech/Digital Interest · Tier 1-2 Cities'},kuaishou:{tool:'Cili JinNiu',budget:'Cold Start ¥200-400/day',targeting:'Age 20-40 · Digital Interest'},wechat:{tool:'ADQ + WeBean',budget:'ADQ: ¥300-800/day · WeBean: ¥100-200/session'}}
+    },
+    {
+      title:'FrameCraft — Ultrasonic Diffuser · Bedroom Upgrade · XHS Plan',
+      analysis:{cat:'Ultrasonic Silent Aroma Diffuser', features:'500ml Large Tank · Ultrasonic Mist · 7-Color Mood Light · <25dB Silent · Auto Shut-Off', audience:'Women 20-35 · Quality-of-Life & Sleep Focused', style:'Warm & Healing · Nordic Minimalist'},
+      titles:[
+        {text:'10 Minutes Before Bed — Your Room Becomes a Spa', type:'Experience Imagination'},
+        {text:'Used It 3 Months — The One Thing That Boosted My Happiness Most', type:'Real Share'},
+        {text:'Under ¥XX Joy — 10x Safer Than Scented Candles', type:'Value Comparison'}
+      ],
+      storyboard:[
+        ['1','0-3s','Dim bedroom, press power button, mist glows warm mood light','10 minutes before bed — one tap to your personal SPA moment','10 Min Before Bed = Pure Bliss'],
+        ['2','3-7s','Add water + essential oil demo, dead simple operation','Open lid, add water and oil drops, mist in 3 seconds — foolproof design','3-Second Mist — Dead Simple'],
+        ['3','7-12s','Fine mist close-up, color light shifting effect','Ultrasonic atomization — fine mist won\'t wet your desk. 7 mood light colors at your fingertips','Ultrasonic Mist — No Desk Dampness'],
+        ['4','12-17s','Silent label + decibel meter display','Under 25dB — quieter than breathing. Won\'t disturb your sleep at all','<25dB — Quieter Than Breathing'],
+        ['5','17-22s','500ml large capacity marker + all-night runtime','500ml tank — one fill lasts all night. Auto shut-off for total peace of mind','500ml — All-Night Runtime'],
+        ['6','22-27s','Bedroom wide shot, ambient light warm and soft','Instantly upgrades your bedroom vibe. Friends come over and ask where you got it','Bedroom Vibe Upgrade — Instant Premium'],
+        ['7','27-30s','Product still-life shot + cart icon flashes','Link in bottom left — under ¥XX pure joy. Buy now, thank yourself later','Bottom Left Link — Start Early']
+      ],
+      bgm:{style:'Soothing Light Music, ASMR Healing Vibes',bpm:'60-75',search:'XHS Bedroom Essentials BGM · ASMR Healing Music · Slow Piano',tracks:'"Night Bloom" · Sleep Piano · Nature White Noise (Rain/Stream)',tips:'Keep BGM soft throughout, add ambient water sound during mist close-up'},
+      postProduction:{editing:{pace:'Slow 2.5s/shot, generous negative space',transitions:'Soft light dissolve + Fade in/out, light changes with gradient switch',effects:'Slow-mo mist to emphasize fine texture, ambient light gradient time-lapse'},coloring:{style:'Warm dark base, ambient light mood',params:'Soft Light +12 · Saturation -3 · Color Temp +400K · Vignette +10'},captions:{font:'ZhanKu Literary Light',anim:'Fade in/out, never breaks the mood',colors:'Cream White #F5F0E8, Keywords Light Gold #E8C776'},sound:{sfx:'Water flow + mist spray + soft wind chimes',mixing:'Voice -4dB / BGM -16dB / Ambient -10dB'}},
+      platforms:{douyin:{time:'21:00-23:00 Pre-Sleep Browse',tip:'9:16 vertical, atmosphere-first, link to cart'},xhs:{time:'21:00-23:00 Pre-Sleep Prime Window',tip:'3:4 ratio, cover uses dim bedroom mood photo + big title, dual post graphic + video'},wechat:{time:'08:00-10:00 · 21:00-23:00',tip:'1:1 square, Moments + group chat lifestyle share'},kuaishou:{time:'20:00-23:00',tip:'Lifestyle product share, real experience focused'}},
+      tags:'#AromaDiffuser #BedroomEssentials #HappinessBoost #SleepBetter #MoodLight',
+      livestream:{
+        weibiedan:{suitable:'50+ online viewers, main push product',host:'Full-body on camera, standing/walking',cycle:'5-min cycle — Hook (retain) → Speed (seed desire) → Product (FABE) → Bond (trust) → Close (compliant checkout)',segments:[{phase:'Hook·Retain','0-30s':'Open with identity + core offer preview: "Petite girls, watch this — these make you look 175cm!"'}],compliance:'No fake urgency · No absolute claims · No efficacy promises · Frame return insurance as risk reversal'},
+        pingbo:{suitable:'Daily streaming, low-traffic hours, brand self-broadcast',host:'Waist-up or seated, product-focused display',cycle:'8-min cycle — Expert demo → Trust building → Interactive Q&A'}
+      },
+      ad:{douyin:{tool:'Qianchuan PC',budget:'Cold Start ¥200-500/day',targeting:'Women 20-35 · Home/Lifestyle Interest'},kuaishou:{tool:'Cili JinNiu',budget:'Cold Start ¥150-300/day',targeting:'Women 25-40 · Home Interest'},wechat:{tool:'ADQ + WeBean',budget:'ADQ: ¥200-500/day'}}
+    }
+  ];
+
+  var activePlan=0, activeSection=0;
+  var planTabs=document.querySelectorAll('.plan-tab');
+  var sideItems=document.querySelectorAll('.preview-sidebar .pitem');
+  var titleEl=document.getElementById('planTitle');
+  var contentEl=document.getElementById('previewContent');
+
+  // ===== RENDER FUNCTIONS (matching real output structure) =====
+
+  function renderAnalysis(p){
+    var h='<div class="preview-content"><h4>AI Product Analysis</h4>';
+    h+='<div class="info-row"><span class="info-label">Category</span><span class="info-value">'+p.analysis.cat+'</span></div>';
+    h+='<div class="info-row"><span class="info-label">Features</span><span class="info-value">'+p.analysis.features+'</span></div>';
+    h+='<div class="info-row"><span class="info-label">Audience</span><span class="info-value">'+p.analysis.audience+'</span></div>';
+    h+='<div class="info-row"><span class="info-label">Style</span><span class="info-value">'+p.analysis.style+'</span></div>';
+    h+='<h4 style="margin-top:16px">Title Options (3 Sets)</h4>';
+    p.titles.forEach(function(t){
+      h+='<div class="script-block"><div class="label">['+t.type+']</div><p>'+t.text+'</p></div>';
+    });
+    h+='</div>';
+    return h;
+  }
+
+  function renderStoryboard(p){
+    var h='<div class="preview-table"><div class="tr"><div class="th">#</div><div class="th">Duration</div><div class="th">Visual</div><div class="th">Voiceover</div><div class="th">Caption</div></div>';
+    p.storyboard.forEach(function(r){
+      h+='<div class="tr"><div class="td" style="color:var(--accent);font-weight:700;text-align:center">'+r[0]+'</div><div class="td" style="font-weight:600">'+r[1]+'</div><div class="td">'+r[2]+'</div><div class="td" style="color:#d4a574">'+r[3]+'</div><div class="td" style="color:#8ab4f8;font-size:11px">'+r[4]+'</div></div>';
+    });
+    h+='</div>';
+    return h;
+  }
+
+  function renderBGM(p){
+    return '<div class="preview-content"><h4>BGM Plan</h4>'+
+      '<div class="info-row"><span class="info-label">Style</span><span class="info-value">'+p.bgm.style+'</span></div>'+
+      '<div class="info-row"><span class="info-label">BPM</span><span class="info-value">'+p.bgm.bpm+'</span></div>'+
+      '<div class="info-row"><span class="info-label">Search</span><span class="info-value">'+p.bgm.search+'</span></div>'+
+      '<div class="script-block"><div class="label">Recommended Tracks</div><p>'+p.bgm.tracks+'</p></div>'+
+      '<div class="script-block"><div class="label">Usage Tips</div><p>'+p.bgm.tips+'</p></div></div>';
+  }
+
+  function renderPostProd(p){
+    return '<div class="preview-content"><h4>Post-Production</h4>'+
+      '<div class="info-row"><span class="info-label">Pace</span><span class="info-value">'+p.postProduction.editing.pace+'</span></div>'+
+      '<div class="info-row"><span class="info-label">Transitions</span><span class="info-value">'+p.postProduction.editing.transitions+'</span></div>'+
+      '<div class="info-row"><span class="info-label">Effects</span><span class="info-value">'+p.postProduction.editing.effects+'</span></div>'+
+      '<h4 style="margin-top:12px">Color Grading</h4>'+
+      '<div class="info-row"><span class="info-label">Style</span><span class="info-value">'+p.postProduction.coloring.style+'</span></div>'+
+      '<div class="info-row"><span class="info-label">Params</span><span class="info-value">'+p.postProduction.coloring.params+'</span></div>'+
+      '<h4 style="margin-top:12px">Captions</h4>'+
+      '<div class="info-row"><span class="info-label">Font</span><span class="info-value">'+p.postProduction.captions.font+'</span></div>'+
+      '<div class="info-row"><span class="info-label">Animation</span><span class="info-value">'+p.postProduction.captions.anim+'</span></div>'+
+      '<div class="info-row"><span class="info-label">Colors</span><span class="info-value">'+p.postProduction.captions.colors+'</span></div></div>';
+  }
+
+  function renderPlatforms(p){
+    return '<div class="preview-content"><h4>4-Platform Independent Strategy</h4>'+
+      '<table class="strategy-table">'+
+      '<tr><td>Douyin</td><td>'+p.platforms.douyin.tip+'<br><span style="font-size:11px;color:var(--muted)">'+p.platforms.douyin.time+'</span></td></tr>'+
+      '<tr><td>XHS</td><td>'+p.platforms.xhs.tip+'<br><span style="font-size:11px;color:var(--muted)">'+p.platforms.xhs.time+'</span></td></tr>'+
+      '<tr><td>WeChat Video</td><td>'+p.platforms.wechat.tip+'<br><span style="font-size:11px;color:var(--muted)">'+p.platforms.wechat.time+'</span></td></tr>'+
+      '<tr><td>Kuaishou</td><td>'+p.platforms.kuaishou.tip+'<br><span style="font-size:11px;color:var(--muted)">'+p.platforms.kuaishou.time+'</span></td></tr>'+
+      '</table>'+
+      '<div class="info-row" style="margin-top:10px"><span class="info-label">Tags</span><span class="info-value" style="font-size:11px">'+p.tags+'</span></div></div>';
+  }
+
+  function renderLive(p){
+    var h='<div class="preview-content"><h4>Livestream Script (Dual Mode)</h4>';
+    h+='<div class="script-block"><div class="label">Micro-Hold — Full Body on Camera</div>';
+    h+='<p style="font-size:11px;color:var(--muted);margin-bottom:4px">Best for: '+p.livestream.weibiedan.suitable+' | '+p.livestream.weibiedan.host+'</p>';
+    h+='<p style="margin-bottom:4px">'+p.livestream.weibiedan.cycle+'</p>';
+    h+='<p style="font-size:11px;color:var(--red)">'+p.livestream.weibiedan.compliance+'</p></div>';
+    h+='<div class="script-block"><div class="label">Smooth Sell — Waist-Up or Seated</div>';
+    h+='<p style="font-size:11px;color:var(--muted);margin-bottom:4px">Best for: '+p.livestream.pingbo.suitable+' | '+p.livestream.pingbo.host+'</p>';
+    h+='<p>'+p.livestream.pingbo.cycle+'</p></div></div>';
+    return h;
+  }
+
+  function renderAd(p){
+    var h='<div class="preview-content"><h4>Paid Ad Strategy</h4>';
+    h+='<div class="script-block"><div class="label">Douyin · '+p.ad.douyin.tool+'</div>';
+    h+='<p style="font-size:11px">Budget: '+p.ad.douyin.budget+' | Targeting: '+p.ad.douyin.targeting+'</p>';
+    h+='<p style="font-size:11px">Optimization: '+p.ad.douyin.roi+' | Creatives: '+p.ad.douyin.material+'</p></div>';
+    h+='<div class="script-block"><div class="label">Kuaishou · '+p.ad.kuaishou.tool+'</div>';
+    h+='<p style="font-size:11px">Budget: '+p.ad.kuaishou.budget+' | Targeting: '+p.ad.kuaishou.targeting+'</p></div>';
+    h+='<div class="script-block"><div class="label">WeChat Video · '+p.ad.wechat.tool+'</div>';
+    h+='<p style="font-size:11px">Budget: '+p.ad.wechat.budget+'</p></div></div>';
+    return h;
+  }
+
+  var renders=[renderAnalysis,renderStoryboard,renderBGM,renderPostProd,renderPlatforms,renderLive,renderAd];
+
+  function refresh(){
+    var p=plans[activePlan];
+    titleEl.textContent=p.title;
+    contentEl.innerHTML=renders[activeSection](p);
+  }
+
+  refresh();
+
+  planTabs.forEach(function(t){
+    t.addEventListener('click',function(){
+      planTabs.forEach(function(b){b.classList.remove('active')});
+      t.classList.add('active');
+      activePlan=parseInt(t.dataset.idx);
+      refresh();
+    });
+  });
+
+  sideItems.forEach(function(s){
+    s.addEventListener('click',function(){
+      sideItems.forEach(function(b){b.classList.remove('active')});
+      s.classList.add('active');
+      activeSection=parseInt(s.dataset.section);
+      refresh();
+    });
+  });
+})();
+
+// ===== NAV SCROLL =====
+(function(){
+  var nav=document.getElementById('nav');
+  if(!nav)return;
+  var last=0;
+  window.addEventListener('scroll',function(){
+    var s=window.scrollY;
+    nav.classList.toggle('scrolled',s>60);
+    if(s>last&&s>400)nav.style.transform='translate(-50%,-120px)';
+    else nav.style.transform='translate(-50%,0)';
+    last=s;
+  });
+})();
+
+
+// ===== MOUSE GLOW =====
+(function(){
+  var glow=document.getElementById('mouseGlow');
+  if(!glow)return;
+  var ticking=false;
+  document.addEventListener('mousemove',function(e){
+    if(ticking)return;
+    ticking=true;
+    requestAnimationFrame(function(){
+      glow.style.left=e.clientX+'px';
+      glow.style.top=e.clientY+'px';
+      ticking=false;
+    });
+  });
+})();
+// ===== PWA =====
+if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js',{scope:'/'}).catch(function(){});
+</script>
+
+<a href="/support" class="support-float" title="Support">Support</a>
+</body>
+</html>

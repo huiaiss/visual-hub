@@ -1,0 +1,51 @@
+{
+  "total_time_s": 0.1,
+  "phases": {
+    "1_load_data": 0.0,
+    "2_read_analysis": 0.0,
+    "3_script_gen": 0.07,
+    "4_asset_pipeline": 0.02,
+    "5_storyboard": 0.0,
+    "6_html_gen": 0.0,
+    "7_validation": 0.0
+  },
+  "output_dir": "C:\\Users\\Administrator\\visual-hub\\data\\videos\\bench_181500",
+  "html_path": "C:\\Users\\Administrator\\visual-hub\\data\\videos\\bench_181500\\index.html",
+  "html_size_kb": 25.5078125,
+  "html_lines": 838,
+  "validation": {
+    "DOCTYPE": true,
+    "GSAP_CDN": false,
+    "Brand_primary": true,
+    "Brand_accent": true,
+    "Hook_reveal": false,
+    "CTA_outro": false,
+    "Scan_overlay": true,
+    "Progress_bar": true,
+    "GSAP_timeline": true,
+    "Audio_element": true,
+    "Scene_visible": true,
+    "No_AI_leak": true
+  },
+  "eco_components": {
+    "hook-reveal": false,
+    "feature-highlight": false,
+    "scene-lifestyle": false,
+    "before-after": false,
+    "trust-signal": false,
+    "cta-outro": false
+  },
+  "scorecard": {
+    "输入完整性": 10,
+    "品类准确度": 8,
+    "创意独特性": 8,
+    "脚本结构": 8,
+    "素材匹配": 10,
+    "组件渲染": 0,
+    "HTML完整度": 9
+  },
+  "script_beats": 7,
+  "script_duration_s": 32.5,
+  "product_images": 3,
+  "scene_images": 11
+}

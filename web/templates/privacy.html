@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>隐私政策 — FrameCraft</title>
+<link rel="manifest" href="/static/manifest.json">
+<link rel="icon" type="image/svg+xml" href="/static/icon-192.svg">
+<meta name="theme-color" content="#050505">
+<style>
+  :root {
+    --bg:#050505;--surface:#0b0b0b;--card:#0f0f0f;--border:rgba(255,255,255,.05);
+    --text:#e8e2d6;--muted:#706a60;
+    --accent:#e8b45a;
+    --font-display:'STXingkai','STZhongsong','Noto Serif SC','SimSun','STSong',serif;
+    --font-body:'PingFang SC','Microsoft YaHei','Noto Sans SC','Hiragino Sans GB','Microsoft JhengHei','WenQuanYi Micro Hei',sans-serif;
+    --radius-lg:24px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--bg);color:var(--text);font-family:var(--font-body);
+    min-height:100vh;-webkit-font-smoothing:antialiased;
+    display:flex;flex-direction:column;align-items:center;
+  }
+  .bg-ambient{position:fixed;inset:0;pointer-events:none;z-index:0}
+  .bg-ambient .orb{position:absolute;border-radius:50%;filter:blur(140px)}
+  .bg-ambient .orb-1{width:650px;height:650px;background:radial-gradient(circle,rgba(232,180,90,.15),transparent);top:-25%;left:-15%}
+
+  .page-wrap{position:relative;z-index:1;width:100%;max-width:760px;padding:48px 24px 80px}
+  .card{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);
+    padding:48px 40px;position:relative;overflow:hidden;
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+  .card::before{content:'';position:absolute;top:0;left:20%;right:20%;height:1px;
+    background:linear-gradient(90deg,transparent,var(--accent),transparent)}
+
+  .logo-row{display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:32px}
+  .logo-row .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent)}
+  .logo-row span{font-family:var(--font-display);font-size:18px;font-weight:900;color:var(--accent);letter-spacing:.04em}
+
+  h1{font-family:var(--font-display);font-size:28px;font-weight:900;text-align:center;margin-bottom:8px}
+  .update-date{text-align:center;font-size:12px;color:var(--muted);margin-bottom:40px}
+
+  h2{font-family:var(--font-display);font-size:18px;font-weight:700;margin-top:36px;margin-bottom:12px;color:var(--accent)}
+  h2:first-of-type{margin-top:0}
+  p{font-size:14px;color:var(--muted);line-height:1.9;margin-bottom:12px}
+  ul{margin-bottom:12px;padding-left:20px}
+  ul li{font-size:14px;color:var(--muted);line-height:2;list-style-type:disc}
+
+  .back-link{display:block;text-align:center;margin-top:28px;font-size:13px;color:var(--muted);text-decoration:none;transition:color .3s}
+  .back-link:hover{color:var(--accent)}
+
+  @media(max-width:480px){
+    .card{padding:32px 22px 28px}
+    h1{font-size:22px}
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-ambient">
+  <div class="orb orb-1"></div>
+</div>
+
+<div class="page-wrap">
+  <div class="card">
+    <div class="logo-row">
+      <svg width="36" height="36" viewBox="0 0 192 192" style="display:inline-block;vertical-align:middle;flex-shrink:0">
+        <rect width="192" height="192" rx="28" fill="transparent"/>
+        <g transform="translate(96,96)">
+          <rect x="-54" y="-54" width="108" height="108" rx="14" fill="none" stroke="#e8b45a" stroke-width="8" transform="rotate(45)"/>
+          <circle cx="0" cy="0" r="30" fill="none" stroke="#e8b45a" stroke-width="7"/>
+          <circle cx="0" cy="0" r="6" fill="#e8b45a" opacity="0.45"/>
+          <line x1="-52" y1="0" x2="-34" y2="0" stroke="#e8b45a" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+          <line x1="34" y1="0" x2="52" y2="0" stroke="#e8b45a" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+          <line x1="0" y1="-52" x2="0" y2="-34" stroke="#e8b45a" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+          <line x1="0" y1="34" x2="0" y2="52" stroke="#e8b45a" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+        </g>
+      </svg>
+      <span>FrameCraft</span>
+    </div>
+    <h1>隐私政策</h1>
+    <p class="update-date">生效日期：2026 年 5 月 20 日</p>
+
+    <h2>一、我们收集哪些信息</h2>
+    <p>当您使用我们的服务时，我们可能收集以下信息：</p>
+    <ul>
+      <li><strong>手机号码</strong> — 用于创建您的账户、发送方案生成通知。我们不强制实名认证，手机号仅用于账号标识和必要的服务通知。</li>
+      <li><strong>主营平台与经营品类</strong> — 用于为您生成适配具体平台和品类的拍摄方案，属于服务所必需的信息。</li>
+      <li><strong>店铺/品牌名称</strong> — 选填字段，仅用于优化方案输出的个性化程度。</li>
+      <li><strong>上传的产品图片</strong> — 仅用于方案生成过程中的产品识别，生成完成后您可随时删除。</li>
+    </ul>
+
+    <h2>二、我们如何使用信息</h2>
+    <ul>
+      <li>生成您所请求的电商拍摄方案</li>
+      <li>改进和优化我们的 AI 方案生成模型</li>
+      <li>向您发送服务相关的必要通知（如方案生成完成）</li>
+      <li>遵守适用法律法规的要求</li>
+    </ul>
+    <p>我们<strong>不会</strong>将您的个人信息用于任何与本服务无关的营销目的，<strong>不会</strong>出售或出租您的个人信息给任何第三方。</p>
+
+    <h2>三、信息的存储与安全</h2>
+    <p>您的个人信息存储在位于中国大陆的服务器上。我们采取合理的技术和管理措施保护您的信息安全，包括但不限于加密存储、访问权限控制等。我们仅在实现本政策所述目的所必需的时间内保留您的个人信息，法律法规另有规定的除外。</p>
+
+    <h2>四、第三方服务</h2>
+    <p>我们使用第三方 AI 大语言模型及视觉模型来提供方案生成服务。您在方案生成过程中上传的产品图片和相关信息会传递给这些 AI 服务提供商用于内容生成。我们不向 AI 服务商提供您的手机号码。我们使用的所有第三方服务均符合中国数据安全相关法律法规。</p>
+
+    <h2>五、您的权利</h2>
+    <p>根据《个人信息保护法》等相关法律法规，您享有以下权利：</p>
+    <ul>
+      <li><strong>查阅权</strong> — 您可以请求查阅我们持有的您的个人信息</li>
+      <li><strong>更正权</strong> — 您可以请求更正不准确的个人信息</li>
+      <li><strong>删除权</strong> — 您可以请求删除您的个人信息（法律法规要求保留的除外）</li>
+      <li><strong>撤回同意</strong> — 您可以随时撤回对个人信息处理的同意，撤回前已完成的处理仍然有效</li>
+      <li><strong>注销账户</strong> — 您可以请求注销账户，我们将删除您的所有个人信息</li>
+    </ul>
+    <p>如需行使上述权利，请通过本政策末尾的联系方式与我们联系。</p>
+
+    <h2>六、未成年人保护</h2>
+    <p>我们的服务面向电商经营者，不面向未满 14 周岁的儿童。如果您是未满 14 周岁的儿童，请在监护人陪同下使用本服务，并由监护人提供同意。</p>
+
+    <h2>七、政策更新</h2>
+    <p>我们可能会不时更新本隐私政策。如有重大变更，我们将通过网站公告或短信通知您。更新后的政策自发布之日起生效。</p>
+
+    <h2>八、联系方式</h2>
+    <p>如您对本隐私政策有任何疑问、意见或投诉，或希望行使您的个人信息权利，请通过以下方式联系我们：</p>
+    <ul>
+      <li><strong>联系邮箱</strong>：[请填写您的联系邮箱]</li>
+      <li><strong>联系地址</strong>：[请填写您的联系地址]</li>
+    </ul>
+    <p>我们将在收到您的请求后 15 个工作日内予以回复。</p>
+  </div>
+
+  <a href="/" class="back-link">← 返回首页</a>
+</div>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>联系客服 — FrameCraft</title>
+<link rel="manifest" href="/static/manifest.json">
+<link rel="icon" type="image/svg+xml" href="/static/icon-192.svg">
+<meta name="theme-color" content="#050505">
+<style>
+  :root {
+    --bg:#050505;--surface:#0b0b0b;--card:#0f0f0f;--border:rgba(255,255,255,.05);
+    --text:#e8e2d6;--muted:#706a60;
+    --accent:#e8b45a;
+    --font-display:'STXingkai','STZhongsong','Noto Serif SC','SimSun','STSong',serif;
+    --font-body:'PingFang SC','Microsoft YaHei','Noto Sans SC','Hiragino Sans GB','Microsoft JhengHei','WenQuanYi Micro Hei',sans-serif;
+    --radius-lg:24px;--radius:16px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--bg);color:var(--text);font-family:var(--font-body);
+    min-height:100vh;-webkit-font-smoothing:antialiased;
+    display:flex;flex-direction:column;align-items:center;
+  }
+  .bg-ambient{position:fixed;inset:0;pointer-events:none;z-index:0}
+  .bg-ambient .orb{position:absolute;border-radius:50%;filter:blur(140px)}
+  .bg-ambient .orb-1{width:650px;height:650px;background:radial-gradient(circle,rgba(232,180,90,.15),transparent);top:-25%;left:-15%}
+
+  .page-wrap{position:relative;z-index:1;width:100%;max-width:600px;padding:48px 24px 80px}
+  .card{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);
+    padding:48px 40px;position:relative;overflow:hidden;
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+  .card::before{content:'';position:absolute;top:0;left:20%;right:20%;height:1px;
+    background:linear-gradient(90deg,transparent,var(--accent),transparent)}
+
+  .logo-row{display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:32px}
+  .logo-row span{font-family:var(--font-display);font-size:18px;font-weight:900;color:var(--accent);letter-spacing:.04em}
+
+  h1{font-family:var(--font-display);font-size:28px;font-weight:900;text-align:center;margin-bottom:8px}
+  .subtitle{text-align:center;font-size:13px;color:var(--muted);margin-bottom:36px;line-height:1.7}
+
+  .contact-methods{display:grid;gap:16px;margin-bottom:40px}
+  .contact-item{
+    background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:var(--radius);
+    padding:24px;display:flex;align-items:center;gap:16px;
+    transition:border-color .3s}
+  .contact-item:hover{border-color:rgba(232,180,90,.15)}
+  .contact-icon{font-size:28px;flex-shrink:0;width:48px;height:48px;display:flex;align-items:center;justify-content:center;
+    background:rgba(232,180,90,.06);border-radius:50%}
+  .contact-info{flex:1}
+  .contact-info .label{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px}
+  .contact-info .value{font-size:13px;color:var(--muted)}
+  .contact-info .value a{color:var(--accent);text-decoration:none}
+  .contact-info .value a:hover{color:#f0c56a}
+
+  .faq-section{margin-top:48px;padding-top:40px;border-top:1px solid var(--border)}
+  h2{font-family:var(--font-display);font-size:20px;font-weight:700;margin-bottom:24px;color:var(--text)}
+  .faq-item{margin-bottom:20px}
+  .faq-q{font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px}
+  .faq-a{font-size:13px;color:var(--muted);line-height:1.8}
+
+  .back-link{display:block;text-align:center;margin-top:28px;font-size:13px;color:var(--muted);text-decoration:none;transition:color .3s}
+  .back-link:hover{color:var(--accent)}
+
+  @media(max-width:480px){
+    .card{padding:32px 22px 28px}
+    h1{font-size:22px}
+    .contact-item{padding:18px}
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-ambient">
+  <div class="orb orb-1"></div>
+</div>
+
+<div class="page-wrap">
+  <div class="card">
+    <div class="logo-row">
+      <svg width="36" height="36" viewBox="0 0 192 192" style="display:inline-block;vertical-align:middle;flex-shrink:0">
+        <rect width="192" height="192" rx="28" fill="transparent"/>
+        <g transform="translate(96,96)">
+          <rect x="-54" y="-54" width="108" height="108" rx="14" fill="none" stroke="#e8b45a" stroke-width="8" transform="rotate(45)"/>
+          <circle cx="0" cy="0" r="30" fill="none" stroke="#e8b45a" stroke-width="7"/>
+          <circle cx="0" cy="0" r="6" fill="#e8b45a" opacity="0.45"/>
+          <line x1="-52" y1="0" x2="-34" y2="0" stroke="#e8b45a" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+          <line x1="34" y1="0" x2="52" y2="0" stroke="#e8b45a" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+          <line x1="0" y1="-52" x2="0" y2="-34" stroke="#e8b45a" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+          <line x1="0" y1="34" x2="0" y2="52" stroke="#e8b45a" stroke-width="5.5" stroke-linecap="round" opacity="0.8"/>
+        </g>
+      </svg>
+      <span>FrameCraft</span>
+    </div>
+    <h1>联系客服</h1>
+    <p class="subtitle">有任何问题、建议或退款需求，请通过以下方式联系我们。<br>工作时间内 2 小时内回复。</p>
+
+    <div class="contact-methods">
+      <div class="contact-item">
+        <div class="contact-icon">💬</div>
+        <div class="contact-info">
+          <div class="label">微信客服</div>
+          <div class="value">微信号：[请填写客服微信号]</div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-icon">📧</div>
+        <div class="contact-info">
+          <div class="label">电子邮件</div>
+          <div class="value"><a href="mailto:support@example.com">[请填写客服邮箱]</a></div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-icon">📞</div>
+        <div class="contact-info">
+          <div class="label">联系电话</div>
+          <div class="value">[请填写客服电话]</div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="contact-icon">🕐</div>
+        <div class="contact-info">
+          <div class="label">工作时间</div>
+          <div class="value">周一至周六 9:00 — 18:00（法定节假日休息）</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-section">
+      <h2>常见问题</h2>
+      <div class="faq-item">
+        <div class="faq-q">Q: 如何选择适合我的套餐？</div>
+        <div class="faq-a">如果你是个人卖家偶尔使用，推荐单次方案或灵感包；如果你每天都需要产出内容，进阶月包(¥199/40次)最划算；代运营或多店铺建议旗舰月包不限次数随便用。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Q: 生成的方案可以商用吗？</div>
+        <div class="faq-a">是的，您依据方案拍摄的视频完全属于您，可自由商用。方案文本本身仅供您个人参考使用。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Q: AI 生成的内容会不会和别人重复？</div>
+        <div class="faq-a">每次生成都基于您上传的独特产品图和实时 AI 推理，方案内容每次不同，不会出现两个用户拿到相同方案的情况。</div>
+      </div>
+    </div>
+  </div>
+
+  <a href="/" class="back-link">← 返回首页</a>
+</div>
+</body>
+</html>
